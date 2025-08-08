@@ -52,6 +52,11 @@
             <artifactId>flink-json</artifactId>
             <version>${flink.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-kafka</artifactId>
+            <version>3.2.0-1.18</version>
+        </dependency>
 
         <!-- GTFS-RT Protobuf -->
         <dependency>

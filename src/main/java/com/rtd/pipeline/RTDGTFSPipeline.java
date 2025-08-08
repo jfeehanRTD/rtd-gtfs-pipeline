@@ -33,6 +33,12 @@ public class RTDGTFSPipeline {
     // Fetch interval (1 hour = 3600 seconds)
     private static final long FETCH_INTERVAL_SECONDS = 3600L;
     
+    // Kafka configuration
+    private static final String KAFKA_BOOTSTRAP_SERVERS = "localhost:9092";
+    private static final String VEHICLE_POSITIONS_TOPIC = "rtd.vehicle.positions";
+    private static final String TRIP_UPDATES_TOPIC = "rtd.trip.updates";
+    private static final String ALERTS_TOPIC = "rtd.alerts";
+    
     public static void main(String[] args) throws Exception {
         
         LOG.info("Starting RTD GTFS-RT Data Pipeline");
@@ -119,8 +125,8 @@ public class RTDGTFSPipeline {
         Table vehicleTable = tableEnv.fromDataStream(stream);
         tableEnv.createTemporaryView("vehicle_positions", vehicleTable);
         
-        // Create sink table for vehicle positions
-        tableEnv.executeSql("""
+        // Create Kafka sink table for vehicle positions
+        tableEnv.executeSql(String.format("""
             CREATE TABLE vehicle_positions_sink (
                 vehicle_id STRING,
                 trip_id STRING,
@@ -135,9 +141,12 @@ public class RTDGTFSPipeline {
                 occupancy_status STRING,
                 PRIMARY KEY (vehicle_id) NOT ENFORCED
             ) WITH (
-                'connector' = 'print'
+                'connector' = 'kafka',
+                'topic' = '%s',
+                'properties.bootstrap.servers' = '%s',
+                'format' = 'json'
             )
-        """);
+        """, VEHICLE_POSITIONS_TOPIC, KAFKA_BOOTSTRAP_SERVERS));
         
         // Insert data into sink
         tableEnv.executeSql("""
@@ -164,8 +173,8 @@ public class RTDGTFSPipeline {
         Table tripTable = tableEnv.fromDataStream(stream);
         tableEnv.createTemporaryView("trip_updates", tripTable);
         
-        // Create sink table for trip updates
-        tableEnv.executeSql("""
+        // Create Kafka sink table for trip updates
+        tableEnv.executeSql(String.format("""
             CREATE TABLE trip_updates_sink (
                 trip_id STRING,
                 route_id STRING,
@@ -177,9 +186,12 @@ public class RTDGTFSPipeline {
                 timestamp_ms BIGINT,
                 PRIMARY KEY (trip_id) NOT ENFORCED
             ) WITH (
-                'connector' = 'print'
+                'connector' = 'kafka',
+                'topic' = '%s',
+                'properties.bootstrap.servers' = '%s',
+                'format' = 'json'
             )
-        """);
+        """, TRIP_UPDATES_TOPIC, KAFKA_BOOTSTRAP_SERVERS));
         
         // Insert data into sink
         tableEnv.executeSql("""
@@ -203,8 +215,8 @@ public class RTDGTFSPipeline {
         Table alertTable = tableEnv.fromDataStream(stream);
         tableEnv.createTemporaryView("alerts", alertTable);
         
-        // Create sink table for alerts
-        tableEnv.executeSql("""
+        // Create Kafka sink table for alerts
+        tableEnv.executeSql(String.format("""
             CREATE TABLE alerts_sink (
                 alert_id STRING,
                 cause STRING,
@@ -217,9 +229,12 @@ public class RTDGTFSPipeline {
                 timestamp_ms BIGINT,
                 PRIMARY KEY (alert_id) NOT ENFORCED
             ) WITH (
-                'connector' = 'print'
+                'connector' = 'kafka',
+                'topic' = '%s',
+                'properties.bootstrap.servers' = '%s',
+                'format' = 'json'
             )
-        """);
+        """, ALERTS_TOPIC, KAFKA_BOOTSTRAP_SERVERS));
         
         // Insert data into sink
         tableEnv.executeSql("""
