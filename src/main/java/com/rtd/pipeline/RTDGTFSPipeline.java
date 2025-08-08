@@ -1,9 +1,11 @@
 package com.rtd.pipeline;
 
 import com.rtd.pipeline.source.GTFSRealtimeSource;
+import com.rtd.pipeline.source.GTFSScheduleSource;
 import com.rtd.pipeline.model.VehiclePosition;
 import com.rtd.pipeline.model.TripUpdate;
 import com.rtd.pipeline.model.Alert;
+import com.rtd.pipeline.model.GTFSScheduleData;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.configuration.Configuration;
@@ -30,6 +32,9 @@ public class RTDGTFSPipeline {
     private static final String TRIP_UPDATES_URL = "https://www.rtd-denver.com/google_sync/TripUpdate.pb";
     private static final String ALERTS_URL = "https://www.rtd-denver.com/google_sync/Alert.pb";
     
+    // RTD GTFS Schedule Feed URL
+    private static final String GTFS_SCHEDULE_URL = "https://www.rtd-denver.com/open-records/open-spatial-information/gtfs";
+    
     // Fetch interval (1 hour = 3600 seconds)
     private static final long FETCH_INTERVAL_SECONDS = 3600L;
     
@@ -38,6 +43,7 @@ public class RTDGTFSPipeline {
     private static final String VEHICLE_POSITIONS_TOPIC = "rtd.vehicle.positions";
     private static final String TRIP_UPDATES_TOPIC = "rtd.trip.updates";
     private static final String ALERTS_TOPIC = "rtd.alerts";
+    private static final String GTFS_SCHEDULE_TOPIC = "rtd.gtfs.schedule";
     
     public static void main(String[] args) throws Exception {
         
@@ -68,10 +74,14 @@ public class RTDGTFSPipeline {
         DataStream<TripUpdate> tripUpdates = createTripUpdateStream(env);
         DataStream<Alert> alerts = createAlertStream(env);
         
+        // Create data stream for GTFS schedule data
+        DataStream<GTFSScheduleData> scheduleData = createGTFSScheduleStream(env);
+        
         // Convert streams to tables and create sinks
         createVehiclePositionTable(tableEnv, vehiclePositions);
         createTripUpdateTable(tableEnv, tripUpdates);
         createAlertTable(tableEnv, alerts);
+        createGTFSScheduleTable(tableEnv, scheduleData);
         
         LOG.info("Pipeline created successfully");
     }
@@ -118,6 +128,20 @@ public class RTDGTFSPipeline {
         .assignTimestampsAndWatermarks(
             WatermarkStrategy.<Alert>forBoundedOutOfOrderness(Duration.ofMinutes(1))
                 .withTimestampAssigner((alert, timestamp) -> alert.getTimestamp())
+        );
+    }
+    
+    private DataStream<GTFSScheduleData> createGTFSScheduleStream(StreamExecutionEnvironment env) {
+        LOG.info("Creating GTFS Schedule stream from: {}", GTFS_SCHEDULE_URL);
+        
+        return env.addSource(new GTFSScheduleSource(
+                GTFS_SCHEDULE_URL,
+                FETCH_INTERVAL_SECONDS
+        ))
+        .name("GTFS Schedule Source")
+        .assignTimestampsAndWatermarks(
+            WatermarkStrategy.<GTFSScheduleData>forBoundedOutOfOrderness(Duration.ofMinutes(1))
+                .withTimestampAssigner((scheduleData, timestamp) -> scheduleData.getTimestamp())
         );
     }
     
@@ -253,5 +277,45 @@ public class RTDGTFSPipeline {
         """);
         
         LOG.info("Alert table and sink created");
+    }
+    
+    private void createGTFSScheduleTable(StreamTableEnvironment tableEnv, DataStream<GTFSScheduleData> stream) {
+        Table scheduleTable = tableEnv.fromDataStream(stream);
+        tableEnv.createTemporaryView("gtfs_schedule", scheduleTable);
+        
+        // Create Kafka sink table for GTFS schedule data
+        tableEnv.executeSql(String.format("""
+            CREATE TABLE gtfs_schedule_sink (
+                file_type STRING,
+                file_content STRING,
+                download_timestamp BIGINT,
+                feed_version STRING,
+                agency_name STRING,
+                feed_start_date STRING,
+                feed_end_date STRING,
+                PRIMARY KEY (file_type, download_timestamp) NOT ENFORCED
+            ) WITH (
+                'connector' = 'kafka',
+                'topic' = '%s',
+                'properties.bootstrap.servers' = '%s',
+                'format' = 'json'
+            )
+        """, GTFS_SCHEDULE_TOPIC, KAFKA_BOOTSTRAP_SERVERS));
+        
+        // Insert data into sink
+        tableEnv.executeSql("""
+            INSERT INTO gtfs_schedule_sink
+            SELECT 
+                fileType,
+                fileContent,
+                downloadTimestamp,
+                feedVersion,
+                agencyName,
+                feedStartDate,
+                feedEndDate
+            FROM gtfs_schedule
+        """);
+        
+        LOG.info("GTFS Schedule table and sink created");
     }
 }
