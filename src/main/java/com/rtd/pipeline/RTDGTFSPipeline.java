@@ -101,59 +101,59 @@ public class RTDGTFSPipeline {
     private DataStream<VehiclePosition> createVehiclePositionStream(StreamExecutionEnvironment env) {
         LOG.info("Creating Vehicle Position stream from: {}", VEHICLE_POSITIONS_URL);
         
-        return env.addSource(new GTFSRealtimeSource<>(
-                VEHICLE_POSITIONS_URL,
-                FETCH_INTERVAL_SECONDS,
-                VehiclePosition.class
-        ))
-        .name("Vehicle Position Source")
-        .assignTimestampsAndWatermarks(
-            WatermarkStrategy.<VehiclePosition>forBoundedOutOfOrderness(Duration.ofMinutes(1))
-                .withTimestampAssigner((position, timestamp) -> position.getTimestamp())
+        return env.fromSource(
+                GTFSRealtimeSource.create(
+                    VEHICLE_POSITIONS_URL,
+                    FETCH_INTERVAL_SECONDS,
+                    VehiclePosition.class
+                ),
+                WatermarkStrategy.<VehiclePosition>forBoundedOutOfOrderness(Duration.ofMinutes(1))
+                    .withTimestampAssigner((position, timestamp) -> position.getTimestamp()),
+                "Vehicle Position Source"
         );
     }
     
     private DataStream<TripUpdate> createTripUpdateStream(StreamExecutionEnvironment env) {
         LOG.info("Creating Trip Update stream from: {}", TRIP_UPDATES_URL);
         
-        return env.addSource(new GTFSRealtimeSource<>(
-                TRIP_UPDATES_URL,
-                FETCH_INTERVAL_SECONDS,
-                TripUpdate.class
-        ))
-        .name("Trip Update Source")
-        .assignTimestampsAndWatermarks(
-            WatermarkStrategy.<TripUpdate>forBoundedOutOfOrderness(Duration.ofMinutes(1))
-                .withTimestampAssigner((update, timestamp) -> update.getTimestamp())
+        return env.fromSource(
+                GTFSRealtimeSource.create(
+                    TRIP_UPDATES_URL,
+                    FETCH_INTERVAL_SECONDS,
+                    TripUpdate.class
+                ),
+                WatermarkStrategy.<TripUpdate>forBoundedOutOfOrderness(Duration.ofMinutes(1))
+                    .withTimestampAssigner((update, timestamp) -> update.getTimestamp()),
+                "Trip Update Source"
         );
     }
     
     private DataStream<Alert> createAlertStream(StreamExecutionEnvironment env) {
         LOG.info("Creating Alert stream from: {}", ALERTS_URL);
         
-        return env.addSource(new GTFSRealtimeSource<>(
-                ALERTS_URL,
-                FETCH_INTERVAL_SECONDS,
-                Alert.class
-        ))
-        .name("Alert Source")
-        .assignTimestampsAndWatermarks(
-            WatermarkStrategy.<Alert>forBoundedOutOfOrderness(Duration.ofMinutes(1))
-                .withTimestampAssigner((alert, timestamp) -> alert.getTimestamp())
+        return env.fromSource(
+                GTFSRealtimeSource.create(
+                    ALERTS_URL,
+                    FETCH_INTERVAL_SECONDS,
+                    Alert.class
+                ),
+                WatermarkStrategy.<Alert>forBoundedOutOfOrderness(Duration.ofMinutes(1))
+                    .withTimestampAssigner((alert, timestamp) -> alert.getTimestamp()),
+                "Alert Source"
         );
     }
     
     private DataStream<GTFSScheduleData> createGTFSScheduleStream(StreamExecutionEnvironment env) {
         LOG.info("Creating GTFS Schedule stream from: {}", GTFS_SCHEDULE_URL);
         
-        return env.addSource(new GTFSScheduleSource(
-                GTFS_SCHEDULE_URL,
-                FETCH_INTERVAL_SECONDS
-        ))
-        .name("GTFS Schedule Source")
-        .assignTimestampsAndWatermarks(
-            WatermarkStrategy.<GTFSScheduleData>forBoundedOutOfOrderness(Duration.ofMinutes(1))
-                .withTimestampAssigner((scheduleData, timestamp) -> scheduleData.getTimestamp())
+        return env.fromSource(
+                GTFSScheduleSource.create(
+                    GTFS_SCHEDULE_URL,
+                    FETCH_INTERVAL_SECONDS
+                ),
+                WatermarkStrategy.<GTFSScheduleData>forBoundedOutOfOrderness(Duration.ofMinutes(1))
+                    .withTimestampAssigner((scheduleData, timestamp) -> scheduleData.getTimestamp()),
+                "GTFS Schedule Source"
         );
     }
     
