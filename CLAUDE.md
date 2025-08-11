@@ -6,12 +6,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 RTD GTFS-RT Data Pipeline - A Java application using Apache Flink to download and process real-time transit feeds from RTD Denver.
 
+## Known Issues and Resolutions
+
+### Flink Version Compatibility Issue
+**Problem**: The pipeline was initially configured with Flink 2.1.0, which has breaking changes that cause `ClassNotFoundException` for `SimpleUdfStreamOperatorFactory` and other classes.
+
+**Root Cause**: Flink 2.x introduced significant API changes and removed several classes that were present in Flink 1.x.
+
+**Resolution**: Downgraded to Flink 1.19.1 for compatibility. The pom.xml has been updated with:
+- `flink.version`: 1.19.1
+- `flink-connector-kafka`: 3.2.0-1.19 (compatible with Flink 1.19.x)
+
+**Error Symptoms**:
+- `java.lang.ClassNotFoundException: org.apache.flink.streaming.api.operators.SimpleUdfStreamOperatorFactory`
+- `Could not deserialize stream node X`
+- Job submission failures
+
+If you encounter serialization/deserialization errors with Flink, check version compatibility first.
+
 ## Build and Run Commands
 
 ### Prerequisites
 - Java 24
 - Maven 3.6+
-- Apache Flink 2.1.0 (for cluster deployment)
+- Apache Flink 1.19.1 (for cluster deployment)
 - Apache Kafka 4.0.0 (for data output)
 
 ### Build Commands
