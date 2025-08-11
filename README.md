@@ -39,9 +39,13 @@ The pipeline fetches data from RTD's public endpoints every hour, processes it u
 - **Java 24** or higher
 - **Maven 3.6+**
 - **Apache Flink 2.1.0** (for cluster deployment)
-- **Apache Kafka 4.0.0** (for data output)
+- **Docker Environment**: 
+  - **macOS**: Colima (recommended) - `brew install colima docker docker-compose`
+  - **Linux**: Docker Engine + Docker Compose
+  - **Windows**: Docker Desktop or WSL2 with Docker
+- **Apache Kafka 4.0.0** (provided via Docker)
 
-**Note:** The project includes built-in Kafka console tools (`./scripts/kafka-topics` and `./scripts/kafka-console-consumer`), so you don't need to install Kafka tools separately.
+**Note:** The project includes built-in Kafka console tools and Docker environment, so you don't need separate Kafka installation.
 
 ## Quick Start
 
@@ -63,41 +67,62 @@ For faster builds without tests:
 mvn clean package -DskipTests
 ```
 
-### 2. Set Up Kafka
+### 2. Set Up Kafka 4.0.0 Environment
 
-Start Kafka locally (using Docker):
+The project includes a complete Docker setup for Kafka 4.0.0 with KRaft (no ZooKeeper).
+
+**Prerequisites (macOS):**
 ```bash
-# Start Kafka with Docker Compose
-docker-compose up -d
+# Install Colima (lightweight Docker alternative)
+brew install colima docker docker-compose
 
-# Or manually start Kafka
-docker run -d --name kafka \
-  -p 9092:9092 \
-  -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
-  -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
-  -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
-  confluentinc/cp-kafka:latest
+# Start Colima VM
+./scripts/docker-setup colima start
+# or manually: colima start --cpu 4 --memory 8
 ```
 
-Create the required topics using the built-in Kafka tools:
+**Quick Setup:**
 ```bash
-# Easy way: Create all RTD topics at once
+# Complete setup: Start Kafka and create all RTD topics
+./scripts/docker-setup setup
+
+# Or step by step:
+./scripts/docker-setup start        # Start Kafka 4.0.0
+./scripts/docker-setup status       # Check if running
+./scripts/kafka-topics --create-rtd-topics  # Create topics
+
+# Other useful commands:
+./scripts/docker-setup stop         # Stop services
+./scripts/docker-setup clean        # Stop and remove all data
+./scripts/docker-setup logs         # View logs
+./scripts/docker-setup ui           # Open Kafka UI (http://localhost:8080)
+./scripts/docker-setup colima       # Manage Colima VM
+```
+
+Manual Docker Compose (if preferred):
+```bash
+docker-compose up -d                # Start services
+docker-compose down                 # Stop services
+docker-compose logs kafka           # View Kafka logs
+```
+
+**Topic Creation:**
+The `./scripts/docker-setup setup` command automatically creates all RTD topics, or you can create them manually:
+
+```bash
+# Create all RTD topics at once (recommended)
 ./scripts/kafka-topics --create-rtd-topics
 
-# Manual way: Create topics individually
+# Or create topics individually if needed
 ./scripts/kafka-topics --create --topic rtd.comprehensive.routes --partitions 3
 ./scripts/kafka-topics --create --topic rtd.route.summary --partitions 1
 ./scripts/kafka-topics --create --topic rtd.vehicle.tracking --partitions 2
 ./scripts/kafka-topics --create --topic rtd.vehicle.positions --partitions 2
 ./scripts/kafka-topics --create --topic rtd.trip.updates --partitions 2
 ./scripts/kafka-topics --create --topic rtd.alerts --partitions 1
-```
 
-Or with standard Kafka tools (if you have them installed):
-```bash
-kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.comprehensive.routes --partitions 3
-kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.route.summary --partitions 1
-# ... etc
+# Verify topics were created
+./scripts/kafka-topics --list
 ```
 
 ### 3. Run Locally (Development)
@@ -313,11 +338,17 @@ The project includes several convenient command-line tools:
 - **Kafka 4.0.0 Compatible**: Uses Java Admin/Consumer APIs instead of deprecated command-line tools
 - Includes RTD-specific shortcuts and helpful usage examples
 
+### Docker Environment Management
+- **`./scripts/docker-setup`**: Complete Docker environment management for Kafka 4.0.0
+- **KRaft Mode**: Modern Kafka without ZooKeeper dependency
+- **Kafka UI**: Web interface at http://localhost:8080 for visual management
+- **One-command setup**: `./scripts/docker-setup setup` starts everything
+
 ### Usage Examples
 ```bash
-# Health check and setup
-./scripts/rtd-query health
-./scripts/kafka-topics --create-rtd-topics
+# Complete environment setup
+./scripts/docker-setup setup           # Start Kafka + create topics
+./scripts/rtd-query health             # Verify connectivity
 
 # Query structured data
 ./scripts/rtd-query routes 20
@@ -326,6 +357,11 @@ The project includes several convenient command-line tools:
 # Monitor raw Kafka streams  
 ./scripts/kafka-console-consumer --topic rtd.alerts --from-beginning
 ./scripts/kafka-topics --list
+
+# Docker management
+./scripts/docker-setup status          # Check services
+./scripts/docker-setup ui              # Open Kafka UI
+./scripts/docker-setup clean           # Clean shutdown
 ```
 
 ## Monitoring
