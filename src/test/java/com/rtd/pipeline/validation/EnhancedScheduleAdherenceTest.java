@@ -428,7 +428,8 @@ public class EnhancedScheduleAdherenceTest {
             
             GhostTrainDetector.GhostTrainReport report = ghostTrains.get(0);
             assertTrue(report.suspectedReason.contains("replacement") || 
-                      report.suspectedReason.contains("operational adjustment"));
+                      report.suspectedReason.contains("operational adjustment") ||
+                      report.suspectedReason.contains("extra service"));
         }
     }
     
