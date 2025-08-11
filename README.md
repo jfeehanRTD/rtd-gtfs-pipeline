@@ -79,7 +79,12 @@ docker run -d --name kafka \
 
 Create the required topics:
 ```bash
-# Create topics for the three data streams
+# Create topics for the comprehensive data sinks
+kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.comprehensive.routes
+kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.route.summary
+kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.vehicle.tracking
+
+# Create topics for the raw GTFS-RT data streams
 kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.vehicle.positions
 kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.trip.updates  
 kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.alerts
@@ -108,10 +113,49 @@ For production deployment on a Flink cluster:
 flink run target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar
 ```
 
-### 5. Monitor Output
+### 5. Query Data with RTD Query Client
 
-Monitor the Kafka topics to see real-time data:
+Use the built-in command-line query client to easily access all Flink data sinks:
+
 ```bash
+# First, run a health check to verify connectivity
+./scripts/rtd-query health
+
+# List all available data sources
+./scripts/rtd-query list
+
+# Query comprehensive route data (combines GTFS + GTFS-RT)
+./scripts/rtd-query routes 20
+
+# Check route performance statistics
+./scripts/rtd-query summary
+
+# Monitor individual vehicle tracking
+./scripts/rtd-query tracking 15
+
+# View raw vehicle positions
+./scripts/rtd-query positions
+
+# Check trip delays and updates
+./scripts/rtd-query updates
+
+# View active service alerts
+./scripts/rtd-query alerts
+
+# Start live monitoring mode (updates every 30 seconds)
+./scripts/rtd-query live
+
+# Test Kafka connectivity
+./scripts/rtd-query test
+```
+
+### 6. Monitor Raw Kafka Topics
+
+For direct access to Kafka topics, you can also monitor them manually:
+```bash
+# Monitor comprehensive routes data
+kafka-console-consumer --bootstrap-server localhost:9092 --topic rtd.comprehensive.routes --from-beginning
+
 # Monitor vehicle positions
 kafka-console-consumer --bootstrap-server localhost:9092 --topic rtd.vehicle.positions --from-beginning
 
@@ -131,8 +175,16 @@ kafka-console-consumer --bootstrap-server localhost:9092 --topic rtd.alerts --fr
 - **Watermarks**: 1-minute tolerance for out-of-order events
 
 ### Kafka Configuration
-The pipeline outputs to three Kafka topics:
-- **rtd.vehicle.positions**: Real-time vehicle location and status data
+
+The pipeline outputs to six Kafka topics organized in two categories:
+
+**Comprehensive Data Sinks (Enhanced with GTFS data):**
+- **rtd.comprehensive.routes**: Complete vehicle and route data with real-time positions, schedule information, and stop details
+- **rtd.route.summary**: Aggregated statistics per route including on-time performance and active vehicle counts
+- **rtd.vehicle.tracking**: Enhanced individual vehicle monitoring with speed, passenger load, and tracking quality metrics
+
+**Raw GTFS-RT Data Streams:**
+- **rtd.vehicle.positions**: Direct real-time vehicle location and status data
 - **rtd.trip.updates**: Schedule adherence and delay information
 - **rtd.alerts**: Service disruption alerts
 
@@ -144,6 +196,9 @@ Default Kafka settings:
 To modify Kafka settings, update the constants in `RTDGTFSPipeline.java`:
 ```java
 private static final String KAFKA_BOOTSTRAP_SERVERS = "localhost:9092";
+private static final String COMPREHENSIVE_ROUTES_TOPIC = "rtd.comprehensive.routes";
+private static final String ROUTE_SUMMARY_TOPIC = "rtd.route.summary";
+private static final String VEHICLE_TRACKING_TOPIC = "rtd.vehicle.tracking";
 private static final String VEHICLE_POSITIONS_TOPIC = "rtd.vehicle.positions";
 private static final String TRIP_UPDATES_TOPIC = "rtd.trip.updates";
 private static final String ALERTS_TOPIC = "rtd.alerts";
@@ -159,7 +214,38 @@ To change output destinations, modify the sink table definitions in `RTDGTFSPipe
 
 ## Data Schema
 
-### Vehicle Positions
+### Comprehensive Routes (Enhanced Sink)
+Combines GTFS schedule data with real-time GTFS-RT information:
+- `route_id`, `route_short_name`, `route_long_name`: Route identification
+- `vehicle_id`, `trip_id`: Vehicle and trip identifiers
+- `latitude`, `longitude`, `bearing`: Real-time GPS position and heading
+- `speed_kmh`: Current speed in kilometers per hour
+- `current_status`: Vehicle status (IN_TRANSIT_TO, STOPPED_AT, etc.)
+- `stop_id`, `stop_name`: Current or next stop information
+- `delay_seconds`: Schedule deviation in seconds
+- `occupancy_status`: Passenger load (EMPTY, FEW_SEATS, STANDING_ROOM, etc.)
+- `vehicle_status`: Operational status
+- `schedule_relationship`: Relationship to schedule (SCHEDULED, ADDED, CANCELED)
+
+### Route Summary (Aggregated Statistics)
+Performance metrics grouped by route:
+- `route_id`, `route_short_name`: Route identification
+- `active_vehicles`, `total_vehicles`: Vehicle counts
+- `on_time_performance`: Percentage of on-time vehicles
+- `average_delay_seconds`: Mean delay across all vehicles
+- `service_status`: Overall route status (NORMAL, DELAYED, DISRUPTED)
+
+### Vehicle Tracking (Enhanced Individual Monitoring)
+Enhanced vehicle-specific data:
+- `vehicle_id`, `route_id`: Vehicle and route identifiers
+- `latitude`, `longitude`, `speed_kmh`: Position and speed
+- `passenger_load`: Estimated passenger count or load level
+- `tracking_quality`: GPS signal quality and data freshness
+- `last_updated`: Timestamp of last position update
+
+### Raw GTFS-RT Data Streams
+
+**Vehicle Positions:**
 - `vehicle_id`: Unique vehicle identifier
 - `trip_id`: Current trip identifier
 - `route_id`: Route being served
@@ -170,7 +256,7 @@ To change output destinations, modify the sink table definitions in `RTDGTFSPipe
 - `congestion_level`: Traffic conditions
 - `occupancy_status`: Passenger load
 
-### Trip Updates
+**Trip Updates:**
 - `trip_id`: Trip identifier
 - `route_id`: Route identifier
 - `vehicle_id`: Assigned vehicle
@@ -178,7 +264,7 @@ To change output destinations, modify the sink table definitions in `RTDGTFSPipe
 - `schedule_relationship`: On time, canceled, etc.
 - `delay_seconds`: Schedule deviation
 
-### Service Alerts
+**Service Alerts:**
 - `alert_id`: Unique alert identifier
 - `cause`: Reason for alert
 - `effect`: Impact description
