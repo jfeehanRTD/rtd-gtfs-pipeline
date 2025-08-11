@@ -1,7 +1,7 @@
 services:
-  # Apache Kafka 4.0.0 with KRaft (no ZooKeeper)
+  # Apache Kafka with KRaft (no ZooKeeper) - ARM64 compatible
   kafka:
-    image: apache/kafka:3.8.0  # Latest stable image with KRaft support
+    image: bitnami/kafka:3.8.0  # Bitnami Kafka with native ARM64 support
     hostname: kafka
     container_name: rtd-kafka
     restart: unless-stopped
@@ -9,32 +9,28 @@ services:
       - "9092:9092"
       - "9093:9093"
     environment:
-      # KRaft configuration
-      KAFKA_NODE_ID: 1
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:9092
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_PROCESS_ROLES: broker,controller
+      # KRaft configuration (Bitnami format)
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CFG_LISTENERS: PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       
-      # Cluster configuration
-      CLUSTER_ID: rtd-kafka-cluster-001
+      # Performance and storage settings (Bitnami format)
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CFG_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
       
-      # Performance and storage settings
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-      
-      # Log settings optimized for RTD data
-      KAFKA_LOG_DIRS: /var/lib/kafka/data
-      KAFKA_LOG_RETENTION_HOURS: 24
-      KAFKA_LOG_RETENTION_BYTES: 1073741824  # 1GB
-      KAFKA_LOG_SEGMENT_BYTES: 104857600     # 100MB
-      KAFKA_LOG_CLEANUP_POLICY: delete
+      # Log settings optimized for RTD data (Bitnami format)
+      KAFKA_CFG_LOG_RETENTION_HOURS: 24
+      KAFKA_CFG_LOG_RETENTION_BYTES: 1073741824  # 1GB
+      KAFKA_CFG_LOG_SEGMENT_BYTES: 104857600     # 100MB
+      KAFKA_CFG_LOG_CLEANUP_POLICY: delete
       
       # JVM settings for development
       KAFKA_HEAP_OPTS: "-Xmx1G -Xms1G"
@@ -56,6 +52,7 @@ services:
     image: provectuslabs/kafka-ui:latest
     container_name: rtd-kafka-ui
     restart: unless-stopped
+    platform: linux/amd64  # Force x86_64 platform for compatibility
     ports:
       - "8080:8080"
     environment:
