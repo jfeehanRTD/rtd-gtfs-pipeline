@@ -1,6 +1,7 @@
 package com.rtd.pipeline.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 
 /**
  * Data model representing a GTFS-RT Alert.
@@ -35,6 +36,9 @@ public class Alert {
     @JsonProperty("timestamp_ms")
     private Long timestamp_ms;
     
+    @JsonProperty("route_ids")
+    private List<String> routeIds;
+    
     // Default constructor
     public Alert() {}
     
@@ -49,6 +53,7 @@ public class Alert {
         this.activePeriodStart = builder.activePeriodStart;
         this.activePeriodEnd = builder.activePeriodEnd;
         this.timestamp_ms = builder.timestamp_ms;
+        this.routeIds = builder.routeIds;
     }
     
     public static Builder builder() {
@@ -83,6 +88,9 @@ public class Alert {
     public Long getTimestamp() { return timestamp_ms; }
     public void setTimestamp_ms(Long timestamp_ms) { this.timestamp_ms = timestamp_ms; }
     
+    public List<String> getRouteIds() { return routeIds; }
+    public void setRouteIds(List<String> routeIds) { this.routeIds = routeIds; }
+    
     @Override
     public String toString() {
         return "Alert{" +
@@ -95,6 +103,7 @@ public class Alert {
                 ", activePeriodStart=" + activePeriodStart +
                 ", activePeriodEnd=" + activePeriodEnd +
                 ", timestamp_ms=" + timestamp_ms +
+                ", routeIds=" + routeIds +
                 '}';
     }
     
@@ -109,6 +118,7 @@ public class Alert {
         private Long activePeriodStart;
         private Long activePeriodEnd;
         private Long timestamp_ms;
+        private List<String> routeIds;
         
         public Builder alertId(String alertId) { this.alertId = alertId; return this; }
         public Builder cause(String cause) { this.cause = cause; return this; }
@@ -119,6 +129,7 @@ public class Alert {
         public Builder activePeriodStart(Long activePeriodStart) { this.activePeriodStart = activePeriodStart; return this; }
         public Builder activePeriodEnd(Long activePeriodEnd) { this.activePeriodEnd = activePeriodEnd; return this; }
         public Builder timestamp_ms(Long timestamp_ms) { this.timestamp_ms = timestamp_ms; return this; }
+        public Builder routeIds(List<String> routeIds) { this.routeIds = routeIds; return this; }
         
         public Alert build() {
             return new Alert(this);

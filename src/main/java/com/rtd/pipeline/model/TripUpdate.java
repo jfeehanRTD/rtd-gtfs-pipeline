@@ -32,6 +32,9 @@ public class TripUpdate {
     @JsonProperty("timestamp_ms")
     private Long timestamp_ms;
     
+    @JsonProperty("stop_id")
+    private String stopId;
+    
     // Default constructor
     public TripUpdate() {}
     
@@ -45,6 +48,7 @@ public class TripUpdate {
         this.scheduleRelationship = builder.scheduleRelationship;
         this.delaySeconds = builder.delaySeconds;
         this.timestamp_ms = builder.timestamp_ms;
+        this.stopId = builder.stopId;
     }
     
     public static Builder builder() {
@@ -76,6 +80,9 @@ public class TripUpdate {
     public Long getTimestamp() { return timestamp_ms; }
     public void setTimestamp_ms(Long timestamp_ms) { this.timestamp_ms = timestamp_ms; }
     
+    public String getStopId() { return stopId; }
+    public void setStopId(String stopId) { this.stopId = stopId; }
+    
     @Override
     public String toString() {
         return "TripUpdate{" +
@@ -87,6 +94,7 @@ public class TripUpdate {
                 ", scheduleRelationship='" + scheduleRelationship + '\'' +
                 ", delaySeconds=" + delaySeconds +
                 ", timestamp_ms=" + timestamp_ms +
+                ", stopId='" + stopId + '\'' +
                 '}';
     }
     
@@ -100,6 +108,7 @@ public class TripUpdate {
         private String scheduleRelationship;
         private Integer delaySeconds;
         private Long timestamp_ms;
+        private String stopId;
         
         public Builder tripId(String tripId) { this.tripId = tripId; return this; }
         public Builder routeId(String routeId) { this.routeId = routeId; return this; }
@@ -109,6 +118,7 @@ public class TripUpdate {
         public Builder scheduleRelationship(String scheduleRelationship) { this.scheduleRelationship = scheduleRelationship; return this; }
         public Builder delaySeconds(Integer delaySeconds) { this.delaySeconds = delaySeconds; return this; }
         public Builder timestamp_ms(Long timestamp_ms) { this.timestamp_ms = timestamp_ms; return this; }
+        public Builder stopId(String stopId) { this.stopId = stopId; return this; }
         
         public TripUpdate build() {
             return new TripUpdate(this);

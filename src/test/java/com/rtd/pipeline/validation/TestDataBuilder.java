@@ -6,6 +6,7 @@ import com.rtd.pipeline.model.Alert;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 /**
  * Builder class for creating test data for GTFS-RT validation tests.
@@ -87,6 +88,11 @@ public class TestDataBuilder {
 
         public VehiclePositionBuilder routeId(String routeId) {
             modelBuilder.routeId(routeId);
+            return this;
+        }
+
+        public VehiclePositionBuilder stopId(String stopId) {
+            modelBuilder.stopId(stopId);
             return this;
         }
 
@@ -201,6 +207,11 @@ public class TestDataBuilder {
 
         public TripUpdateBuilder routeId(String routeId) {
             modelBuilder.routeId(routeId);
+            return this;
+        }
+
+        public TripUpdateBuilder stopId(String stopId) {
+            modelBuilder.stopId(stopId);
             return this;
         }
 
@@ -322,6 +333,11 @@ public class TestDataBuilder {
 
         public AlertBuilder timestamp(Long timestamp) {
             modelBuilder.timestamp_ms(timestamp);
+            return this;
+        }
+
+        public AlertBuilder routeIds(List<String> routeIds) {
+            modelBuilder.routeIds(routeIds);
             return this;
         }
 

@@ -41,6 +41,9 @@ public class VehiclePosition {
     @JsonProperty("occupancy_status")
     private String occupancyStatus;
     
+    @JsonProperty("stop_id")
+    private String stopId;
+    
     // Default constructor
     public VehiclePosition() {}
     
@@ -57,6 +60,7 @@ public class VehiclePosition {
         this.currentStatus = builder.currentStatus;
         this.congestionLevel = builder.congestionLevel;
         this.occupancyStatus = builder.occupancyStatus;
+        this.stopId = builder.stopId;
     }
     
     public static Builder builder() {
@@ -97,6 +101,9 @@ public class VehiclePosition {
     public String getOccupancyStatus() { return occupancyStatus; }
     public void setOccupancyStatus(String occupancyStatus) { this.occupancyStatus = occupancyStatus; }
     
+    public String getStopId() { return stopId; }
+    public void setStopId(String stopId) { this.stopId = stopId; }
+    
     @Override
     public String toString() {
         return "VehiclePosition{" +
@@ -111,6 +118,7 @@ public class VehiclePosition {
                 ", currentStatus='" + currentStatus + '\'' +
                 ", congestionLevel='" + congestionLevel + '\'' +
                 ", occupancyStatus='" + occupancyStatus + '\'' +
+                ", stopId='" + stopId + '\'' +
                 '}';
     }
     
@@ -127,6 +135,7 @@ public class VehiclePosition {
         private String currentStatus;
         private String congestionLevel;
         private String occupancyStatus;
+        private String stopId;
         
         public Builder vehicleId(String vehicleId) { this.vehicleId = vehicleId; return this; }
         public Builder tripId(String tripId) { this.tripId = tripId; return this; }
@@ -139,6 +148,7 @@ public class VehiclePosition {
         public Builder currentStatus(String currentStatus) { this.currentStatus = currentStatus; return this; }
         public Builder congestionLevel(String congestionLevel) { this.congestionLevel = congestionLevel; return this; }
         public Builder occupancyStatus(String occupancyStatus) { this.occupancyStatus = occupancyStatus; return this; }
+        public Builder stopId(String stopId) { this.stopId = stopId; return this; }
         
         public VehiclePosition build() {
             return new VehiclePosition(this);

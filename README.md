@@ -217,13 +217,86 @@ src/
 4. Configure appropriate sinks for your use case
 
 ### Testing
+
+The project includes comprehensive test suites for validating GTFS-RT data and detecting service issues:
+
 ```bash
 # Run all tests
 mvn test
 
+# Run all tests without warnings (clean output)
+mvn test 2>/dev/null
+
 # Run specific test
 mvn test -Dtest=YourTestClass
+
+# Run validation tests only
+mvn test -Dtest="*ValidationTest"
+
+# Run schedule adherence tests
+mvn test -Dtest="*ScheduleAdherenceTest,EnhancedScheduleAdherenceTest"
+
+# Run service disruption tests
+mvn test -Dtest="ServiceDisruptionPatternTest"
+
+# Clean test runner script (suppresses warnings)
+./test-clean.sh                                    # Run all tests
+./test-clean.sh -Dtest="*ValidationTest"          # Run specific tests
 ```
+
+**Note:** You may see warnings about deprecated `sun.misc.Unsafe` methods when running tests. These are harmless warnings from Maven/Guice internal operations on Java 17+ and don't affect test functionality. For clean output, use `mvn test 2>/dev/null` or the provided `./test-clean.sh` script.
+
+#### Test Coverage
+
+**Data Validation Tests:**
+- `VehiclePositionValidationTest`: Validates GPS coordinates, timestamps, and vehicle data
+- `TripUpdateValidationTest`: Validates trip schedules and delay information
+- `AlertValidationTest`: Validates service alert structure and content
+- `ComprehensiveValidationTest`: End-to-end validation scenarios
+
+**Service Quality Tests:**
+- `ScheduleAdherenceTest`: Detects missing vehicles and trains more than 3 minutes late
+- `EnhancedScheduleAdherenceTest`: Advanced detection including:
+  - Ghost trains (unscheduled vehicles)
+  - Cascading delays across routes
+  - Schedule recovery tracking
+- `ServiceDisruptionPatternTest`: Pattern analysis including:
+  - Partial route disruptions
+  - Historical delay patterns
+  - Anomaly detection
+  - Rush hour and day-of-week patterns
+
+**Historical Analysis Tests:**
+- `HistoricalDataModelTest`: Tests data structures for tracking service history
+- `RTDLightRailTrackingTest`: Comprehensive light rail service monitoring
+
+### Service Monitoring Capabilities
+
+The enhanced test suite provides RTD with powerful monitoring capabilities:
+
+1. **Missing Train Detection**
+   - Identifies scheduled trips with no real-time data
+   - Detects vehicles with outdated GPS positions (>10 minutes)
+   - Tracks partial route coverage gaps
+
+2. **Delay Analysis**
+   - Categorizes delays: on-time (<1 min), slightly late (1-3 min), significantly late (>3 min)
+   - Tracks cascading delays across connecting routes
+   - Monitors schedule recovery progress
+
+3. **Ghost Train Detection**
+   - Identifies unscheduled vehicles operating on routes
+   - Suggests reasons (replacement service, express runs, operational adjustments)
+
+4. **Pattern Recognition**
+   - Learns historical delay patterns by route, station, time, and day
+   - Detects anomalies that deviate from expected patterns
+   - Identifies chronic delay locations
+
+5. **Disruption Classification**
+   - Categorizes disruption types (signal problems, weather, incidents)
+   - Estimates impact duration and affected segments
+   - Provides severity scoring
 
 ## Dependencies
 
