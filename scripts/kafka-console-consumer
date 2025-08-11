@@ -25,7 +25,7 @@ print_error() {
 
 print_header() {
     echo -e "${BLUE}================================${NC}"
-    echo -e "${BLUE}RTD Kafka Console Consumer${NC}"
+    echo -e "${BLUE}RTD Kafka Console Consumer (v4.0)${NC}"
     echo -e "${BLUE}================================${NC}"
 }
 
@@ -105,7 +105,7 @@ main() {
     
     # Run Kafka console consumer with all provided arguments
     java -cp "target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar:$CLASSPATH" \
-         kafka.tools.ConsoleConsumer "$@"
+         com.rtd.pipeline.tools.KafkaConsumerManager "$@"
 }
 
 # Handle Ctrl+C gracefully

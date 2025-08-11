@@ -308,8 +308,9 @@ The project includes several convenient command-line tools:
 - No external dependencies required
 
 ### Kafka Tools (No Installation Required)
-- **`./scripts/kafka-topics`**: Create, list, describe, and manage Kafka topics
-- **`./scripts/kafka-console-consumer`**: Monitor Kafka topics with real-time data
+- **`./scripts/kafka-topics`**: Create, list, describe, and manage Kafka topics using modern Admin API
+- **`./scripts/kafka-console-consumer`**: Monitor Kafka topics with real-time data using Consumer API
+- **Kafka 4.0.0 Compatible**: Uses Java Admin/Consumer APIs instead of deprecated command-line tools
 - Includes RTD-specific shortcuts and helpful usage examples
 
 ### Usage Examples

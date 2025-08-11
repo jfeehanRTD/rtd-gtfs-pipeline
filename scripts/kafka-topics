@@ -25,7 +25,7 @@ print_error() {
 
 print_header() {
     echo -e "${BLUE}================================${NC}"
-    echo -e "${BLUE}RTD Kafka Topics Manager${NC}"
+    echo -e "${BLUE}RTD Kafka Topics Manager (v4.0)${NC}"
     echo -e "${BLUE}================================${NC}"
 }
 
@@ -90,30 +90,10 @@ show_usage() {
 create_rtd_topics() {
     print_status "Creating all RTD GTFS-RT topics..."
     
-    local topics=(
-        "rtd.comprehensive.routes:3:1"
-        "rtd.route.summary:1:1" 
-        "rtd.vehicle.tracking:2:1"
-        "rtd.vehicle.positions:2:1"
-        "rtd.trip.updates:2:1"
-        "rtd.alerts:1:1"
-    )
-    
-    for topic_spec in "${topics[@]}"; do
-        IFS=':' read -r topic_name partitions replication <<< "$topic_spec"
-        echo "Creating topic: $topic_name (partitions: $partitions, replication: $replication)"
-        
-        java -cp "target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar:$CLASSPATH" \
-             kafka.admin.TopicCommand \
-             --bootstrap-server localhost:9092 \
-             --create \
-             --topic "$topic_name" \
-             --partitions "$partitions" \
-             --replication-factor "$replication" \
-             --if-not-exists
-    done
-    
-    print_status "RTD topics created successfully!"
+    java -cp "target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar:$CLASSPATH" \
+         com.rtd.pipeline.tools.KafkaTopicsManager \
+         --create-rtd-topics \
+         --bootstrap-server localhost:9092
 }
 
 # Main execution
@@ -145,26 +125,11 @@ main() {
     print_status "Running Kafka topics command..."
     echo
     
-    # Set default bootstrap server if not provided
-    has_bootstrap_server=false
-    for arg in "$@"; do
-        if [[ "$arg" == "--bootstrap-server" ]]; then
-            has_bootstrap_server=true
-            break
-        fi
-    done
-    
     # Run Kafka topics command with all provided arguments
-    if [ "$has_bootstrap_server" = false ]; then
-        java -cp "target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar:$CLASSPATH" \
-             kafka.admin.TopicCommand \
-             --bootstrap-server localhost:9092 \
-             "$@"
-    else
-        java -cp "target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar:$CLASSPATH" \
-             kafka.admin.TopicCommand \
-             "$@"
-    fi
+    # Default bootstrap server is handled in the Java class
+    java -cp "target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar:$CLASSPATH" \
+         com.rtd.pipeline.tools.KafkaTopicsManager \
+         "$@"
 }
 
 # Handle Ctrl+C gracefully  
