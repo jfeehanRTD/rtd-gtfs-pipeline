@@ -37,7 +37,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table-planner-loader</artifactId>
+            <artifactId>flink-table-planner_2.12</artifactId>
             <version>${flink.version}</version>
         </dependency>
         <dependency>
@@ -229,7 +229,7 @@
                             </filters>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.rtd.pipeline.RTDGTFSPipeline</mainClass>
+                                    <mainClass>com.rtd.pipeline.SimpleRTDPipeline</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -270,7 +270,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>com.rtd.pipeline.RTDGTFSPipeline</mainClass>
+                    <mainClass>com.rtd.pipeline.SimpleRTDPipeline</mainClass>
                     <commandlineArgs>
                         --add-opens=java.base/sun.misc=ALL-UNNAMED
                         --add-opens=java.base/java.nio=ALL-UNNAMED
