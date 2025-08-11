@@ -38,8 +38,8 @@ The pipeline fetches data from RTD's public endpoints every hour, processes it u
 
 - **Java 24** or higher
 - **Maven 3.6+**
-- **Apache Flink 1.18.0** (for cluster deployment)
-- **Apache Kafka** (for data output)
+- **Apache Flink 2.1.0** (for cluster deployment)
+- **Apache Kafka 4.0.0** (for data output)
 
 **Note:** The project includes built-in Kafka console tools (`./scripts/kafka-topics` and `./scripts/kafka-console-consumer`), so you don't need to install Kafka tools separately.
 
@@ -440,12 +440,13 @@ The enhanced test suite provides RTD with powerful monitoring capabilities:
 
 ## Dependencies
 
-- **Apache Flink 1.18.0**: Stream processing engine
-- **Flink Kafka Connector 3.2.0-1.18**: Kafka integration (latest for Flink 1.18)
+- **Apache Flink 2.1.0**: Stream processing engine with latest performance improvements
+- **Flink Kafka Connector 4.0.0-2.0**: Kafka integration compatible with Kafka 4.0.0
+- **Apache Kafka 4.0.0**: Modern Kafka with KRaft (no ZooKeeper) and improved performance
 - **GTFS-RT Bindings 0.0.4**: Google's protobuf library for GTFS-RT
 - **Apache HttpComponents 4.5.14**: HTTP client for feed downloads
-- **Jackson 2.15.2**: JSON processing
-- **SLF4J + Log4j2**: Logging framework
+- **Jackson 2.18.1**: Latest JSON processing with enhanced performance
+- **SLF4J 2.0.16 + Log4j2 2.24.3**: Modern logging framework
 
 ## License
 

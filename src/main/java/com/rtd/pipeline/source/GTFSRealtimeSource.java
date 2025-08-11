@@ -4,7 +4,7 @@ import com.google.transit.realtime.GtfsRealtime.*;
 import com.rtd.pipeline.model.VehiclePosition;
 import com.rtd.pipeline.model.TripUpdate;
 import com.rtd.pipeline.model.Alert;
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.streaming.api.functions.source.legacy.SourceFunction;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;

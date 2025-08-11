@@ -11,7 +11,8 @@ RTD GTFS-RT Data Pipeline - A Java application using Apache Flink to download an
 ### Prerequisites
 - Java 24
 - Maven 3.6+
-- Apache Flink 1.18.0 (for cluster deployment)
+- Apache Flink 2.1.0 (for cluster deployment)
+- Apache Kafka 4.0.0 (for data output)
 
 ### Build Commands
 ```bash

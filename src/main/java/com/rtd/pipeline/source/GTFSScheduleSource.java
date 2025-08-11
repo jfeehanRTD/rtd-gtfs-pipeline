@@ -1,7 +1,7 @@
 package com.rtd.pipeline.source;
 
 import com.rtd.pipeline.model.GTFSScheduleData;
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.streaming.api.functions.source.legacy.SourceFunction;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
