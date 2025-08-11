@@ -221,9 +221,13 @@
                         -XX:+IgnoreUnrecognizedVMOptions
                         -Djava.util.logging.config.file=logging.properties
                     </argLine>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                    <printSummary>false</printSummary>
+                    <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                    <printSummary>true</printSummary>
                     <useSystemClassLoader>false</useSystemClassLoader>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                    </includes>
                 </configuration>
             </plugin>
 
