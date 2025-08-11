@@ -41,6 +41,8 @@ The pipeline fetches data from RTD's public endpoints every hour, processes it u
 - **Apache Flink 1.18.0** (for cluster deployment)
 - **Apache Kafka** (for data output)
 
+**Note:** The project includes built-in Kafka console tools (`./scripts/kafka-topics` and `./scripts/kafka-console-consumer`), so you don't need to install Kafka tools separately.
+
 ## Quick Start
 
 ### 1. Build the Application
@@ -77,17 +79,25 @@ docker run -d --name kafka \
   confluentinc/cp-kafka:latest
 ```
 
-Create the required topics:
+Create the required topics using the built-in Kafka tools:
 ```bash
-# Create topics for the comprehensive data sinks
-kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.comprehensive.routes
-kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.route.summary
-kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.vehicle.tracking
+# Easy way: Create all RTD topics at once
+./scripts/kafka-topics --create-rtd-topics
 
-# Create topics for the raw GTFS-RT data streams
-kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.vehicle.positions
-kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.trip.updates  
-kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.alerts
+# Manual way: Create topics individually
+./scripts/kafka-topics --create --topic rtd.comprehensive.routes --partitions 3
+./scripts/kafka-topics --create --topic rtd.route.summary --partitions 1
+./scripts/kafka-topics --create --topic rtd.vehicle.tracking --partitions 2
+./scripts/kafka-topics --create --topic rtd.vehicle.positions --partitions 2
+./scripts/kafka-topics --create --topic rtd.trip.updates --partitions 2
+./scripts/kafka-topics --create --topic rtd.alerts --partitions 1
+```
+
+Or with standard Kafka tools (if you have them installed):
+```bash
+kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.comprehensive.routes --partitions 3
+kafka-topics --create --bootstrap-server localhost:9092 --topic rtd.route.summary --partitions 1
+# ... etc
 ```
 
 ### 3. Run Locally (Development)
@@ -151,19 +161,34 @@ Use the built-in command-line query client to easily access all Flink data sinks
 
 ### 6. Monitor Raw Kafka Topics
 
-For direct access to Kafka topics, you can also monitor them manually:
+The project includes built-in Kafka tools so you don't need to install Kafka separately:
+
 ```bash
-# Monitor comprehensive routes data
-kafka-console-consumer --bootstrap-server localhost:9092 --topic rtd.comprehensive.routes --from-beginning
+# Create all RTD topics at once
+./scripts/kafka-topics --create-rtd-topics
+
+# List all available topics
+./scripts/kafka-topics --list
+
+# Monitor comprehensive routes data from beginning
+./scripts/kafka-console-consumer --topic rtd.comprehensive.routes --from-beginning --max-messages 10
 
 # Monitor vehicle positions
-kafka-console-consumer --bootstrap-server localhost:9092 --topic rtd.vehicle.positions --from-beginning
+./scripts/kafka-console-consumer --topic rtd.vehicle.positions --from-beginning
 
-# Monitor trip updates
-kafka-console-consumer --bootstrap-server localhost:9092 --topic rtd.trip.updates --from-beginning
+# Monitor trip updates  
+./scripts/kafka-console-consumer --topic rtd.trip.updates --from-beginning
 
 # Monitor alerts
-kafka-console-consumer --bootstrap-server localhost:9092 --topic rtd.alerts --from-beginning
+./scripts/kafka-console-consumer --topic rtd.alerts --from-beginning
+
+# Monitor with custom settings
+./scripts/kafka-console-consumer --topic rtd.route.summary --max-messages 20 --timeout-ms 5000
+```
+
+If you have Kafka installed separately, you can also use the standard commands:
+```bash
+kafka-console-consumer --bootstrap-server localhost:9092 --topic rtd.comprehensive.routes --from-beginning
 ```
 
 ## Configuration
@@ -272,6 +297,35 @@ Enhanced vehicle-specific data:
 - `description_text`: Detailed information
 - `url`: Additional information link
 - `active_period_start`, `active_period_end`: Validity timeframe
+
+## Built-in Tools
+
+The project includes several convenient command-line tools:
+
+### RTD Query Client
+- **`./scripts/rtd-query`**: Query and monitor all Flink data sinks with formatted output
+- Supports live monitoring, health checks, and connectivity testing
+- No external dependencies required
+
+### Kafka Tools (No Installation Required)
+- **`./scripts/kafka-topics`**: Create, list, describe, and manage Kafka topics
+- **`./scripts/kafka-console-consumer`**: Monitor Kafka topics with real-time data
+- Includes RTD-specific shortcuts and helpful usage examples
+
+### Usage Examples
+```bash
+# Health check and setup
+./scripts/rtd-query health
+./scripts/kafka-topics --create-rtd-topics
+
+# Query structured data
+./scripts/rtd-query routes 20
+./scripts/rtd-query live
+
+# Monitor raw Kafka streams  
+./scripts/kafka-console-consumer --topic rtd.alerts --from-beginning
+./scripts/kafka-topics --list
+```
 
 ## Monitoring
 
