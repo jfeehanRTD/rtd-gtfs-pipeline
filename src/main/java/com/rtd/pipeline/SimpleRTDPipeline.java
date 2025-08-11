@@ -20,7 +20,7 @@ public class SimpleRTDPipeline {
     private static final Logger LOG = LoggerFactory.getLogger(SimpleRTDPipeline.class);
     
     private static final String VEHICLE_POSITIONS_URL = "https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/VehiclePosition.pb";
-    private static final long FETCH_INTERVAL_SECONDS = 30L;
+    private static final long FETCH_INTERVAL_SECONDS = 60L;
     
     public static void main(String[] args) throws Exception {
         

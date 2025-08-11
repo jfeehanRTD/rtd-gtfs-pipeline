@@ -22,8 +22,8 @@ public class RTDTestPipeline {
     // RTD GTFS-RT Feed URLs
     private static final String VEHICLE_POSITIONS_URL = "https://www.rtd-denver.com/google_sync/VehiclePosition.pb";
     
-    // Short fetch interval for testing (30 seconds)
-    private static final long FETCH_INTERVAL_SECONDS = 30L;
+    // Fetch interval for live data (1 minute)
+    private static final long FETCH_INTERVAL_SECONDS = 60L;
     
     public static void main(String[] args) throws Exception {
         

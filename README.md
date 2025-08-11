@@ -9,7 +9,7 @@ This application processes three types of real-time transit data from RTD Denver
 - **Trip Updates**: Schedule adherence and delay information
 - **Service Alerts**: Disruptions, detours, and other service announcements
 
-The pipeline fetches data from RTD's public endpoints every hour, processes it using Apache Flink's streaming capabilities, and outputs structured data that can be easily integrated with databases, message queues, or other downstream systems.
+The pipeline fetches data from RTD's public endpoints every minute, processes it using Apache Flink's streaming capabilities, and outputs structured data that can be easily integrated with databases, message queues, or other downstream systems.
 
 ## Architecture
 
@@ -23,7 +23,7 @@ The pipeline fetches data from RTD's public endpoints every hour, processes it u
 - **Table API Integration**: Structured data processing and configurable output sinks
 
 ### Data Flow
-1. **HTTP Source**: Downloads protobuf data from RTD endpoints every hour
+1. **HTTP Source**: Downloads protobuf data from RTD endpoints every minute
 2. **Deserialization**: Converts GTFS-RT protobuf messages to Java objects
 3. **Stream Processing**: Applies watermarks and timestamp assignment
 4. **Table API**: Converts streams to SQL-queryable tables
@@ -269,7 +269,7 @@ kafka-console-consumer --bootstrap-server localhost:9092 --topic rtd.comprehensi
 ## Configuration
 
 ### Pipeline Settings
-- **Fetch Interval**: 1 hour (3600 seconds)
+- **Fetch Interval**: 1 minute (60 seconds)
 - **Parallelism**: 1 (configurable)
 - **Checkpointing**: Every 60 seconds with EXACTLY_ONCE semantics
 - **Watermarks**: 1-minute tolerance for out-of-order events

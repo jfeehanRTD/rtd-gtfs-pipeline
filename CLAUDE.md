@@ -68,12 +68,12 @@ flink run target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar
 
 ### High-Level Components
 - **RTDGTFSPipeline**: Main job class that orchestrates the entire pipeline
-- **GTFSRealtimeSource**: Custom source function that downloads GTFS-RT feeds every hour
+- **GTFSRealtimeSource**: Custom source function that downloads GTFS-RT feeds every minute
 - **Data Models**: VehiclePosition, TripUpdate, Alert - representing the three GTFS-RT feed types
 - **Table API Sinks**: Print connectors for processed data output
 
 ### Data Flow
-1. **Source**: HTTP requests to RTD GTFS-RT endpoints every hour
+1. **Source**: HTTP requests to RTD GTFS-RT endpoints every minute
 2. **Parse**: Protobuf deserialization of GTFS-RT feeds
 3. **Transform**: Conversion to structured data models
 4. **Sink**: Table API output (currently print connector, easily configurable for databases)
@@ -87,6 +87,6 @@ flink run target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar
 
 - Always run tests after making code changes to ensure functionality remains intact
 - The pipeline processes three separate GTFS-RT feed types in parallel streams
-- Each feed is fetched hourly and parsed using the Google GTFS-RT protobuf library
+- Each feed is fetched every minute and parsed using the Google GTFS-RT protobuf library
 - Watermarks are configured for 1-minute out-of-order tolerance
 - Table API sinks can be easily reconfigured for different output formats (Kafka, databases, etc.)

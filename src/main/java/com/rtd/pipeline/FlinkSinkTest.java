@@ -26,8 +26,8 @@ public class FlinkSinkTest {
     // Updated RTD endpoint
     private static final String VEHICLE_POSITIONS_URL = "https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/VehiclePosition.pb";
     
-    // Short interval for testing (30 seconds)
-    private static final long FETCH_INTERVAL_SECONDS = 30L;
+    // Fetch interval for live data (1 minute)
+    private static final long FETCH_INTERVAL_SECONDS = 60L;
     
     private static final ObjectMapper objectMapper = new ObjectMapper();
     
