@@ -48,17 +48,33 @@ public class GTFSScheduleSource {
         
         private final String gtfsUrl;
         private final long fetchIntervalSeconds;
-        private final AtomicLong lastFetchTime = new AtomicLong(0);
-        private volatile List<GTFSScheduleData> currentData = new ArrayList<>();
-        private volatile int currentIndex = 0;
+        private transient AtomicLong lastFetchTime;
+        private transient List<GTFSScheduleData> currentData;
+        private transient int currentIndex;
+        private transient Logger LOG;
         
         public GTFSScheduleGeneratorFunction(String gtfsUrl, long fetchIntervalSeconds) {
             this.gtfsUrl = gtfsUrl;
             this.fetchIntervalSeconds = fetchIntervalSeconds;
         }
         
+        private void initializeTransientFields() {
+            if (lastFetchTime == null) {
+                lastFetchTime = new AtomicLong(0);
+            }
+            if (currentData == null) {
+                currentData = new ArrayList<>();
+            }
+            currentIndex = 0;
+            if (LOG == null) {
+                LOG = LoggerFactory.getLogger(GTFSScheduleGeneratorFunction.class);
+            }
+        }
+        
         @Override
         public GTFSScheduleData map(Long value) throws Exception {
+            initializeTransientFields();
+            
             long currentTime = System.currentTimeMillis();
             
             // Check if we need to fetch new data

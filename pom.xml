@@ -42,6 +42,17 @@
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-runtime</artifactId>
+            <version>${flink.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-api-java</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-files</artifactId>
             <version>${flink.version}</version>
         </dependency>
@@ -259,13 +270,14 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>com.rtd.pipeline.SimpleRTDPipelineTest</mainClass>
+                    <mainClass>com.rtd.pipeline.RTDGTFSPipeline</mainClass>
                     <commandlineArgs>
                         --add-opens=java.base/sun.misc=ALL-UNNAMED
                         --add-opens=java.base/java.nio=ALL-UNNAMED
                         --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
                         --add-opens=java.base/java.io=ALL-UNNAMED
                     </commandlineArgs>
+                    <classpathScope>compile</classpathScope>
                 </configuration>
             </plugin>
         </plugins>

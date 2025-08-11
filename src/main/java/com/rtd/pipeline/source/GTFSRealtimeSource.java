@@ -50,9 +50,10 @@ public class GTFSRealtimeSource<T> {
         private final String feedUrl;
         private final long fetchIntervalSeconds;
         private final Class<T> outputType;
-        private final AtomicLong lastFetchTime = new AtomicLong(0);
-        private volatile List<T> currentData = new ArrayList<>();
-        private volatile int currentIndex = 0;
+        private transient AtomicLong lastFetchTime;
+        private transient List<T> currentData;
+        private transient int currentIndex;
+        private transient Logger LOG;
         
         public GTFSRealtimeGeneratorFunction(String feedUrl, long fetchIntervalSeconds, Class<T> outputType) {
             this.feedUrl = feedUrl;
@@ -60,8 +61,23 @@ public class GTFSRealtimeSource<T> {
             this.outputType = outputType;
         }
         
+        private void initializeTransientFields() {
+            if (lastFetchTime == null) {
+                lastFetchTime = new AtomicLong(0);
+            }
+            if (currentData == null) {
+                currentData = new ArrayList<>();
+            }
+            currentIndex = 0;
+            if (LOG == null) {
+                LOG = LoggerFactory.getLogger(GTFSRealtimeGeneratorFunction.class);
+            }
+        }
+        
         @Override
         public T map(Long value) throws Exception {
+            initializeTransientFields();
+            
             long currentTime = System.currentTimeMillis();
             
             // Check if we need to fetch new data
