@@ -2,10 +2,11 @@
   "name": "rtd-maps-app",
   "version": "1.0.0",
   "private": true,
-  "description": "Real-time RTD Denver transit visualization using Google Maps and live GTFS-RT data",
+  "description": "Real-time RTD Denver transit visualization using OpenStreetMap and live GTFS-RT data",
   "dependencies": {
-    "@googlemaps/react-wrapper": "^1.1.35",
-    "@types/googlemaps": "^3.43.3",
+    "leaflet": "^1.9.4",
+    "react-leaflet": "^4.2.1",
+    "@types/leaflet": "^1.9.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "typescript": "^5.3.3",
@@ -58,7 +59,8 @@
     "Maps",
     "React",
     "TypeScript",
-    "Google Maps"
+    "OpenStreetMap",
+    "Leaflet"
   ],
   "author": "RTD GTFS Pipeline Team",
   "license": "MIT"

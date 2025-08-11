@@ -1,6 +1,6 @@
 # RTD Live Transit Map
 
-A real-time visualization of RTD Denver's buses and light rail trains using Google Maps, built with React and TypeScript. This application consumes live GTFS-RT data from the RTD pipeline and displays vehicle positions, routes, delays, and service information on an interactive map.
+A real-time visualization of RTD Denver's buses and light rail trains using OpenStreetMap, built with React and TypeScript. This application consumes live GTFS-RT data from the RTD pipeline and displays vehicle positions, routes, delays, and service information on an interactive map.
 
 ![RTD Maps Demo](https://via.placeholder.com/800x400/0066CC/FFFFFF?text=RTD+Live+Transit+Map)
 
@@ -13,10 +13,11 @@ A real-time visualization of RTD Denver's buses and light rail trains using Goog
 - **Service Alerts**: Display active service disruptions and announcements
 
 ### Interactive Map Experience
-- **Google Maps Integration**: High-performance mapping with RTD-optimized styling
-- **Vehicle Selection**: Click vehicles for detailed information panels
+- **OpenStreetMap Integration**: Free, open-source mapping with custom RTD styling
+- **Vehicle Selection**: Click vehicles for detailed information panels  
 - **Smart Filtering**: Filter by vehicle type, routes, delays, and map bounds
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **No API Keys Required**: 100% free to run and deploy
 
 ### Data Integration
 - **Kafka Consumer**: Connects to RTD GTFS-RT pipeline topics
@@ -27,7 +28,7 @@ A real-time visualization of RTD Denver's buses and light rail trains using Goog
 ## 🛠️ Technology Stack
 
 - **Frontend**: React 18 + TypeScript + Vite
-- **Maps**: Google Maps JavaScript API with React wrapper
+- **Maps**: Leaflet + OpenStreetMap with React-Leaflet wrapper
 - **Styling**: Tailwind CSS with RTD brand colors
 - **Data**: Kafka consumers + RTD GTFS-RT APIs
 - **Icons**: Lucide React icons
@@ -37,9 +38,10 @@ A real-time visualization of RTD Denver's buses and light rail trains using Goog
 
 ### Prerequisites
 
-1. **Node.js 18+** and npm/yarn
-2. **Google Maps API Key** with Maps JavaScript API enabled
-3. **RTD Pipeline Running** (optional - will use mock data otherwise)
+1. **Node.js 18+** and npm/yarn  
+2. **RTD Pipeline Running** (optional - will use mock data otherwise)
+
+**No API keys required!** OpenStreetMap is completely free.
 
 ### Installation
 
@@ -51,11 +53,10 @@ cd rtd-maps-app
 # Install dependencies
 npm install
 
-# Copy environment template
+# Copy environment template (optional)
 cp .env.example .env
 
-# Add your Google Maps API Key to .env
-VITE_GOOGLE_MAPS_API_KEY=your_api_key_here
+# No API key needed! Ready to run.
 ```
 
 ### Development
@@ -139,13 +140,13 @@ VITE_DEBUG_MODE=false
 VITE_MOCK_DATA=false
 ```
 
-### Google Maps Setup
+### OpenStreetMap Benefits
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing
-3. Enable **Maps JavaScript API**
-4. Create credentials → API Key
-5. Restrict the key to your domain (recommended)
+- **100% Free**: No API keys, no usage limits, no billing
+- **Open Source**: Community-driven mapping data
+- **Privacy Friendly**: No tracking or data collection
+- **Reliable**: Distributed infrastructure with high availability
+- **Customizable**: Full control over map styling and features
 
 ### Kafka Integration
 
@@ -322,9 +323,10 @@ VITE_RTD_API_BASE=https://api.rtd.com npm run build
 ### Common Issues
 
 **Map doesn't load**
-- Check Google Maps API key is correct
-- Verify Maps JavaScript API is enabled
-- Check browser console for API errors
+- Check internet connection to OpenStreetMap tiles
+- Verify Leaflet CSS is loading correctly  
+- Check browser console for JavaScript errors
+- Try refreshing or clearing browser cache
 
 **No vehicle data**
 - Verify RTD API endpoints are accessible
@@ -363,6 +365,6 @@ This project is part of the RTD GTFS-RT Pipeline and processes publicly availabl
 ## 🙏 Acknowledgments
 
 - **RTD Denver** for providing public GTFS-RT data
-- **Google Maps Platform** for mapping services  
+- **OpenStreetMap Community** for free, open mapping data  
 - **React + TypeScript** community for excellent tooling
 - **Tailwind CSS** for rapid UI development

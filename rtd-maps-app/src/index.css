@@ -147,17 +147,33 @@
   }
 }
 
-/* Google Maps custom styles */
-.gm-style-iw {
-  @apply rounded-lg;
+/* Leaflet custom styles */
+.leaflet-popup-content-wrapper {
+  @apply rounded-lg shadow-lg;
+  padding: 0;
 }
 
-.gm-style-iw-c {
-  @apply rounded-lg overflow-hidden;
+.leaflet-popup-content {
+  margin: 0;
+  line-height: 1.4;
 }
 
-.gm-style-iw-d {
-  @apply text-sm;
+.leaflet-popup-tip {
+  @apply shadow-lg;
+}
+
+.vehicle-popup .leaflet-popup-close-button {
+  @apply text-gray-400 hover:text-gray-600;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+}
+
+/* Vehicle marker styles */
+.vehicle-marker {
+  background: transparent !important;
+  border: none !important;
 }
 
 /* Loading states */

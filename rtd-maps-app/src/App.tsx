@@ -1,7 +1,7 @@
 // RTD Live Transit Map - Main Application Component
 
 import React, { useState, useCallback } from 'react';
-import RTDGoogleMap from './components/GoogleMap';
+import OpenStreetMap from './components/OpenStreetMap';
 import VehicleDetailsPanel from './components/VehicleDetailsPanel';
 import { useRTDData } from './hooks/useRTDData';
 import { EnhancedVehicleData, MapFilters } from './types/rtd';
@@ -15,9 +15,6 @@ import {
   MapPin
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-
-// Environment configuration
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
 function App() {
   const [selectedVehicle, setSelectedVehicle] = useState<EnhancedVehicleData | null>(null);
@@ -56,25 +53,7 @@ function App() {
     await refresh();
   }, [refresh]);
 
-  // Check if Google Maps API key is configured
-  if (!GOOGLE_MAPS_API_KEY) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center p-8 max-w-md">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Configuration Required</h2>
-          <p className="text-gray-600 mb-6">
-            Please configure your Google Maps API key in the environment variables.
-          </p>
-          <div className="bg-gray-100 p-4 rounded-lg text-left">
-            <code className="text-sm text-gray-700">
-              VITE_GOOGLE_MAPS_API_KEY=your_api_key_here
-            </code>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // No API key needed for OpenStreetMap!
 
   return (
     <div className="h-screen relative bg-gray-100 font-sans">
@@ -171,8 +150,7 @@ function App() {
           </div>
         ) : (
           // Map with data
-          <RTDGoogleMap
-            apiKey={GOOGLE_MAPS_API_KEY}
+          <OpenStreetMap
             vehicles={filteredVehicles}
             selectedVehicle={selectedVehicle}
             filters={filters}
@@ -193,7 +171,7 @@ function App() {
         <div className="bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1 text-xs text-gray-600 shadow-sm">
           <div className="flex items-center space-x-2">
             <CheckCircle className="w-3 h-3 text-green-500" />
-            <span>Powered by RTD GTFS-RT • Live transit data</span>
+            <span>Powered by OpenStreetMap & RTD GTFS-RT • Live transit data</span>
           </div>
         </div>
       </div>
