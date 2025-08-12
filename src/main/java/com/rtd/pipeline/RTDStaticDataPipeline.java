@@ -4,6 +4,9 @@ import com.rtd.pipeline.source.RTDRowSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -54,34 +57,49 @@ public class RTDStaticDataPipeline {
                     if (!vehicles.isEmpty()) {
                         System.out.printf("✅ Retrieved %d vehicles from RTD\n", vehicles.size());
                         
-                        // Display first 5 vehicles
-                        int displayCount = Math.min(5, vehicles.size());
+                        // Get and format the timestamp from the first vehicle
+                        if (!vehicles.isEmpty()) {
+                            Long timestampMs = (Long) vehicles.get(0).getField(0);
+                            if (timestampMs != null) {
+                                String formattedTime = Instant.ofEpochMilli(timestampMs)
+                                    .atZone(ZoneId.of("America/Denver"))
+                                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z"));
+                                System.out.printf("📅 Feed Timestamp: %s\n", formattedTime);
+                            }
+                        }
+                        
+                        System.out.println("\nVehicle Details:");
+                        System.out.println("  Bus# | Route | Position            | Status         | ID");
+                        System.out.println("  " + "-".repeat(70));
+                        
+                        // Display first 10 vehicles (increased from 5)
+                        int displayCount = Math.min(10, vehicles.size());
                         for (int i = 0; i < displayCount; i++) {
                             org.apache.flink.types.Row vehicle = vehicles.get(i);
+                            // Updated field indices after adding vehicle_label
                             String vehicleId = (String) vehicle.getField(1);
-                            String routeId = (String) vehicle.getField(3);
-                            Double latitude = (Double) vehicle.getField(4);
-                            Double longitude = (Double) vehicle.getField(5);
-                            String status = (String) vehicle.getField(8);
+                            String vehicleLabel = (String) vehicle.getField(2);  // Fleet number
+                            String routeId = (String) vehicle.getField(4);      // Shifted from 3
+                            Double latitude = (Double) vehicle.getField(5);     // Shifted from 4
+                            Double longitude = (Double) vehicle.getField(6);    // Shifted from 5
+                            String status = (String) vehicle.getField(9);       // Shifted from 8
                             
-                            // Show last 8 chars of vehicle ID for better uniqueness (or full ID if shorter)
-                            String displayId = "N/A";
-                            if (vehicleId != null) {
-                                if (vehicleId.length() > 16) {
-                                    // For long IDs, show first 4 and last 4 chars
-                                    displayId = vehicleId.substring(0, 4) + "..." + 
-                                               vehicleId.substring(vehicleId.length() - 4);
-                                } else {
-                                    displayId = vehicleId;
-                                }
+                            // Show last 4 chars of vehicle ID for uniqueness
+                            String shortId = "N/A";
+                            if (vehicleId != null && vehicleId.length() >= 4) {
+                                shortId = "..." + vehicleId.substring(vehicleId.length() - 4);
                             }
                             
-                            System.out.printf("  Vehicle: %s | Route: %s | Position: (%.6f, %.6f) | Status: %s\n",
-                                displayId,
+                            // Format vehicle label (fleet number) with padding
+                            String displayLabel = vehicleLabel != null ? vehicleLabel : "----";
+                            
+                            System.out.printf("  %-5s | %-5s | %9.6f,%10.6f | %-14s | %s\n",
+                                displayLabel,
                                 routeId != null ? routeId : "N/A",
                                 latitude != null ? latitude : 0.0,
                                 longitude != null ? longitude : 0.0,
-                                status != null ? status : "N/A"
+                                status != null ? status : "N/A",
+                                shortId
                             );
                         }
                         

@@ -112,54 +112,56 @@ public class RTDRowSource implements SourceFunction<Row> {
      * Converts GTFS-RT VehiclePosition to Flink Row with fixed schema:
      * 0: timestamp_ms (BIGINT)
      * 1: vehicle_id (STRING) 
-     * 2: trip_id (STRING)
-     * 3: route_id (STRING)
-     * 4: latitude (DOUBLE)
-     * 5: longitude (DOUBLE)
-     * 6: bearing (FLOAT)
-     * 7: speed (FLOAT)
-     * 8: current_status (STRING)
-     * 9: congestion_level (STRING)
-     * 10: occupancy_status (STRING)
+     * 2: vehicle_label (STRING) - Fleet number like "6559"
+     * 3: trip_id (STRING)
+     * 4: route_id (STRING)
+     * 5: latitude (DOUBLE)
+     * 6: longitude (DOUBLE)
+     * 7: bearing (FLOAT)
+     * 8: speed (FLOAT)
+     * 9: current_status (STRING)
+     * 10: congestion_level (STRING)
+     * 11: occupancy_status (STRING)
      */
     private Row parseVehiclePositionToRow(VehiclePosition vehiclePos, long feedTimestamp) {
         try {
-            Row row = new Row(11); // 11 fields
+            Row row = new Row(12); // 12 fields (added vehicle_label)
             
             // Timestamp
             row.setField(0, feedTimestamp);
             
-            // Vehicle ID
+            // Vehicle ID and Label
             row.setField(1, vehiclePos.getVehicle().hasId() ? vehiclePos.getVehicle().getId() : null);
+            row.setField(2, vehiclePos.getVehicle().hasLabel() ? vehiclePos.getVehicle().getLabel() : null);
             
             // Trip and Route information
             if (vehiclePos.hasTrip()) {
                 TripDescriptor trip = vehiclePos.getTrip();
-                row.setField(2, trip.hasTripId() ? trip.getTripId() : null);
-                row.setField(3, trip.hasRouteId() ? trip.getRouteId() : null);
+                row.setField(3, trip.hasTripId() ? trip.getTripId() : null);
+                row.setField(4, trip.hasRouteId() ? trip.getRouteId() : null);
             } else {
-                row.setField(2, null);
                 row.setField(3, null);
+                row.setField(4, null);
             }
             
             // Position information
             if (vehiclePos.hasPosition()) {
                 Position pos = vehiclePos.getPosition();
-                row.setField(4, pos.hasLatitude() ? (double) pos.getLatitude() : null);
-                row.setField(5, pos.hasLongitude() ? (double) pos.getLongitude() : null);
-                row.setField(6, pos.hasBearing() ? pos.getBearing() : null);
-                row.setField(7, pos.hasSpeed() ? pos.getSpeed() : null);
+                row.setField(5, pos.hasLatitude() ? (double) pos.getLatitude() : null);
+                row.setField(6, pos.hasLongitude() ? (double) pos.getLongitude() : null);
+                row.setField(7, pos.hasBearing() ? pos.getBearing() : null);
+                row.setField(8, pos.hasSpeed() ? pos.getSpeed() : null);
             } else {
-                row.setField(4, null);
                 row.setField(5, null);
                 row.setField(6, null);
                 row.setField(7, null);
+                row.setField(8, null);
             }
             
             // Status information
-            row.setField(8, vehiclePos.hasCurrentStatus() ? vehiclePos.getCurrentStatus().name() : null);
-            row.setField(9, vehiclePos.hasCongestionLevel() ? vehiclePos.getCongestionLevel().name() : null);
-            row.setField(10, vehiclePos.hasOccupancyStatus() ? vehiclePos.getOccupancyStatus().name() : null);
+            row.setField(9, vehiclePos.hasCurrentStatus() ? vehiclePos.getCurrentStatus().name() : null);
+            row.setField(10, vehiclePos.hasCongestionLevel() ? vehiclePos.getCongestionLevel().name() : null);
+            row.setField(11, vehiclePos.hasOccupancyStatus() ? vehiclePos.getOccupancyStatus().name() : null);
             
             return row;
             
