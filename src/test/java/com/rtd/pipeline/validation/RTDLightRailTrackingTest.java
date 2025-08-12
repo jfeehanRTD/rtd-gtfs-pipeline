@@ -164,7 +164,7 @@ class RTDLightRailTrackingTest {
                     frequencyMinutes = freq.peakFrequencyMinutes;
                 } else if (time.isBefore(LocalTime.of(15, 0))) {
                     frequencyMinutes = freq.midDayFrequencyMinutes;
-                } else if (time.isBefore(LocalTime.of(24, 0))) {
+                } else if (time.isBefore(LocalTime.of(23, 59))) {
                     frequencyMinutes = freq.eveningFrequencyMinutes;
                 } else {
                     frequencyMinutes = freq.lateNightFrequencyMinutes;
