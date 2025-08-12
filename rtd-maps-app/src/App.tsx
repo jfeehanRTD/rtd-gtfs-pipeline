@@ -1,6 +1,6 @@
 // RTD Live Transit Map - Main Application Component
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import OpenStreetMap from './components/OpenStreetMap';
 import VehicleDetailsPanel from './components/VehicleDetailsPanel';
 import { useRTDData } from './hooks/useRTDData';

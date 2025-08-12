@@ -1,7 +1,7 @@
 // Vehicle Markers Component for Leaflet Map - RTD Transit Vehicles
 
-import React, { useMemo } from 'react';
-import { Marker, Popup, useMap } from 'react-leaflet';
+import { useMemo } from 'react';
+import { Marker, Popup } from 'react-leaflet';
 import { EnhancedVehicleData } from '@/types/rtd';
 import L from 'leaflet';
 import { formatDistanceToNow } from 'date-fns';
@@ -98,7 +98,6 @@ const VehicleMarkers: React.FC<VehicleMarkersProps> = ({
   selectedVehicle,
   onVehicleSelect
 }) => {
-  const map = useMap();
 
   // Create markers with memoization for performance
   const markers = useMemo(() => {

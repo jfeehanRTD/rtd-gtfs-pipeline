@@ -43,7 +43,7 @@ export class RTDDataService {
     alerts: 'https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/Alert.pb'
   };
 
-  private updateInterval: NodeJS.Timeout | null = null;
+  private updateInterval: ReturnType<typeof setInterval> | null = null;
   private readonly UPDATE_INTERVAL_MS = 30000; // 30 seconds
 
   public static getInstance(): RTDDataService {
@@ -79,7 +79,7 @@ export class RTDDataService {
     
     try {
       // Simulate Kafka consumer by checking if our RTD query service is available
-      const response = await axios.get('http://localhost:8080/health', { timeout: 5000 });
+      await axios.get('http://localhost:8080/health', { timeout: 5000 });
       console.log('✅ Kafka/RTD service available');
       this.startKafkaConsumer();
     } catch (error) {

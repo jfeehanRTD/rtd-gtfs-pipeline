@@ -1,6 +1,6 @@
 // Map Controls - Filters and settings for the RTD transit map
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { MapFilters } from '@/types/rtd';
 import { 
   Filter,
@@ -9,8 +9,6 @@ import {
   Train,
   Clock,
   Eye,
-  EyeOff,
-  RefreshCw,
   MapPin,
   Info
 } from 'lucide-react';

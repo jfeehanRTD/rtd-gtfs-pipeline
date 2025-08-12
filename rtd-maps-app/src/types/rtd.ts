@@ -145,7 +145,6 @@ export interface MapConfig {
     lng: number;
   };
   zoom: number;
-  styles?: google.maps.MapTypeStyle[];
   disableDefaultUI?: boolean;
   zoomControl?: boolean;
   mapTypeControl?: boolean;

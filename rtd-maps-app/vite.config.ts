@@ -1,8 +1,19 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      '@/components': path.resolve(__dirname, './src/components'),
+      '@/types': path.resolve(__dirname, './src/types'),
+      '@/services': path.resolve(__dirname, './src/services'),
+      '@/utils': path.resolve(__dirname, './src/utils'),
+      '@/hooks': path.resolve(__dirname, './src/hooks'),
+    },
+  },
   server: {
     port: 3000,
     host: true,
@@ -14,7 +25,7 @@ export default defineConfig({
     global: 'globalThis'
   },
   optimizeDeps: {
-    include: ['react', 'react-dom']
+    include: ['react', 'react-dom', 'leaflet']
   },
   build: {
     outDir: 'dist',
@@ -23,7 +34,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          maps: ['@googlemaps/react-wrapper']
+          maps: ['leaflet', 'react-leaflet']
         }
       }
     }
