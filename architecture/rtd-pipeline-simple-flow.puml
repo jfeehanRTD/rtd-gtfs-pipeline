@@ -1,0 +1,183 @@
+@startuml RTD_Pipeline_Simple_Flow
+!theme plain
+title RTD GTFS-RT Pipeline - Simplified Linear Data Flow
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontSize 14
+skinparam arrowThickness 3
+skinparam arrowColor #2E86C1
+skinparam activityBackgroundColor #E8F6F3
+skinparam activityBorderColor #1ABC9C
+skinparam partitionBorderColor #34495E
+skinparam noteBackgroundColor #FFF3CD
+skinparam noteBorderColor #FFC107
+
+|#E8E8E8|**1. DATA SOURCES**|
+start
+:RTD GTFS-RT APIs
+----
+• VehiclePosition.pb
+• TripUpdate.pb  
+• Alert.pb;
+note right
+  **Protocol:** HTTPS
+  **Format:** Protocol Buffers
+  **Frequency:** 60 seconds
+  **Volume:** ~400 vehicles
+end note
+
+|#C8E6C9|**2. DATA INGESTION**|
+:HTTP Fetcher
+----
+Downloads binary data
+from RTD endpoints;
+
+:Protobuf Parser
+----
+Deserializes Protocol
+Buffer messages;
+
+:Kafka Producer
+----
+Publishes to Kafka topics;
+
+|#FFCDD2|**3. KAFKA RAW DATA**|
+split
+  :rtd.vehicle.positions
+  ----
+  GPS & status data
+  (3 partitions);
+split again
+  :rtd.trip.updates
+  ----
+  Schedule adherence
+  (2 partitions);
+split again
+  :rtd.alerts
+  ----
+  Service disruptions
+  (1 partition);
+end split
+
+|#BBDEFB|**4. FLINK STREAM PROCESSING**|
+
+==Vehicle Processing==
+:Deserialize Protobuf
+----
+Convert to Java objects;
+
+:Enrich with Static GTFS
+----
+Add route names, stops;
+note right
+  Joins with:
+  • routes.txt
+  • stops.txt
+  • trips.txt
+end note
+
+:Calculate Delays
+----
+Compare scheduled vs actual;
+
+:Assign Watermarks
+----
+1-minute tolerance;
+
+==Trip Processing==
+:Analyze Schedule
+----
+Detect late trips;
+
+:Detect Cascades
+----
+Find delay patterns;
+
+==Alert Processing==
+:Classify Alerts
+----
+Categorize by type;
+
+:Analyze Impact
+----
+Estimate affected routes;
+
+==Aggregation==
+:Route Aggregator
+----
+5-minute windows
+Performance metrics;
+
+:Anomaly Detector
+----
+Pattern matching
+Threshold monitoring;
+
+|#C8E6C9|**5. KAFKA PROCESSED DATA**|
+split
+  :rtd.comprehensive.routes
+  ----
+  **Enriched vehicle data**
+  JSON format
+  Real-time updates;
+split again
+  :rtd.route.summary
+  ----
+  **Aggregated metrics**
+  Per-route statistics
+  On-time performance;
+split again
+  :rtd.vehicle.tracking
+  ----
+  **Monitoring data**
+  Historical tracking
+  Anomaly flags;
+end split
+
+|#FFE0B2|**6. API LAYER**|
+:HTTP API Server (Port 8080)
+----
+Kafka Consumer
+JSON Converter
+CORS Handler;
+
+:REST Endpoints
+----
+**/api/vehicles** - Current positions
+**/api/health** - System status;
+
+|#E1F5FE|**7. WEB APPLICATION**|
+:React App (Port 3002)
+----
+RTD Data Service
+OpenStreetMap View
+Vehicle Tracker;
+note right
+  **Update Rate:** 30 seconds
+  **Map:** OpenStreetMap
+  **Framework:** React/TypeScript
+end note
+
+|#F5F5F5|**8. DATA CONSUMERS**|
+split
+  :Analytics Dashboard
+  ----
+  Real-time metrics;
+split again
+  :Mobile Apps
+  ----
+  Passenger info;
+split again
+  :Data Warehouse
+  ----
+  Historical analysis;
+split again
+  :Operations Center
+  ----
+  Service monitoring;
+end split
+
+stop
+
+@enduml

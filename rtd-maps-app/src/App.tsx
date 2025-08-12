@@ -6,6 +6,7 @@ import VehicleDetailsPanel from './components/VehicleDetailsPanel';
 import VehicleSelector from './components/VehicleSelector';
 import DataSourcePanel from './components/DataSourcePanel';
 import VehicleTracker from './components/VehicleTracker';
+import UpdateIntervalControl from './components/UpdateIntervalControl';
 import { useRTDData } from './hooks/useRTDData';
 import { EnhancedVehicleData, MapFilters } from './types/rtd';
 import { VehicleHistory } from './services/dataQueryService';
@@ -21,7 +22,8 @@ import {
   Target,
   Navigation,
   Menu,
-  X
+  X,
+  Settings2
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -33,6 +35,7 @@ function App() {
   const [showVehicleSelector, setShowVehicleSelector] = useState(false);
   const [showDataSources, setShowDataSources] = useState(false);
   const [showTracker, setShowTracker] = useState(false);
+  const [showIntervalControl, setShowIntervalControl] = useState(false);
   const [filters, setFilters] = useState<MapFilters>({
     showBuses: true,
     showTrains: true,
@@ -49,7 +52,9 @@ function App() {
     error,
     refresh,
     filteredVehicles,
-    applyFilters
+    applyFilters,
+    setUpdateInterval,
+    getUpdateInterval
   } = useRTDData();
 
   // Handle vehicle selection for details
@@ -111,6 +116,11 @@ function App() {
   const handleRefresh = useCallback(async () => {
     await refresh();
   }, [refresh]);
+
+  // Handle update interval change
+  const handleIntervalChange = useCallback(async (intervalSeconds: number) => {
+    await setUpdateInterval(intervalSeconds);
+  }, [setUpdateInterval]);
 
   // No API key needed for OpenStreetMap!
 
@@ -191,6 +201,16 @@ function App() {
                 title="Vehicle Tracker"
               >
                 <Navigation className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => setShowIntervalControl(!showIntervalControl)}
+                className={`p-2 rounded-md transition-colors ${
+                  showIntervalControl ? 'bg-rtd-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+                title="Update Interval"
+              >
+                <Settings2 className="w-4 h-4" />
               </button>
             </div>
             
@@ -291,6 +311,16 @@ function App() {
                   selectedVehicles={selectedVehicles}
                   onVehicleUpdate={handleVehicleUpdate}
                   onHistoryUpdate={handleHistoryUpdate}
+                />
+              </div>
+            )}
+
+            {/* Update Interval Control Panel */}
+            {showIntervalControl && (
+              <div className="w-80 h-fit">
+                <UpdateIntervalControl
+                  currentInterval={getUpdateInterval()}
+                  onIntervalChange={handleIntervalChange}
                 />
               </div>
             )}

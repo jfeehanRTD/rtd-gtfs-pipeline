@@ -1,0 +1,223 @@
+@startuml RTD_Pipeline_Data_Flow
+!theme plain
+title RTD GTFS-RT Pipeline - Clear Data Flow Architecture
+
+skinparam backgroundColor #FEFEFE
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam arrowThickness 2
+skinparam arrowColor #4A90E2
+skinparam noteBackgroundColor #FFF9E6
+skinparam noteBorderColor #E6D600
+
+' Define color scheme
+!define EXTERNAL_COLOR #E8E8E8
+!define INGESTION_COLOR #5CB85C
+!define KAFKA_RAW_COLOR #FF7F7F
+!define FLINK_COLOR #4A90E2
+!define KAFKA_PROCESSED_COLOR #5CB85C
+!define API_COLOR #FFA500
+!define WEB_COLOR #61DAFB
+!define CONSUMER_COLOR #9E9E9E
+
+' Layout hint
+!define LAYOUT_TOP_DOWN direction: top to bottom
+!define LAYOUT_LEFT_RIGHT direction: left to right
+
+' ============================================
+' LAYER 1: EXTERNAL DATA SOURCES
+' ============================================
+rectangle "**EXTERNAL DATA SOURCES**" as ext_layer #F5F5F5 {
+  
+  component "RTD GTFS-RT APIs" as rtd_api <<External>> #EXTERNAL_COLOR {
+    file "VehiclePosition.pb" as vp_api #EXTERNAL_COLOR
+    file "TripUpdate.pb" as tu_api #EXTERNAL_COLOR
+    file "Alert.pb" as al_api #EXTERNAL_COLOR
+  }
+  
+  database "Static GTFS\nDatabase" as static_gtfs <<External>> #EXTERNAL_COLOR
+  
+  note right of rtd_api
+    **Update Frequency:** 60 seconds
+    **Data Volume:** ~400+ vehicles
+    **Format:** Protocol Buffers
+  end note
+}
+
+' ============================================
+' LAYER 2: DATA INGESTION
+' ============================================
+rectangle "**DATA INGESTION LAYER**" as ingestion_layer #F0FFF0 {
+  
+  component "GTFS-RT Producer Application" as producer #INGESTION_COLOR {
+    rectangle "1. HTTP Fetcher" as fetcher #INGESTION_COLOR
+    rectangle "2. Protobuf Parser" as parser #INGESTION_COLOR
+    rectangle "3. Kafka Producer" as kafka_producer #INGESTION_COLOR
+    
+    fetcher -down-> parser : "Raw bytes"
+    parser -down-> kafka_producer : "Parsed objects"
+  }
+}
+
+' ============================================
+' LAYER 3: RAW DATA TOPICS (KAFKA)
+' ============================================
+rectangle "**KAFKA RAW DATA LAYER**" as kafka_raw_layer #FFE5E5 {
+  queue "rtd.vehicle.positions" as vehicle_topic <<Kafka Topic>> #KAFKA_RAW_COLOR
+  queue "rtd.trip.updates" as trip_topic <<Kafka Topic>> #KAFKA_RAW_COLOR
+  queue "rtd.alerts" as alert_topic <<Kafka Topic>> #KAFKA_RAW_COLOR
+  
+  note bottom of vehicle_topic
+    **Partitions:** 3
+    **Retention:** 24 hours
+    **Format:** Protobuf
+  end note
+}
+
+' ============================================
+' LAYER 4: STREAM PROCESSING (FLINK)
+' ============================================
+rectangle "**APACHE FLINK PROCESSING LAYER**" as flink_layer #E5F2FF {
+  
+  rectangle "Vehicle Position Pipeline" as vehicle_pipeline #FLINK_COLOR {
+    component "4. Deserializer" as v_deserializer #FLINK_COLOR
+    component "5. Enricher" as v_enricher #FLINK_COLOR
+    component "6. Delay Calculator" as v_delay #FLINK_COLOR
+    
+    v_deserializer -right-> v_enricher
+    v_enricher -right-> v_delay
+  }
+  
+  rectangle "Trip Update Pipeline" as trip_pipeline #FLINK_COLOR {
+    component "4. Schedule Analyzer" as t_analyzer #FLINK_COLOR
+    component "5. Delay Aggregator" as t_aggregator #FLINK_COLOR
+    
+    t_analyzer -right-> t_aggregator
+  }
+  
+  rectangle "Alert Pipeline" as alert_pipeline #FLINK_COLOR {
+    component "4. Alert Classifier" as a_classifier #FLINK_COLOR
+    component "5. Impact Analyzer" as a_impact #FLINK_COLOR
+    
+    a_classifier -right-> a_impact
+  }
+  
+  rectangle "Aggregation & Analytics" as analytics #FLINK_COLOR {
+    component "7. Route Aggregator" as aggregator #FLINK_COLOR
+    component "8. Anomaly Detector" as anomaly #FLINK_COLOR
+    
+    aggregator -down-> anomaly
+  }
+}
+
+' ============================================
+' LAYER 5: PROCESSED DATA TOPICS (KAFKA)
+' ============================================
+rectangle "**KAFKA PROCESSED DATA LAYER**" as kafka_processed_layer #E5FFE5 {
+  queue "rtd.comprehensive.routes" as comprehensive_topic <<Kafka Topic>> #KAFKA_PROCESSED_COLOR
+  queue "rtd.route.summary" as summary_topic <<Kafka Topic>> #KAFKA_PROCESSED_COLOR
+  queue "rtd.vehicle.tracking" as tracking_topic <<Kafka Topic>> #KAFKA_PROCESSED_COLOR
+  
+  note bottom of comprehensive_topic
+    **Format:** JSON
+    **Contains:** Enriched vehicle data
+    **Update Rate:** Real-time
+  end note
+}
+
+' ============================================
+' LAYER 6: API & WEB LAYER
+' ============================================
+rectangle "**API & WEB APPLICATION LAYER**" as api_layer #FFF5E5 {
+  
+  component "HTTP API Server\n(Port 8080)" as api_server #API_COLOR {
+    rectangle "9. Kafka Consumer" as api_consumer #API_COLOR
+    rectangle "10. JSON API" as json_api #API_COLOR
+    
+    api_consumer -right-> json_api
+  }
+  
+  component "React Web App\n(Port 3002)" as web_app #WEB_COLOR {
+    rectangle "11. Data Service" as data_service #WEB_COLOR
+    rectangle "12. Map View" as map_view #WEB_COLOR
+    
+    data_service -right-> map_view
+  }
+}
+
+' ============================================
+' LAYER 7: DATA CONSUMERS
+' ============================================
+rectangle "**DATA CONSUMERS**" as consumer_layer #F5F5F5 {
+  component "Analytics\nDashboard" as dashboard #CONSUMER_COLOR
+  component "Mobile\nApps" as mobile #CONSUMER_COLOR
+  component "Data\nWarehouse" as warehouse #CONSUMER_COLOR
+  component "Operations\nCenter" as ops_center #CONSUMER_COLOR
+}
+
+' ============================================
+' DATA FLOW CONNECTIONS (Top to Bottom)
+' ============================================
+
+' From APIs to Producer
+vp_api -[#4A90E2,bold]-> fetcher : "HTTPS/GET"
+tu_api -[#4A90E2,bold]-> fetcher : "HTTPS/GET"
+al_api -[#4A90E2,bold]-> fetcher : "HTTPS/GET"
+
+' From Producer to Raw Topics
+kafka_producer -[#4A90E2,bold]-> vehicle_topic : "Publish"
+kafka_producer -[#4A90E2,bold]-> trip_topic : "Publish"
+kafka_producer -[#4A90E2,bold]-> alert_topic : "Publish"
+
+' From Raw Topics to Flink Processing
+vehicle_topic -[#4A90E2,bold]-> v_deserializer : "Consume"
+trip_topic -[#4A90E2,bold]-> t_analyzer : "Consume"
+alert_topic -[#4A90E2,bold]-> a_classifier : "Consume"
+
+' Static GTFS enrichment
+static_gtfs -[#9E9E9E,dashed]-> v_enricher : "Enrich"
+
+' From Flink to Processed Topics
+v_delay -[#4A90E2,bold]-> comprehensive_topic : "Publish"
+v_delay -[#4A90E2,bold]-> tracking_topic : "Publish"
+t_aggregator -[#4A90E2,bold]-> summary_topic : "Publish"
+a_impact -[#4A90E2,bold]-> comprehensive_topic : "Publish"
+
+' Aggregation inputs
+comprehensive_topic -[#4A90E2,bold]-> aggregator : "Aggregate"
+tracking_topic -[#4A90E2,bold]-> anomaly : "Analyze"
+
+' Aggregation outputs
+aggregator -[#4A90E2,bold]-> summary_topic : "Publish"
+
+' From Processed Topics to API
+comprehensive_topic -[#4A90E2,bold]-> api_consumer : "Subscribe"
+
+' From API to Web App
+json_api -[#4A90E2,bold]-> data_service : "REST/JSON"
+
+' From Processed Topics to Consumers
+comprehensive_topic -[#4A90E2,bold]-> dashboard : "Stream"
+comprehensive_topic -[#4A90E2,bold]-> mobile : "Stream"
+summary_topic -[#4A90E2,bold]-> warehouse : "Batch"
+comprehensive_topic -[#4A90E2,bold]-> ops_center : "Stream"
+
+' ============================================
+' LEGEND
+' ============================================
+legend right
+  |= Symbol |= Meaning |
+  |<#EXTERNAL_COLOR>      | External System |
+  |<#INGESTION_COLOR>     | Data Ingestion |
+  |<#KAFKA_RAW_COLOR>     | Kafka Raw Data |
+  |<#FLINK_COLOR>         | Flink Processing |
+  |<#KAFKA_PROCESSED_COLOR>| Kafka Processed Data |
+  |<#API_COLOR>           | REST API |
+  |<#WEB_COLOR>           | Web Application |
+  |<#CONSUMER_COLOR>      | Data Consumer |
+  |<color:#4A90E2>━━></color>| Data Flow |
+  |<color:#9E9E9E>┅┅></color>| Static Data |
+endlegend
+
+@enduml

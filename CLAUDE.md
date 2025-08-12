@@ -49,16 +49,58 @@ mvn clean package -DskipTests
 
 ### Run Commands
 
-#### Local Development (Flink Mini Cluster)
-```bash
-# Run with Maven (includes all dependencies)
-mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDGTFSPipeline"
+#### RTD Control Script (Recommended)
+The easiest way to manage the RTD pipeline and React web app:
 
-# Run packaged JAR
-java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar com.rtd.pipeline.RTDGTFSPipeline
+```bash
+# Start both Java pipeline and React app
+./rtd-control.sh start
+
+# Start only specific services
+./rtd-control.sh start java    # Java pipeline only
+./rtd-control.sh start react   # React app only
+
+# Check status of all services
+./rtd-control.sh status
+
+# Stop services
+./rtd-control.sh stop          # Stop both
+./rtd-control.sh stop java     # Stop Java only
+./rtd-control.sh stop react    # Stop React only
+
+# Restart services
+./rtd-control.sh restart       # Restart both
+./rtd-control.sh restart java  # Restart Java only
+
+# View real-time logs
+./rtd-control.sh logs java     # Java pipeline logs
+./rtd-control.sh logs react    # React app logs
+
+# Clean up log files and temp directories
+./rtd-control.sh cleanup
+
+# Show help
+./rtd-control.sh help
 ```
 
-#### Flink Cluster Deployment
+#### Manual Commands (Alternative)
+
+**Local Development (Flink Mini Cluster)**
+```bash
+# Run with Maven (includes all dependencies)
+mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDStaticDataPipeline"
+
+# Run packaged JAR
+java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar com.rtd.pipeline.RTDStaticDataPipeline
+```
+
+**React Web App**
+```bash
+# Start React development server
+cd rtd-maps-app && npm start
+```
+
+**Flink Cluster Deployment**
 ```bash
 # Submit to Flink cluster
 flink run target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar

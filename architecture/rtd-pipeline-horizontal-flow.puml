@@ -1,0 +1,126 @@
+@startuml RTD_Pipeline_Horizontal_Flow
+!theme plain
+title RTD GTFS-RT Data Pipeline - Clean Horizontal Flow
+
+skinparam backgroundColor white
+skinparam component {
+  BackgroundColor<<source>> #E8E8E8
+  BackgroundColor<<ingestion>> #90EE90
+  BackgroundColor<<kafka_raw>> #FFB6C1
+  BackgroundColor<<flink>> #87CEEB
+  BackgroundColor<<kafka_processed>> #98FB98
+  BackgroundColor<<api>> #FFD700
+  BackgroundColor<<web>> #87CEEB
+  BackgroundColor<<consumer>> #D3D3D3
+  BorderColor #333333
+  BorderThickness 2
+  FontSize 14
+  FontStyle bold
+}
+
+skinparam arrow {
+  Color #2E86C1
+  Thickness 3
+  FontSize 12
+}
+
+skinparam note {
+  BackgroundColor #FFFACD
+  BorderColor #DAA520
+  FontSize 11
+}
+
+' Force left-to-right layout
+left to right direction
+
+' ==========================================
+' Data Sources
+' ==========================================
+package "Data Sources" {
+  [RTD APIs\n====\nVehiclePosition.pb\nTripUpdate.pb\nAlert.pb] <<source>> as API
+  
+  database "Static GTFS" <<source>> as GTFS
+}
+
+' ==========================================
+' Ingestion
+' ==========================================
+package "Ingestion" {
+  [Producer App\n====\n1. HTTP Fetch\n2. Parse Protobuf\n3. Kafka Publish] <<ingestion>> as PRODUCER
+}
+
+' ==========================================
+' Kafka Raw Layer
+' ==========================================
+package "Kafka Raw" {
+  [Raw Topics\n====\nvehicle.positions\ntrip.updates\nalerts] <<kafka_raw>> as RAW
+}
+
+' ==========================================
+' Flink Processing
+' ==========================================
+package "Flink Processing" {
+  [Stream Processing\n====\n• Deserialize\n• Enrich Data\n• Calculate Delays\n• Detect Anomalies] <<flink>> as FLINK
+}
+
+' ==========================================
+' Kafka Processed Layer
+' ==========================================
+package "Kafka Processed" {
+  [Processed Topics\n====\ncomprehensive.routes\nroute.summary\nvehicle.tracking] <<kafka_processed>> as PROCESSED
+}
+
+' ==========================================
+' API Layer
+' ==========================================
+package "API" {
+  [HTTP Server\n====\nPort 8080\n/api/vehicles\n/api/health] <<api>> as SERVER
+}
+
+' ==========================================
+' Applications
+' ==========================================
+package "Applications" {
+  [React App\n====\nPort 3002\nLive Map\nVehicle Tracking] <<web>> as WEB
+  
+  [Dashboard] <<consumer>> as DASH
+  [Mobile] <<consumer>> as MOBILE
+  [Warehouse] <<consumer>> as DW
+}
+
+' ==========================================
+' Data Flow Arrows
+' ==========================================
+API -right-> PRODUCER : "60 sec\npolling"
+PRODUCER -right-> RAW : "Publish\nProtobuf"
+RAW -right-> FLINK : "Consume\nStream"
+GTFS -up-> FLINK : "Enrich"
+FLINK -right-> PROCESSED : "Publish\nJSON"
+PROCESSED -right-> SERVER : "Subscribe"
+SERVER -right-> WEB : "REST API"
+PROCESSED -down-> DASH : "Stream"
+PROCESSED -down-> MOBILE : "Stream"
+PROCESSED -down-> DW : "Batch"
+
+' ==========================================
+' Annotations
+' ==========================================
+note top of API
+  **Protocol:** HTTPS
+  **Format:** Protocol Buffer
+  **Volume:** ~400 vehicles/min
+end note
+
+note bottom of FLINK
+  **Latency:** < 1 second
+  **Windows:** 5 minutes
+  **Watermark:** 1 minute
+end note
+
+note top of WEB
+  **Update:** 30 seconds
+  **Map:** OpenStreetMap
+  **Users:** 1000+ concurrent
+end note
+
+@enduml

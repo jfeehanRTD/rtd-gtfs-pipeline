@@ -51,7 +51,7 @@ export class RTDDataService {
   };
 
   private updateInterval: ReturnType<typeof setInterval> | null = null;
-  private readonly UPDATE_INTERVAL_MS = 30000; // 30 seconds
+  private updateIntervalMs = 1000; // Default 1 second for real-time updates
   private readonly API_BASE_URL = 'http://localhost:8080/api';
 
   public static getInstance(): RTDDataService {
@@ -80,7 +80,7 @@ export class RTDDataService {
 
   private async testAPIConnection(): Promise<void> {
     try {
-      const response = await axios.get(`${this.API_BASE_URL}/health`, { timeout: 5000 });
+      const response = await axios.get(`${this.API_BASE_URL}/health`, { timeout: 3000 });
       
       if (response.status === 200) {
         console.log('✅ Connected to RTD Java API server');
@@ -95,7 +95,7 @@ export class RTDDataService {
   }
 
   private startAPIPolling(): void {
-    console.log('📡 Starting RTD API polling every', this.UPDATE_INTERVAL_MS / 1000, 'seconds');
+    console.log('📡 Starting RTD API polling every', this.updateIntervalMs / 1000, 'second(s)');
     
     // Initial fetch
     this.fetchFromAPI();
@@ -103,13 +103,13 @@ export class RTDDataService {
     // Set up interval
     this.updateInterval = setInterval(async () => {
       await this.fetchFromAPI();
-    }, this.UPDATE_INTERVAL_MS);
+    }, this.updateIntervalMs);
   }
 
   private async fetchFromAPI(): Promise<void> {
     try {
       const response = await axios.get<RTDAPIResponse>(`${this.API_BASE_URL}/vehicles`, { 
-        timeout: 10000 
+        timeout: 5000  // Reduced timeout for 1-second updates
       });
       
       if (response.data && response.data.vehicles) {
@@ -282,6 +282,35 @@ export class RTDDataService {
 
   public async refresh(): Promise<void> {
     await this.fetchFromAPI();
+  }
+
+  public async setUpdateInterval(intervalSeconds: number): Promise<void> {
+    const intervalMs = Math.max(500, intervalSeconds * 1000); // Minimum 0.5 seconds
+    
+    console.log(`⏱️ Changing update interval from ${this.updateIntervalMs/1000}s to ${intervalMs/1000}s`);
+    
+    // Update React polling interval
+    this.updateIntervalMs = intervalMs;
+    
+    // Restart polling with new interval
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+    }
+    this.startAPIPolling();
+
+    // Update Java pipeline interval
+    try {
+      await axios.post(`${this.API_BASE_URL}/config/interval`, {
+        intervalSeconds: intervalSeconds
+      }, { timeout: 3000 });
+      console.log(`✅ Java pipeline interval updated to ${intervalSeconds}s`);
+    } catch (error) {
+      console.warn('⚠️ Failed to update Java pipeline interval:', error);
+    }
+  }
+
+  public getUpdateInterval(): number {
+    return this.updateIntervalMs / 1000;
   }
 
   public destroy(): void {

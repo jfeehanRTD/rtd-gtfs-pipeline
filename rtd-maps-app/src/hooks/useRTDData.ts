@@ -13,6 +13,8 @@ interface UseRTDDataResult {
   refresh: () => Promise<void>;
   filteredVehicles: EnhancedVehicleData[];
   applyFilters: (filters: MapFilters) => void;
+  setUpdateInterval: (intervalSeconds: number) => Promise<void>;
+  getUpdateInterval: () => number;
 }
 
 export const useRTDData = (initialFilters?: Partial<MapFilters>): UseRTDDataResult => {
@@ -152,6 +154,20 @@ export const useRTDData = (initialFilters?: Partial<MapFilters>): UseRTDDataResu
     }
   }, []);
 
+  // Update interval management
+  const setUpdateInterval = useCallback(async (intervalSeconds: number) => {
+    if (dataServiceRef.current) {
+      await dataServiceRef.current.setUpdateInterval(intervalSeconds);
+    }
+  }, []);
+
+  const getUpdateInterval = useCallback(() => {
+    if (dataServiceRef.current) {
+      return dataServiceRef.current.getUpdateInterval();
+    }
+    return 1; // Default
+  }, []);
+
   return {
     vehicles,
     alerts,
@@ -160,7 +176,9 @@ export const useRTDData = (initialFilters?: Partial<MapFilters>): UseRTDDataResu
     error,
     refresh,
     filteredVehicles,
-    applyFilters
+    applyFilters,
+    setUpdateInterval,
+    getUpdateInterval
   };
 };
 

@@ -1,0 +1,201 @@
+@startuml RTD_Pipeline_Component_Architecture
+!theme plain
+title RTD GTFS-RT Pipeline - Detailed Component Architecture
+
+skinparam component {
+  BackgroundColor<<External>> #E0E0E0
+  BackgroundColor<<Producer>> #28a745
+  BackgroundColor<<Kafka>> #FF6B6B
+  BackgroundColor<<Flink>> #007ACC
+  BackgroundColor<<API>> #FFA500
+  BackgroundColor<<WebApp>> #61DAFB
+  BackgroundColor<<Consumer>> #6C757D
+  BorderColor #333333
+  ArrowColor #666666
+}
+
+skinparam database {
+  BackgroundColor #336791
+  BorderColor #225177
+}
+
+skinparam queue {
+  BackgroundColor #FF6B6B
+  BorderColor #CC5555
+}
+
+skinparam rectangle {
+  BackgroundColor #F5F5F5
+  BorderColor #999999
+}
+
+' External Systems
+package "External Systems" {
+  component "RTD GTFS-RT APIs" as RTD_API <<External>> {
+    [VehiclePosition.pb]
+    [TripUpdate.pb]
+    [Alert.pb]
+  }
+  
+  database "Static GTFS Data" as STATIC_GTFS <<External>> {
+    [routes.txt]
+    [stops.txt]
+    [stop_times.txt]
+    [trips.txt]
+  }
+}
+
+' Data Ingestion Layer
+package "Data Ingestion Layer" {
+  component "GTFS-RT Producer" as PRODUCER <<Producer>> {
+    [HTTP Fetcher] as FETCHER
+    [Protobuf Parser] as PARSER
+    [Kafka Producer Client] as KAFKA_CLIENT
+    
+    FETCHER --> PARSER : Raw PB bytes
+    PARSER --> KAFKA_CLIENT : Parsed messages
+  }
+}
+
+' Apache Kafka Message Bus
+package "Apache Kafka Cluster (v4.0.0)" {
+  queue "Raw Data Topics" as RAW_TOPICS <<Kafka>> {
+    [rtd.vehicle.positions] as VEHICLE_TOPIC
+    [rtd.trip.updates] as TRIP_TOPIC
+    [rtd.alerts] as ALERT_TOPIC
+  }
+  
+  queue "Processed Data Topics" as PROCESSED_TOPICS <<Kafka>> {
+    [rtd.comprehensive.routes] as COMPREHENSIVE_TOPIC
+    [rtd.route.summary] as SUMMARY_TOPIC
+    [rtd.vehicle.tracking] as TRACKING_TOPIC
+  }
+}
+
+' Apache Flink Processing
+package "Apache Flink Cluster (v1.19.1)" {
+  component "Vehicle Processor" as VEHICLE_PROC <<Flink>> {
+    [Stream Deserializer]
+    [Data Enricher]
+    [Delay Calculator]
+    [Watermark Assigner]
+  }
+  
+  component "Trip Processor" as TRIP_PROC <<Flink>> {
+    [Schedule Analyzer]
+    [Cascade Detector]
+    [Delay Aggregator]
+  }
+  
+  component "Alert Processor" as ALERT_PROC <<Flink>> {
+    [Alert Classifier]
+    [Impact Analyzer]
+    [Severity Scorer]
+  }
+  
+  component "Route Aggregator" as AGGREGATOR <<Flink>> {
+    [Performance Metrics]
+    [Vehicle Counter]
+    [Window Functions]
+    [State Management]
+  }
+  
+  component "Anomaly Detector" as ANOMALY <<Flink>> {
+    [Pattern Matcher]
+    [Threshold Monitor]
+    [CEP Engine]
+    [ML Pipeline]
+  }
+}
+
+' API and Web Layer
+package "API & Web Layer" {
+  component "HTTP API Server" as API_SERVER <<API>> {
+    [/api/vehicles] as VEHICLE_API
+    [/api/health] as HEALTH_API
+    [JSON Converter] as JSON_CONV
+    [CORS Handler] as CORS
+  }
+  
+  component "React Web App" as WEB_APP <<WebApp>> {
+    [OpenStreetMap View] as MAP
+    [Vehicle Tracker] as TRACKER
+    [RTD Data Service] as DATA_SERVICE
+    [Vehicle Selector] as SELECTOR
+    [Data Query Tools] as QUERY_TOOLS
+  }
+}
+
+' Data Consumers
+package "External Consumers" {
+  component "Analytics Dashboard" as DASHBOARD <<Consumer>>
+  component "Mobile Applications" as MOBILE <<Consumer>>
+  component "Data Warehouse" as WAREHOUSE <<Consumer>>
+  component "Operations Center" as OPS_CENTER <<Consumer>>
+}
+
+' Data Flow Relationships
+
+' Ingestion Flow
+RTD_API --> FETCHER : "HTTPS/Protobuf\n60 sec intervals"
+KAFKA_CLIENT --> VEHICLE_TOPIC : "Publish raw\nvehicle data"
+KAFKA_CLIENT --> TRIP_TOPIC : "Publish trip\nupdates"
+KAFKA_CLIENT --> ALERT_TOPIC : "Publish service\nalerts"
+
+' Processing Flow - Vehicles
+VEHICLE_TOPIC --> VEHICLE_PROC : "Consume\nraw data"
+STATIC_GTFS --> VEHICLE_PROC : "Enrich with\nstatic data"
+VEHICLE_PROC --> COMPREHENSIVE_TOPIC : "Enriched\nvehicle data"
+VEHICLE_PROC --> TRACKING_TOPIC : "Tracking\nmetrics"
+
+' Processing Flow - Trips
+TRIP_TOPIC --> TRIP_PROC : "Schedule\nupdates"
+TRIP_PROC --> SUMMARY_TOPIC : "Route\nstatistics"
+
+' Processing Flow - Alerts
+ALERT_TOPIC --> ALERT_PROC : "Service\nalerts"
+ALERT_PROC --> COMPREHENSIVE_TOPIC : "Alert\ncontext"
+
+' Aggregation Flow
+COMPREHENSIVE_TOPIC --> AGGREGATOR : "Vehicle\nstreams"
+AGGREGATOR --> SUMMARY_TOPIC : "Aggregated\nmetrics"
+
+' Anomaly Detection
+TRACKING_TOPIC --> ANOMALY : "Pattern\nanalysis"
+SUMMARY_TOPIC --> ANOMALY : "Threshold\nmonitoring"
+
+' API Flow
+COMPREHENSIVE_TOPIC --> API_SERVER : "Latest data\nKafka Consumer"
+API_SERVER --> WEB_APP : "REST/JSON\nHTTP"
+
+' Consumer Flow
+COMPREHENSIVE_TOPIC --> DASHBOARD : "Real-time\nmetrics"
+COMPREHENSIVE_TOPIC --> MOBILE : "Vehicle\nlocations"
+SUMMARY_TOPIC --> WAREHOUSE : "Historical\ndata"
+COMPREHENSIVE_TOPIC --> OPS_CENTER : "Operations\nmonitoring"
+
+' Annotations
+note top of PRODUCER : Fetches every 60 seconds\n~400+ vehicles per fetch
+
+note right of RAW_TOPICS : Raw GTFS-RT data\nProtocol Buffer format\nPartitioned by vehicle/trip ID
+
+note right of PROCESSED_TOPICS : Enriched JSON data\nReady for consumption\nCompacted topics
+
+note bottom of VEHICLE_PROC : - Deserializes Protocol Buffers\n- Enriches with route/stop info\n- Calculates delays\n- Assigns watermarks (1 min)
+
+note bottom of AGGREGATOR : - 5-minute tumbling windows\n- Route-level aggregations\n- On-time performance metrics\n- Active vehicle counts
+
+note left of WEB_APP : TypeScript/React\nOpenStreetMap tiles\nReal-time updates\nNo API key required
+
+legend right
+  |= Color |= Component Type |
+  |<#28a745> | Data Producer |
+  |<#FF6B6B> | Kafka Topics |
+  |<#007ACC> | Flink Processing |
+  |<#FFA500> | REST API |
+  |<#61DAFB> | Web Application |
+  |<#6C757D> | Data Consumer |
+  |<#E0E0E0> | External System |
+endlegend
+
+@enduml

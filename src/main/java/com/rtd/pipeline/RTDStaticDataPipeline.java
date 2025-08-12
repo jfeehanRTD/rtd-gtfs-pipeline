@@ -32,13 +32,16 @@ public class RTDStaticDataPipeline {
     private static final Logger LOG = LoggerFactory.getLogger(RTDStaticDataPipeline.class);
     
     private static final String VEHICLE_POSITIONS_URL = "https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/VehiclePosition.pb";
-    private static final long FETCH_INTERVAL_SECONDS = 60L;
+    private static volatile long FETCH_INTERVAL_SECONDS = 60L;
     private static final int HTTP_SERVER_PORT = 8080;
     
     // Shared data for HTTP endpoints
     private static final AtomicReference<List<Row>> latestVehicleData = new AtomicReference<>();
     private static final AtomicReference<String> latestJsonData = new AtomicReference<>();
     private static final AtomicReference<Long> lastUpdateTime = new AtomicReference<>(System.currentTimeMillis());
+    
+    // Scheduler for data fetching
+    private static ScheduledExecutorService scheduler;
     
     public static void main(String[] args) throws Exception {
         
@@ -51,7 +54,7 @@ public class RTDStaticDataPipeline {
         startHttpServer();
         
         // Create a simple scheduler to fetch RTD data periodically
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler = Executors.newSingleThreadScheduledExecutor();
         RTDRowSource dataSource = new RTDRowSource(VEHICLE_POSITIONS_URL, FETCH_INTERVAL_SECONDS);
         
         // Counter for demonstration
@@ -61,11 +64,11 @@ public class RTDStaticDataPipeline {
             System.out.println("=== Starting RTD Data Fetching ===");
             System.out.println("Press Ctrl+C to stop\n");
             
-            // Schedule periodic data fetching
-            scheduler.scheduleAtFixedRate(() -> {
+            // Schedule periodic data fetching with dynamic interval
+            scheduler.scheduleWithFixedDelay(() -> {
                 try {
                     fetchCount[0]++;
-                    System.out.printf("=== Fetch #%d ===\n", fetchCount[0]);
+                    System.out.printf("=== Fetch #%d (every %ds) ===\n", fetchCount[0], FETCH_INTERVAL_SECONDS);
                     
                     // Use the RTDRowSource to fetch data directly
                     java.lang.reflect.Method fetchMethod = RTDRowSource.class.getDeclaredMethod("fetchVehiclePositionsAsRows");
@@ -173,6 +176,7 @@ public class RTDStaticDataPipeline {
         // Set up endpoints
         server.createContext("/api/vehicles", new VehiclesHandler());
         server.createContext("/api/health", new HealthHandler());
+        server.createContext("/api/config/interval", new IntervalConfigHandler());
         server.createContext("/", new CorsHandler()); // CORS preflight
         
         // Start the server
@@ -318,6 +322,84 @@ public class RTDStaticDataPipeline {
         }
     }
     
+    static class IntervalConfigHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // Add CORS headers
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+            
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(200, -1);
+                return;
+            }
+            
+            if ("POST".equals(exchange.getRequestMethod())) {
+                try {
+                    // Read request body
+                    String body = new String(exchange.getRequestBody().readAllBytes());
+                    
+                    // Simple JSON parsing (expecting {"intervalSeconds": number})
+                    if (body.contains("intervalSeconds")) {
+                        String[] parts = body.split("intervalSeconds\"\\s*:\\s*");
+                        if (parts.length > 1) {
+                            String numberStr = parts[1].replaceAll("[^0-9.]", "");
+                            double intervalSeconds = Double.parseDouble(numberStr);
+                            
+                            if (intervalSeconds >= 0.5 && intervalSeconds <= 300) {
+                                long newInterval = Math.round(intervalSeconds);
+                                FETCH_INTERVAL_SECONDS = Math.max(1, newInterval); // Minimum 1 second for Java
+                                
+                                System.out.printf("⏱️ Update interval changed to %d seconds by web UI\n", FETCH_INTERVAL_SECONDS);
+                                
+                                String response = String.format(
+                                    "{\"success\": true, \"intervalSeconds\": %d, \"message\": \"Interval updated successfully\"}",
+                                    FETCH_INTERVAL_SECONDS
+                                );
+                                
+                                byte[] responseBytes = response.getBytes();
+                                exchange.sendResponseHeaders(200, responseBytes.length);
+                                try (OutputStream os = exchange.getResponseBody()) {
+                                    os.write(responseBytes);
+                                }
+                                return;
+                            }
+                        }
+                    }
+                    
+                    // Invalid request
+                    String errorResponse = "{\"success\": false, \"message\": \"Invalid interval. Must be between 0.5 and 300 seconds.\"}";
+                    byte[] responseBytes = errorResponse.getBytes();
+                    exchange.sendResponseHeaders(400, responseBytes.length);
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        os.write(responseBytes);
+                    }
+                    
+                } catch (Exception e) {
+                    String errorResponse = "{\"success\": false, \"message\": \"Error processing request: " + e.getMessage() + "\"}";
+                    byte[] responseBytes = errorResponse.getBytes();
+                    exchange.sendResponseHeaders(500, responseBytes.length);
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        os.write(responseBytes);
+                    }
+                }
+            } else {
+                // GET request - return current interval
+                String response = String.format(
+                    "{\"intervalSeconds\": %d, \"message\": \"Current fetch interval\"}",
+                    FETCH_INTERVAL_SECONDS
+                );
+                byte[] responseBytes = response.getBytes();
+                exchange.sendResponseHeaders(200, responseBytes.length);
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(responseBytes);
+                }
+            }
+        }
+    }
+    
     static class CorsHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -328,7 +410,7 @@ public class RTDStaticDataPipeline {
             if ("OPTIONS".equals(exchange.getRequestMethod())) {
                 exchange.sendResponseHeaders(200, -1);
             } else {
-                String response = "RTD Pipeline Server - Use /api/vehicles or /api/health";
+                String response = "RTD Pipeline Server - Use /api/vehicles, /api/health, or /api/config/interval";
                 exchange.sendResponseHeaders(200, response.length());
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(response.getBytes());
