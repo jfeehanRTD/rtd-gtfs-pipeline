@@ -64,8 +64,20 @@ public class RTDStaticDataPipeline {
                             Double longitude = (Double) vehicle.getField(5);
                             String status = (String) vehicle.getField(8);
                             
+                            // Show last 8 chars of vehicle ID for better uniqueness (or full ID if shorter)
+                            String displayId = "N/A";
+                            if (vehicleId != null) {
+                                if (vehicleId.length() > 16) {
+                                    // For long IDs, show first 4 and last 4 chars
+                                    displayId = vehicleId.substring(0, 4) + "..." + 
+                                               vehicleId.substring(vehicleId.length() - 4);
+                                } else {
+                                    displayId = vehicleId;
+                                }
+                            }
+                            
                             System.out.printf("  Vehicle: %s | Route: %s | Position: (%.6f, %.6f) | Status: %s\n",
-                                vehicleId != null ? vehicleId.substring(0, Math.min(8, vehicleId.length())) : "N/A",
+                                displayId,
                                 routeId != null ? routeId : "N/A",
                                 latitude != null ? latitude : 0.0,
                                 longitude != null ? longitude : 0.0,
