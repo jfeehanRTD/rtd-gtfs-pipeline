@@ -68,13 +68,12 @@ public class RTDStaticDataPipeline {
                             }
                         }
                         
-                        System.out.println("\nVehicle Details:");
+                        System.out.println("\nVehicle Details (All Vehicles):");
                         System.out.println("  Bus# | Route | Position            | Status         | ID");
                         System.out.println("  " + "-".repeat(70));
                         
-                        // Display first 10 vehicles (increased from 5)
-                        int displayCount = Math.min(10, vehicles.size());
-                        for (int i = 0; i < displayCount; i++) {
+                        // Display ALL vehicles
+                        for (int i = 0; i < vehicles.size(); i++) {
                             org.apache.flink.types.Row vehicle = vehicles.get(i);
                             // Updated field indices after adding vehicle_label
                             String vehicleId = (String) vehicle.getField(1);
@@ -103,9 +102,7 @@ public class RTDStaticDataPipeline {
                             );
                         }
                         
-                        if (vehicles.size() > displayCount) {
-                            System.out.printf("  ... and %d more vehicles\n", vehicles.size() - displayCount);
-                        }
+                        System.out.printf("\n📊 Total: %d vehicles displayed\n", vehicles.size());
                         
                     } else {
                         System.out.println("❌ No vehicles retrieved from RTD");

@@ -39,13 +39,12 @@ public class VehicleLabelTest {
                 System.out.printf("📅 Feed Timestamp: %s\n\n", formattedTime);
             }
             
-            System.out.println("Sample Vehicles with Labels:");
+            System.out.println("All Vehicles with Labels:");
             System.out.println("Bus#  | Route | Position                   | Status         | Full Vehicle ID");
             System.out.println("-".repeat(85));
             
-            // Display first 15 vehicles
-            int displayCount = Math.min(15, vehicles.size());
-            for (int i = 0; i < displayCount; i++) {
+            // Display ALL vehicles
+            for (int i = 0; i < vehicles.size(); i++) {
                 Row vehicle = vehicles.get(i);
                 // Field indices:
                 // 0: timestamp_ms, 1: vehicle_id, 2: vehicle_label
@@ -75,6 +74,7 @@ public class VehicleLabelTest {
                 );
             }
             
+            System.out.printf("\n📊 Total: %d vehicles displayed\n", vehicles.size());
             System.out.println("\n✅ Test Complete!");
             System.out.println("Vehicle labels (fleet numbers) and timestamps are now displayed correctly.");
             
