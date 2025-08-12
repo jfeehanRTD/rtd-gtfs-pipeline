@@ -47,23 +47,29 @@ export const useRTDData = (initialFilters?: Partial<MapFilters>): UseRTDDataResu
     
     // Subscribe to vehicle updates
     unsubscribeRef.current = dataServiceRef.current.subscribe((newVehicles) => {
-      console.log(`📊 Received ${newVehicles.length} vehicles`);
+      // console.log(`📊 Received ${newVehicles.length} vehicles`);
       setVehicles(newVehicles);
       setIsLoading(false);
       setError(null);
     });
 
-    // Set up connection state polling
+    // Set up connection state polling - less frequent
     const connectionInterval = setInterval(() => {
       if (dataServiceRef.current) {
         const state = dataServiceRef.current.getConnectionState();
-        setConnectionState(state);
+        setConnectionState(prev => {
+          // Only update if state actually changed
+          if (JSON.stringify(prev) !== JSON.stringify(state)) {
+            return state;
+          }
+          return prev;
+        });
         
         if (state.error) {
           setError(state.error);
         }
       }
-    }, 1000);
+    }, 5000); // Check every 5 seconds instead of 1
 
     // Load initial alerts
     const loadAlerts = async () => {

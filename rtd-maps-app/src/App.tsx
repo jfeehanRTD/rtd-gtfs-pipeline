@@ -1,10 +1,14 @@
-// RTD Live Transit Map - Main Application Component
+// RTD Live Transit Map - Enhanced Application with Data Query Tools
 
 import { useState, useCallback } from 'react';
 import OpenStreetMap from './components/OpenStreetMap';
 import VehicleDetailsPanel from './components/VehicleDetailsPanel';
+import VehicleSelector from './components/VehicleSelector';
+import DataSourcePanel from './components/DataSourcePanel';
+import VehicleTracker from './components/VehicleTracker';
 import { useRTDData } from './hooks/useRTDData';
 import { EnhancedVehicleData, MapFilters } from './types/rtd';
+import { VehicleHistory } from './services/dataQueryService';
 import { 
   Wifi, 
   WifiOff, 
@@ -12,12 +16,23 @@ import {
   AlertCircle, 
   CheckCircle,
   Clock,
-  MapPin
+  MapPin,
+  Layers,
+  Target,
+  Navigation,
+  Menu,
+  X
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 function App() {
   const [selectedVehicle, setSelectedVehicle] = useState<EnhancedVehicleData | null>(null);
+  const [selectedVehicles, setSelectedVehicles] = useState<Set<string>>(new Set());
+  const [selectedSources, setSelectedSources] = useState<Set<string>>(new Set(['kafka-vehicles', 'rtd-direct']));
+  const [vehicleHistories, setVehicleHistories] = useState<Map<string, VehicleHistory>>(new Map());
+  const [showVehicleSelector, setShowVehicleSelector] = useState(false);
+  const [showDataSources, setShowDataSources] = useState(false);
+  const [showTracker, setShowTracker] = useState(false);
   const [filters, setFilters] = useState<MapFilters>({
     showBuses: true,
     showTrains: true,
@@ -37,9 +52,53 @@ function App() {
     applyFilters
   } = useRTDData();
 
-  // Handle vehicle selection
+  // Handle vehicle selection for details
   const handleVehicleSelect = useCallback((vehicle: EnhancedVehicleData | null) => {
     setSelectedVehicle(vehicle);
+  }, []);
+
+  // Handle vehicle selection for tracking
+  const handleVehicleToggle = useCallback((vehicleId: string) => {
+    setSelectedVehicles(prev => {
+      const next = new Set(prev);
+      if (next.has(vehicleId)) {
+        next.delete(vehicleId);
+      } else {
+        next.add(vehicleId);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleSelectAllVehicles = useCallback(() => {
+    setSelectedVehicles(new Set(filteredVehicles.map(v => v.vehicle_id)));
+  }, [filteredVehicles]);
+
+  const handleClearAllVehicles = useCallback(() => {
+    setSelectedVehicles(new Set());
+  }, []);
+
+  // Handle data source selection
+  const handleSourceToggle = useCallback((sourceId: string) => {
+    setSelectedSources(prev => {
+      const next = new Set(prev);
+      if (next.has(sourceId)) {
+        next.delete(sourceId);
+      } else {
+        next.add(sourceId);
+      }
+      return next;
+    });
+  }, []);
+
+  // Handle vehicle tracking updates
+  const handleVehicleUpdate = useCallback((vehicles: EnhancedVehicleData[]) => {
+    // Update could trigger map refresh or other UI updates
+    // console.log(`Received ${vehicles.length} vehicle updates`);
+  }, []);
+
+  const handleHistoryUpdate = useCallback((vehicleId: string, history: VehicleHistory) => {
+    setVehicleHistories(prev => new Map(prev).set(vehicleId, history));
   }, []);
 
   // Handle filter changes
@@ -90,11 +149,49 @@ function App() {
             <h1 className="text-lg font-bold text-gray-800">RTD Live Transit Map</h1>
           </div>
 
-          {/* Right: Actions */}
+          {/* Right: Actions and Tools */}
           <div className="flex items-center space-x-4">
             <div className="text-sm text-gray-600">
               <span className="font-medium">{filteredVehicles.length}</span>
               <span className="text-gray-500"> / {vehicles.length} vehicles</span>
+              {selectedVehicles.size > 0 && (
+                <span className="ml-2 text-rtd-primary font-medium">
+                  ({selectedVehicles.size} selected)
+                </span>
+              )}
+            </div>
+
+            {/* Tool Buttons */}
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={() => setShowDataSources(!showDataSources)}
+                className={`p-2 rounded-md transition-colors ${
+                  showDataSources ? 'bg-rtd-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+                title="Data Sources"
+              >
+                <Layers className="w-4 h-4" />
+              </button>
+              
+              <button
+                onClick={() => setShowVehicleSelector(!showVehicleSelector)}
+                className={`p-2 rounded-md transition-colors ${
+                  showVehicleSelector ? 'bg-rtd-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+                title="Vehicle Selector"
+              >
+                <Target className="w-4 h-4" />
+              </button>
+              
+              <button
+                onClick={() => setShowTracker(!showTracker)}
+                className={`p-2 rounded-md transition-colors ${
+                  showTracker ? 'bg-rtd-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+                title="Vehicle Tracker"
+              >
+                <Navigation className="w-4 h-4" />
+              </button>
             </div>
             
             <button
@@ -159,6 +256,47 @@ function App() {
           />
         )}
 
+        {/* Side Panels */}
+        <div className="absolute top-0 left-0 bottom-0 flex z-40 pointer-events-none">
+          <div className="flex space-x-4 p-4 pointer-events-auto">
+            {/* Data Sources Panel */}
+            {showDataSources && (
+              <div className="w-80 h-fit max-h-full">
+                <DataSourcePanel
+                  selectedSources={selectedSources}
+                  onSourceToggle={handleSourceToggle}
+                  onRefresh={handleRefresh}
+                />
+              </div>
+            )}
+            
+            {/* Vehicle Selector Panel */}
+            {showVehicleSelector && (
+              <div className="w-96 h-fit max-h-full">
+                <VehicleSelector
+                  vehicles={filteredVehicles}
+                  selectedVehicles={selectedVehicles}
+                  onVehicleToggle={handleVehicleToggle}
+                  onSelectAll={handleSelectAllVehicles}
+                  onClearAll={handleClearAllVehicles}
+                  onClose={() => setShowVehicleSelector(false)}
+                />
+              </div>
+            )}
+            
+            {/* Vehicle Tracker Panel */}
+            {showTracker && (
+              <div className="w-80 h-fit">
+                <VehicleTracker
+                  selectedVehicles={selectedVehicles}
+                  onVehicleUpdate={handleVehicleUpdate}
+                  onHistoryUpdate={handleHistoryUpdate}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Vehicle Details Panel */}
         <VehicleDetailsPanel
           vehicle={selectedVehicle}
@@ -171,7 +309,7 @@ function App() {
         <div className="bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1 text-xs text-gray-600 shadow-sm">
           <div className="flex items-center space-x-2">
             <CheckCircle className="w-3 h-3 text-green-500" />
-            <span>Powered by OpenStreetMap & RTD GTFS-RT • Live transit data</span>
+            <span>Powered by OpenStreetMap & RTD GTFS-RT • Enhanced with Multi-Source Data Query</span>
           </div>
         </div>
       </div>

@@ -1,20 +1,31 @@
 package com.rtd.pipeline;
 
 import com.rtd.pipeline.source.RTDRowSource;
+import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpExchange;
+import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * RTD data pipeline that works around Flink 2.0.0 serialization issues.
  * Uses direct data fetching without Flink execution to demonstrate live RTD integration.
  * This provides the core functionality while avoiding Flink runtime compatibility problems.
+ * 
+ * Now includes an embedded HTTP server to serve live RTD data to the React web app.
  */
 public class RTDStaticDataPipeline {
     
@@ -22,12 +33,22 @@ public class RTDStaticDataPipeline {
     
     private static final String VEHICLE_POSITIONS_URL = "https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/VehiclePosition.pb";
     private static final long FETCH_INTERVAL_SECONDS = 60L;
+    private static final int HTTP_SERVER_PORT = 8080;
+    
+    // Shared data for HTTP endpoints
+    private static final AtomicReference<List<Row>> latestVehicleData = new AtomicReference<>();
+    private static final AtomicReference<String> latestJsonData = new AtomicReference<>();
+    private static final AtomicReference<Long> lastUpdateTime = new AtomicReference<>(System.currentTimeMillis());
     
     public static void main(String[] args) throws Exception {
         
-        System.out.println("=== RTD Static Data Pipeline - Workaround for Flink 2.0.0 Issues ===");
-        System.out.println("Demonstrates live RTD data integration without Flink execution problems");
-        System.out.println("Fetching RTD data every " + FETCH_INTERVAL_SECONDS + " seconds\n");
+        System.out.println("=== RTD Static Data Pipeline with Web Server ===");
+        System.out.println("Live RTD data integration serving React web app");
+        System.out.println("Fetching RTD data every " + FETCH_INTERVAL_SECONDS + " seconds");
+        System.out.println("HTTP server on port " + HTTP_SERVER_PORT + "\n");
+        
+        // Start HTTP server first
+        startHttpServer();
         
         // Create a simple scheduler to fetch RTD data periodically
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -56,6 +77,11 @@ public class RTDStaticDataPipeline {
                     
                     if (!vehicles.isEmpty()) {
                         System.out.printf("✅ Retrieved %d vehicles from RTD\n", vehicles.size());
+                        
+                        // Update shared data for HTTP server
+                        latestVehicleData.set(vehicles);
+                        latestJsonData.set(convertToJson(vehicles));
+                        lastUpdateTime.set(System.currentTimeMillis());
                         
                         // Get and format the timestamp from the first vehicle
                         if (!vehicles.isEmpty()) {
@@ -137,6 +163,177 @@ public class RTDStaticDataPipeline {
         System.out.println("✅ Demonstrated live vehicle position retrieval");
         System.out.println("✅ Used Flink Row data types for structured data");
         System.out.println("✅ Avoided Flink execution serialization issues");
+        System.out.println("✅ Served live data to React web app via HTTP");
         System.out.println("💡 This shows the core RTD integration works - Flink 2.0.0 execution is the blocker");
+    }
+    
+    private static void startHttpServer() throws IOException {
+        HttpServer server = HttpServer.create(new InetSocketAddress(HTTP_SERVER_PORT), 0);
+        
+        // Set up endpoints
+        server.createContext("/api/vehicles", new VehiclesHandler());
+        server.createContext("/api/health", new HealthHandler());
+        server.createContext("/", new CorsHandler()); // CORS preflight
+        
+        // Start the server
+        server.setExecutor(Executors.newCachedThreadPool());
+        server.start();
+        
+        System.out.printf("✅ HTTP server started at http://localhost:%d\n", HTTP_SERVER_PORT);
+        System.out.printf("📍 Vehicle data: http://localhost:%d/api/vehicles\n", HTTP_SERVER_PORT);
+        System.out.printf("🏥 Health check: http://localhost:%d/api/health\n\n", HTTP_SERVER_PORT);
+        
+        // Add shutdown hook for HTTP server
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("\n🛑 Shutting down HTTP server...");
+            server.stop(0);
+        }));
+    }
+    
+    private static String convertToJson(List<Row> vehicles) {
+        StringBuilder json = new StringBuilder();
+        json.append("{\n");
+        json.append("  \"vehicles\": [\n");
+        
+        for (int i = 0; i < vehicles.size(); i++) {
+            Row vehicle = vehicles.get(i);
+            
+            // Extract fields based on RTDRowSource schema
+            // 0: timestamp_ms, 1: vehicle_id, 2: vehicle_label, 3: trip_id, 4: route_id
+            // 5: latitude, 6: longitude, 7: bearing, 8: speed, 9: current_status
+            // 10: congestion_level, 11: occupancy_status
+            
+            json.append("    {\n");
+            json.append("      \"vehicle_id\": \"").append(getString(vehicle, 1)).append("\",\n");
+            json.append("      \"vehicle_label\": \"").append(getString(vehicle, 2)).append("\",\n");
+            json.append("      \"trip_id\": \"").append(getString(vehicle, 3)).append("\",\n");
+            json.append("      \"route_id\": \"").append(getString(vehicle, 4)).append("\",\n");
+            json.append("      \"latitude\": ").append(getDouble(vehicle, 5)).append(",\n");
+            json.append("      \"longitude\": ").append(getDouble(vehicle, 6)).append(",\n");
+            json.append("      \"bearing\": ").append(getDouble(vehicle, 7)).append(",\n");
+            json.append("      \"speed\": ").append(getDouble(vehicle, 8)).append(",\n");
+            json.append("      \"current_status\": \"").append(getString(vehicle, 9)).append("\",\n");
+            json.append("      \"occupancy_status\": \"").append(getString(vehicle, 11)).append("\",\n");
+            json.append("      \"timestamp_ms\": ").append(getLong(vehicle, 0)).append(",\n");
+            json.append("      \"last_updated\": \"").append(Instant.now().toString()).append("\",\n");
+            json.append("      \"is_real_time\": true\n");
+            json.append("    }");
+            
+            if (i < vehicles.size() - 1) {
+                json.append(",");
+            }
+            json.append("\n");
+        }
+        
+        json.append("  ],\n");
+        json.append("  \"metadata\": {\n");
+        json.append("    \"total_count\": ").append(vehicles.size()).append(",\n");
+        json.append("    \"last_update\": \"").append(Instant.ofEpochMilli(lastUpdateTime.get()).toString()).append("\",\n");
+        json.append("    \"source\": \"RTD GTFS-RT Live Feed\"\n");
+        json.append("  }\n");
+        json.append("}");
+        
+        return json.toString();
+    }
+    
+    private static String getString(Row row, int index) {
+        Object value = row.getField(index);
+        return value != null ? value.toString() : "";
+    }
+    
+    private static double getDouble(Row row, int index) {
+        Object value = row.getField(index);
+        if (value instanceof Double) return (Double) value;
+        if (value instanceof Float) return ((Float) value).doubleValue();
+        if (value instanceof String) {
+            try {
+                return Double.parseDouble((String) value);
+            } catch (NumberFormatException e) {
+                return 0.0;
+            }
+        }
+        return 0.0;
+    }
+    
+    private static long getLong(Row row, int index) {
+        Object value = row.getField(index);
+        if (value instanceof Long) return (Long) value;
+        if (value instanceof Integer) return ((Integer) value).longValue();
+        return 0L;
+    }
+    
+    // HTTP Handlers
+    static class VehiclesHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // Add CORS headers
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+            
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(200, -1);
+                return;
+            }
+            
+            String jsonData = latestJsonData.get();
+            if (jsonData == null) {
+                jsonData = "{\"vehicles\": [], \"metadata\": {\"total_count\": 0, \"error\": \"No data available\"}}";
+            }
+            
+            byte[] response = jsonData.getBytes();
+            exchange.sendResponseHeaders(200, response.length);
+            
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
+        }
+    }
+    
+    static class HealthHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // Add CORS headers
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+            
+            long timeSinceUpdate = System.currentTimeMillis() - lastUpdateTime.get();
+            boolean isHealthy = timeSinceUpdate < (FETCH_INTERVAL_SECONDS * 1000 * 2); // Within 2 intervals
+            
+            String health = String.format(
+                "{\"status\": \"%s\", \"last_update\": \"%s\", \"vehicle_count\": %d, \"uptime_ms\": %d}",
+                isHealthy ? "healthy" : "stale",
+                Instant.ofEpochMilli(lastUpdateTime.get()).toString(),
+                latestVehicleData.get() != null ? latestVehicleData.get().size() : 0,
+                timeSinceUpdate
+            );
+            
+            byte[] response = health.getBytes();
+            exchange.sendResponseHeaders(200, response.length);
+            
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
+        }
+    }
+    
+    static class CorsHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+            
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(200, -1);
+            } else {
+                String response = "RTD Pipeline Server - Use /api/vehicles or /api/health";
+                exchange.sendResponseHeaders(200, response.length());
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+            }
+        }
     }
 }

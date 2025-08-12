@@ -1,4 +1,4 @@
-// RTD Data Service - Consumes real-time data from Kafka topics and RTD APIs
+// RTD Data Service - Connects to live Java RTD API server
 
 import axios from 'axios';
 import { 
@@ -8,8 +8,33 @@ import {
   EnhancedVehicleData, 
   RouteInfo, 
   DataConnectionState,
-  KafkaConfig 
+  KafkaConfig,
+  VehicleStatus,
+  OccupancyStatus
 } from '@/types/rtd';
+
+interface RTDAPIResponse {
+  vehicles: Array<{
+    vehicle_id: string;
+    vehicle_label: string;
+    trip_id: string;
+    route_id: string;
+    latitude: number;
+    longitude: number;
+    bearing: number;
+    speed: number;
+    current_status: string;
+    occupancy_status: string;
+    timestamp_ms: number;
+    last_updated: string;
+    is_real_time: boolean;
+  }>;
+  metadata: {
+    total_count: number;
+    last_update: string;
+    source: string;
+  };
+}
 
 export class RTDDataService {
   private static instance: RTDDataService;
@@ -25,26 +50,9 @@ export class RTDDataService {
     error: null
   };
 
-  private kafkaConfig: KafkaConfig = {
-    brokers: ['localhost:9092'],
-    clientId: 'rtd-maps-app',
-    topics: {
-      vehiclePositions: 'rtd.vehicle.positions',
-      tripUpdates: 'rtd.trip.updates', 
-      alerts: 'rtd.alerts',
-      comprehensiveRoutes: 'rtd.comprehensive.routes'
-    }
-  };
-
-  // Fallback: Direct RTD API endpoints (when Kafka not available)
-  private readonly RTD_API_ENDPOINTS = {
-    vehiclePositions: 'https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/VehiclePosition.pb',
-    tripUpdates: 'https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/TripUpdate.pb',
-    alerts: 'https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/Alert.pb'
-  };
-
   private updateInterval: ReturnType<typeof setInterval> | null = null;
   private readonly UPDATE_INTERVAL_MS = 30000; // 30 seconds
+  private readonly API_BASE_URL = 'http://localhost:8080/api';
 
   public static getInstance(): RTDDataService {
     if (!RTDDataService.instance) {
@@ -58,153 +66,128 @@ export class RTDDataService {
   }
 
   private async initializeService(): Promise<void> {
-    console.log('🚌 Initializing RTD Data Service...');
+    console.log('🚌 Initializing RTD Data Service - connecting to live Java API...');
     
-    // Try Kafka first, fallback to direct API
-    try {
-      await this.connectToKafka();
-    } catch (error) {
-      console.warn('⚠️  Kafka connection failed, using direct API fallback:', error);
-      this.startDirectAPIPolling();
-    }
-
     // Load route information
     await this.loadRouteInformation();
+    
+    // Try to connect to the Java API server
+    await this.testAPIConnection();
+    
+    // Start polling for data
+    this.startAPIPolling();
   }
 
-  private async connectToKafka(): Promise<void> {
-    // Note: In a real implementation, this would use KafkaJS or similar
-    // For now, we'll simulate Kafka by polling a REST endpoint that serves Kafka data
-    console.log('🔄 Attempting to connect to Kafka topics...');
-    
+  private async testAPIConnection(): Promise<void> {
     try {
-      // Simulate Kafka consumer by checking if our RTD query service is available
-      await axios.get('http://localhost:8080/health', { timeout: 5000 });
-      console.log('✅ Kafka/RTD service available');
-      this.startKafkaConsumer();
+      const response = await axios.get(`${this.API_BASE_URL}/health`, { timeout: 5000 });
+      
+      if (response.status === 200) {
+        console.log('✅ Connected to RTD Java API server');
+        this.connectionState.isConnected = true;
+        this.connectionState.error = null;
+      }
     } catch (error) {
-      throw new Error('Kafka service unavailable');
+      console.warn('⚠️ RTD Java API server not available, will retry...', error);
+      this.connectionState.isConnected = false;
+      this.connectionState.error = 'Java API server not available on port 8080';
     }
   }
 
-  private startKafkaConsumer(): void {
-    console.log('📡 Starting Kafka consumer simulation...');
+  private startAPIPolling(): void {
+    console.log('📡 Starting RTD API polling every', this.UPDATE_INTERVAL_MS / 1000, 'seconds');
     
+    // Initial fetch
+    this.fetchFromAPI();
+    
+    // Set up interval
     this.updateInterval = setInterval(async () => {
-      try {
-        // In a real implementation, this would be Kafka consumer callbacks
-        // For demo purposes, we'll poll REST endpoints that serve Kafka topic data
-        await this.fetchFromKafkaREST();
+      await this.fetchFromAPI();
+    }, this.UPDATE_INTERVAL_MS);
+  }
+
+  private async fetchFromAPI(): Promise<void> {
+    try {
+      const response = await axios.get<RTDAPIResponse>(`${this.API_BASE_URL}/vehicles`, { 
+        timeout: 10000 
+      });
+      
+      if (response.data && response.data.vehicles) {
+        // Convert API response to our internal format
+        const vehicles = response.data.vehicles.map(apiVehicle => ({
+          vehicle_id: apiVehicle.vehicle_id,
+          trip_id: apiVehicle.trip_id,
+          route_id: apiVehicle.route_id,
+          latitude: apiVehicle.latitude,
+          longitude: apiVehicle.longitude,
+          bearing: apiVehicle.bearing,
+          speed: apiVehicle.speed,
+          current_status: this.mapStatus(apiVehicle.current_status),
+          occupancy_status: this.mapOccupancy(apiVehicle.occupancy_status),
+          timestamp_ms: apiVehicle.timestamp_ms,
+        }));
+
+        this.processVehiclePositions(vehicles);
         
         this.connectionState = {
           isConnected: true,
           lastUpdate: new Date(),
-          vehicleCount: this.vehiclePositions.size,
+          vehicleCount: response.data.vehicles.length,
           error: null
         };
-      } catch (error) {
-        console.error('❌ Kafka consumer error:', error);
-        this.connectionState.error = error instanceof Error ? error.message : 'Unknown error';
-        // Fallback to direct API
-        this.startDirectAPIPolling();
+        
+        console.log(`📊 Fetched ${response.data.vehicles.length} live vehicles from RTD`);
       }
-    }, this.UPDATE_INTERVAL_MS);
-  }
-
-  private async fetchFromKafkaREST(): Promise<void> {
-    // Simulate fetching from Kafka by using REST endpoints that serve topic data
-    // In production, this would be replaced with actual Kafka consumer
-    
-    try {
-      const [vehicleData, tripData, alertData] = await Promise.all([
-        axios.get('/api/kafka/vehicle-positions'), // Mock endpoint
-        axios.get('/api/kafka/trip-updates'),     // Mock endpoint  
-        axios.get('/api/kafka/alerts')            // Mock endpoint
-      ]);
-
-      this.processVehiclePositions(vehicleData.data);
-      this.processTripUpdates(tripData.data);
-      this.processAlerts(alertData.data);
       
     } catch (error) {
-      // Fallback to direct RTD API
-      await this.fetchDirectFromRTD();
+      console.error('❌ Failed to fetch from RTD API:', error);
+      
+      if (axios.isAxiosError(error)) {
+        if (error.code === 'ECONNREFUSED') {
+          this.connectionState.error = 'RTD Java API server not running on port 8080';
+        } else if (error.code === 'ETIMEDOUT') {
+          this.connectionState.error = 'RTD API server timeout';
+        } else {
+          this.connectionState.error = `API Error: ${error.message}`;
+        }
+      } else {
+        this.connectionState.error = 'Unknown error fetching RTD data';
+      }
+      
+      this.connectionState.isConnected = false;
     }
   }
 
-  private startDirectAPIPolling(): void {
-    console.log('🔄 Starting direct RTD API polling...');
-    
-    if (this.updateInterval) {
-      clearInterval(this.updateInterval);
-    }
-
-    this.updateInterval = setInterval(async () => {
-      await this.fetchDirectFromRTD();
-    }, this.UPDATE_INTERVAL_MS);
-
-    // Initial fetch
-    this.fetchDirectFromRTD();
-  }
-
-  private async fetchDirectFromRTD(): Promise<void> {
-    try {
-      console.log('📱 Fetching live data from RTD APIs...');
-      
-      // For this demo, we'll simulate the data fetch
-      // In production, this would parse protobuf data from RTD endpoints
-      const mockVehicles = await this.generateMockRTDData();
-      
-      this.processVehiclePositions(mockVehicles);
-      
-      this.connectionState = {
-        isConnected: true,
-        lastUpdate: new Date(),
-        vehicleCount: mockVehicles.length,
-        error: null
-      };
-      
-      this.notifyListeners();
-      
-    } catch (error) {
-      console.error('❌ Direct RTD API error:', error);
-      this.connectionState.error = error instanceof Error ? error.message : 'Failed to fetch RTD data';
+  private mapStatus(status: string): VehicleStatus {
+    switch (status?.toUpperCase()) {
+      case 'IN_TRANSIT_TO':
+        return VehicleStatus.IN_TRANSIT_TO;
+      case 'STOPPED_AT':
+        return VehicleStatus.STOPPED_AT;
+      case 'INCOMING_AT':
+        return VehicleStatus.INCOMING_AT;
+      default:
+        return VehicleStatus.IN_TRANSIT_TO;
     }
   }
 
-  private async generateMockRTDData(): Promise<VehiclePosition[]> {
-    // Generate realistic mock data for Denver area
-    const vehicles: VehiclePosition[] = [];
-    const routes = ['A', 'B', 'C', 'D', 'E', '15', '16', '20', '44', '83'];
-    const denverBounds = {
-      north: 39.914,
-      south: 39.614,
-      east: -104.600,
-      west: -105.109
-    };
-
-    const vehicleCount = Math.floor(Math.random() * 200) + 100; // 100-300 vehicles
-
-    for (let i = 0; i < vehicleCount; i++) {
-      const lat = denverBounds.south + Math.random() * (denverBounds.north - denverBounds.south);
-      const lng = denverBounds.west + Math.random() * (denverBounds.east - denverBounds.west);
-      const routeId = routes[Math.floor(Math.random() * routes.length)];
-
-      vehicles.push({
-        vehicle_id: `RTD_${String(i).padStart(4, '0')}`,
-        trip_id: `TRIP_${i}_${Date.now()}`,
-        route_id: routeId,
-        latitude: lat,
-        longitude: lng,
-        bearing: Math.random() * 360,
-        speed: Math.random() * 20 + 5, // 5-25 m/s
-        current_status: ['IN_TRANSIT_TO', 'STOPPED_AT', 'INCOMING_AT'][Math.floor(Math.random() * 3)] as any,
-        occupancy_status: ['FEW_SEATS_AVAILABLE', 'STANDING_ROOM_ONLY', 'MANY_SEATS_AVAILABLE'][Math.floor(Math.random() * 3)] as any,
-        timestamp_ms: Date.now() - Math.random() * 30000 // Within last 30 seconds
-      });
+  private mapOccupancy(occupancy: string): OccupancyStatus {
+    switch (occupancy?.toUpperCase()) {
+      case 'EMPTY':
+        return OccupancyStatus.EMPTY;
+      case 'MANY_SEATS_AVAILABLE':
+        return OccupancyStatus.MANY_SEATS_AVAILABLE;
+      case 'FEW_SEATS_AVAILABLE':
+        return OccupancyStatus.FEW_SEATS_AVAILABLE;
+      case 'STANDING_ROOM_ONLY':
+        return OccupancyStatus.STANDING_ROOM_ONLY;
+      case 'CRUSHED_STANDING_ROOM_ONLY':
+        return OccupancyStatus.CRUSHED_STANDING_ROOM_ONLY;
+      case 'FULL':
+        return OccupancyStatus.FULL;
+      default:
+        return OccupancyStatus.MANY_SEATS_AVAILABLE;
     }
-
-    return vehicles;
   }
 
   private processVehiclePositions(vehicles: VehiclePosition[]): void {
@@ -216,7 +199,7 @@ export class RTDDataService {
         route_info: this.routes.get(vehicle.route_id || ''),
         delay_seconds: this.tripUpdates.get(vehicle.trip_id || '')?.delay_seconds,
         last_updated: now,
-        is_real_time: (now.getTime() - vehicle.timestamp_ms) < 60000 // Real-time if < 1 minute old
+        is_real_time: (now.getTime() - vehicle.timestamp_ms) < 300000 // Real-time if < 5 minutes old
       };
       
       this.vehiclePositions.set(vehicle.vehicle_id, enhanced);
@@ -225,28 +208,26 @@ export class RTDDataService {
     this.notifyListeners();
   }
 
-  private processTripUpdates(updates: TripUpdate[]): void {
-    updates.forEach(update => {
-      this.tripUpdates.set(update.trip_id, update);
-    });
-  }
-
-  private processAlerts(alerts: Alert[]): void {
-    this.alerts = alerts;
-  }
-
   private async loadRouteInformation(): Promise<void> {
-    // In production, this would load from GTFS static data
-    // For now, we'll add some common RTD routes
+    // Static route information
     const rtdRoutes: RouteInfo[] = [
       { route_id: 'A', route_short_name: 'A', route_long_name: 'Union Station to Denver Airport', route_type: 0, route_color: '#0066CC' },
       { route_id: 'B', route_short_name: 'B', route_long_name: 'Union Station to Westminster', route_type: 0, route_color: '#00AA44' },
       { route_id: 'C', route_short_name: 'C', route_long_name: 'Union Station to Littleton', route_type: 0, route_color: '#FF6600' },
       { route_id: 'D', route_short_name: 'D', route_long_name: 'Union Station to Ridgegate', route_type: 0, route_color: '#FFD700' },
       { route_id: 'E', route_short_name: 'E', route_long_name: 'Union Station to Lincoln', route_type: 0, route_color: '#800080' },
+      { route_id: 'F', route_short_name: 'F', route_long_name: '18th & California to Union Station', route_type: 0, route_color: '#FF69B4' },
+      { route_id: 'G', route_short_name: 'G', route_long_name: 'Union Station to Wheat Ridge', route_type: 0, route_color: '#008080' },
+      { route_id: 'H', route_short_name: 'H', route_long_name: 'Union Station to Nine Mile', route_type: 0, route_color: '#DC143C' },
+      { route_id: 'N', route_short_name: 'N', route_long_name: 'Union Station to Eastlake', route_type: 0, route_color: '#32CD32' },
+      { route_id: 'R', route_short_name: 'R', route_long_name: 'Union Station Shuttle', route_type: 0, route_color: '#FF4500' },
+      { route_id: 'W', route_short_name: 'W', route_long_name: 'Union Station to Jefferson County', route_type: 0, route_color: '#4B0082' },
+      // Common bus routes
       { route_id: '15', route_short_name: '15', route_long_name: 'East Colfax', route_type: 3, route_color: '#666666' },
       { route_id: '16', route_short_name: '16', route_long_name: '16th Street Mall', route_type: 3, route_color: '#666666' },
-      { route_id: '20', route_short_name: '20', route_long_name: 'East 20th Avenue', route_type: 3, route_color: '#666666' }
+      { route_id: '20', route_short_name: '20', route_long_name: 'East 20th Avenue', route_type: 3, route_color: '#666666' },
+      { route_id: '44', route_short_name: '44', route_long_name: 'West 44th Avenue', route_type: 3, route_color: '#666666' },
+      { route_id: '83', route_short_name: '83', route_long_name: '83rd Avenue', route_type: 3, route_color: '#666666' }
     ];
 
     rtdRoutes.forEach(route => {
@@ -300,7 +281,7 @@ export class RTDDataService {
   }
 
   public async refresh(): Promise<void> {
-    await this.fetchDirectFromRTD();
+    await this.fetchFromAPI();
   }
 
   public destroy(): void {
