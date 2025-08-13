@@ -31,6 +31,7 @@ print_error() {
 # Configuration
 PROXY_SUBSCRIBE_URL="http://10.4.51.37:80/rtd/tli/consumer/tim"
 PROXY_UNSUBSCRIBE_URL="http://10.4.51.37:80/rtd/tli/consumer/tim"
+PROXY_IP="10.4.51.37"
 TTL_SECONDS=90000
 USERNAME="rc-proxy-admin"
 PASSWORD="aE@jeLAM76zLNqQLeXuu"
@@ -42,20 +43,32 @@ get_local_ip() {
     
     # Method 1: Use route command (most reliable on macOS/Linux)
     if command -v route &> /dev/null; then
-        ip=$(route get default 2>/dev/null | grep interface | awk '{print $2}' | xargs ifconfig 2>/dev/null | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -1)
+        candidate_ip=$(route get default 2>/dev/null | grep interface | awk '{print $2}' | xargs ifconfig 2>/dev/null | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -1)
+        # Skip if this IP is the same as the proxy server IP
+        if [[ -n "$candidate_ip" ]] && [[ "$candidate_ip" != "$PROXY_IP" ]]; then
+            ip="$candidate_ip"
+        fi
     fi
     
     # Method 2: Use ip command (Linux)
     if [[ -z "$ip" ]] && command -v ip &> /dev/null; then
-        ip=$(ip route get 8.8.8.8 2>/dev/null | awk '{print $7}' | head -1)
+        candidate_ip=$(ip route get 8.8.8.8 2>/dev/null | awk '{print $7}' | head -1)
+        # Skip if this IP is the same as the proxy server IP
+        if [[ -n "$candidate_ip" ]] && [[ "$candidate_ip" != "$PROXY_IP" ]]; then
+            ip="$candidate_ip"
+        fi
     fi
     
     # Method 3: Use ifconfig and filter for common network interfaces
     if [[ -z "$ip" ]] && command -v ifconfig &> /dev/null; then
         # Look for common interface patterns (en0, eth0, wlan0)
-        for interface in en0 eth0 wlan0 en1 eth1; do
-            ip=$(ifconfig $interface 2>/dev/null | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -1)
-            [[ -n "$ip" ]] && break
+        for interface in en0 eth0 wlan0 en1 eth1 en8; do
+            candidate_ip=$(ifconfig $interface 2>/dev/null | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -1)
+            # Skip if this IP is the same as the proxy server IP
+            if [[ -n "$candidate_ip" ]] && [[ "$candidate_ip" != "$PROXY_IP" ]]; then
+                ip="$candidate_ip"
+                break
+            fi
         done
     fi
     
@@ -64,9 +77,18 @@ get_local_ip() {
         ip=$(hostname -I 2>/dev/null | awk '{print $1}')
     fi
     
-    # Method 5: Use external service as fallback
+    # Method 5: Get all IPs and exclude proxy IP (fallback)
+    if [[ -z "$ip" ]] && command -v ifconfig &> /dev/null; then
+        ip=$(ifconfig 2>/dev/null | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | grep -v "$PROXY_IP" | head -1)
+    fi
+    
+    # Method 6: Use external service as last resort
     if [[ -z "$ip" ]] && command -v curl &> /dev/null; then
-        ip=$(curl -s --connect-timeout 5 ifconfig.me 2>/dev/null || curl -s --connect-timeout 5 ipinfo.io/ip 2>/dev/null)
+        candidate_ip=$(curl -s --connect-timeout 5 ifconfig.me 2>/dev/null || curl -s --connect-timeout 5 ipinfo.io/ip 2>/dev/null)
+        # Skip if this IP is the same as the proxy server IP
+        if [[ -n "$candidate_ip" ]] && [[ "$candidate_ip" != "$PROXY_IP" ]]; then
+            ip="$candidate_ip"
+        fi
     fi
     
     echo "$ip"
