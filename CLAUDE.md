@@ -121,9 +121,9 @@ flink run target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar
 4. **Sink**: Table API output (currently print connector, easily configurable for databases)
 
 ### Feed URLs
-- Vehicle Positions: `https://www.rtd-denver.com/google_sync/VehiclePosition.pb`
-- Trip Updates: `https://www.rtd-denver.com/google_sync/TripUpdate.pb`
-- Alerts: `https://www.rtd-denver.com/google_sync/Alert.pb`
+- Vehicle Positions: `https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/VehiclePosition.pb`
+- Trip Updates: `https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/TripUpdate.pb`
+- Alerts: `https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/Alerts.pb`
 
 ## Development Guidelines
 

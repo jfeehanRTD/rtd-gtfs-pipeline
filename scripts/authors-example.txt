@@ -1,0 +1,27 @@
+# SVN to Git Authors Mapping
+# Format: svn-username = Git Name <email@domain.com>
+# 
+# This file maps SVN usernames to proper Git author identities.
+# Edit this file with correct names and email addresses before migration.
+
+# Example mappings - replace with your actual SVN users
+jdoe = John Doe <john.doe@rtd-denver.com>
+jsmith = Jane Smith <jane.smith@rtd-denver.com>
+admin = System Admin <admin@rtd-denver.com>
+developer = Developer Account <developer@rtd-denver.com>
+builduser = Build System <build@rtd-denver.com>
+
+# Common system accounts
+jenkins = Jenkins CI <jenkins@rtd-denver.com>
+bamboo = Bamboo Build <bamboo@rtd-denver.com>
+teamcity = TeamCity <teamcity@rtd-denver.com>
+
+# Legacy accounts
+legacy = Legacy User <legacy@rtd-denver.com>
+unknown = Unknown User <unknown@rtd-denver.com>
+
+# Instructions:
+# 1. Run the migration script with --authors option pointing to this file
+# 2. The script will auto-generate a template based on your SVN repository
+# 3. Edit the generated file with correct names and emails
+# 4. Re-run the migration script

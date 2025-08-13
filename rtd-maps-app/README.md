@@ -91,7 +91,7 @@ npm run preview
 ### RTD APIs (Fallback)
 - Vehicle Positions: `https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/VehiclePosition.pb`
 - Trip Updates: `https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/TripUpdate.pb`
-- Service Alerts: `https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/Alert.pb`
+- Service Alerts: `https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/Alerts.pb`
 
 ### Mock Data
 When neither Kafka nor RTD APIs are available, the app generates realistic mock data with:

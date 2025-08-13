@@ -30,9 +30,9 @@ The pipeline fetches data from RTD's public endpoints every minute, processes it
 5. **Sinks**: Outputs to configurable destinations (currently print connector)
 
 ### Feed Endpoints
-- Vehicle Positions: `https://www.rtd-denver.com/google_sync/VehiclePosition.pb`
-- Trip Updates: `https://www.rtd-denver.com/google_sync/TripUpdate.pb`
-- Service Alerts: `https://www.rtd-denver.com/google_sync/Alert.pb`
+- Vehicle Positions: `https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/VehiclePosition.pb`
+- Trip Updates: `https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/TripUpdate.pb`
+- Service Alerts: `https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/Alerts.pb`
 
 ## Prerequisites
 
