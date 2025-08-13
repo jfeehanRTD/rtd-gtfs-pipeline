@@ -279,6 +279,124 @@ If you have Kafka installed separately, you can also use the standard commands:
 kafka-console-consumer --bootstrap-server localhost:9092 --topic rtd.comprehensive.routes --from-beginning
 ```
 
+## Data File Paths on Local Environment
+
+### Base Directory Structure
+
+The pipeline stores all data files in a time-partitioned directory structure under:
+
+```
+./data/
+```
+
+**Full Absolute Path:**
+```
+/Users/jamesfeehan/gen/rtd/rtd-gtfs-pipeline-refArch1/data/
+```
+
+### Vehicle Data Files
+
+Real-time vehicle position data is stored with **hourly partitioning**:
+
+```
+./data/vehicles/
+├── json/YYYY/MM/DD/HH/YYYY-MM-DD_HH-mm-ss.json
+├── csv/YYYY/MM/DD/HH/YYYY-MM-DD_HH-mm-ss.csv
+└── table/YYYY/MM/DD/HH/YYYY-MM-DD_HH-mm-ss.table
+```
+
+**Example Files:**
+```bash
+data/vehicles/json/2025/08/13/11/2025-08-13_11-00-03.json
+data/vehicles/csv/2025/08/13/11/2025-08-13_11-00-03.csv
+data/vehicles/table/2025/08/13/11/2025-08-13_11-00-03.table
+```
+
+### GTFS Schedule Data Files
+
+Static schedule data is stored with **daily partitioning**:
+
+```
+./data/schedule/
+├── json/YYYY/MM/DD/YYYY-MM-DD_HH-mm-ss.json
+└── table/YYYY/MM/DD/YYYY-MM-DD_HH-mm-ss.table
+```
+
+**Example Files:**
+```bash
+data/schedule/json/2025/08/13/2025-08-13_11-00-04.json
+data/schedule/table/2025/08/13/2025-08-13_11-00-04.table
+```
+
+### Data Format Details
+
+#### CSV Format (Vehicle Data)
+Header: `timestamp_ms,vehicle_id,vehicle_label,trip_id,route_id,latitude,longitude,bearing,speed,current_status,congestion_level,occupancy_status`
+
+Sample data:
+```csv
+1755104371000,3BEA62A24818FA46E063DC4D1FACC2EE,6547,115363139,40,39.73966598510742,-104.9408187866211,179.0,,IN_TRANSIT_TO,,EMPTY
+```
+
+#### JSON Format
+Structured JSON with metadata:
+```json
+{
+  "vehicles": [...],
+  "metadata": {
+    "total_count": 410,
+    "last_update": "2025-08-13T17:00:03.123Z",
+    "source": "RTD GTFS-RT Live Feed"
+  }
+}
+```
+
+#### Table Format
+Structured JSON for SQL-like access - one JSON object per line for easy parsing.
+
+### Data Retention & Cleanup
+
+- **Retention Period**: 2 days (configurable)
+- **Cleanup Schedule**: Every 6 hours automatically
+- **Cleanup Logic**: Files older than retention period are automatically deleted
+- **Storage Growth**: ~10MB per day for typical vehicle volumes (400+ vehicles)
+
+### Accessing Data Files
+
+#### Direct File System Access
+```bash
+# List recent vehicle data files
+find ./data/vehicles -name "*.json" | head -10
+
+# View latest CSV data
+ls -lt data/vehicles/csv/*/*/*/ | head -1 | awk '{print $NF}' | xargs head -20
+
+# Count total data files
+find ./data -type f \( -name "*.json" -o -name "*.csv" -o -name "*.table" \) | wc -l
+```
+
+#### HTTP API Access
+When pipeline is running, data is also available via HTTP:
+```bash
+# Live vehicle data
+curl http://localhost:8081/api/vehicles
+
+# Schedule data  
+curl http://localhost:8081/api/schedule
+
+# Health check
+curl http://localhost:8081/api/health
+
+# Data query information
+curl http://localhost:8081/api/data/query
+```
+
+### Time Zone Information
+
+- **File Timestamps**: Local system time (Mountain Time for Denver)
+- **Data Timestamps**: Unix timestamps in milliseconds (UTC)
+- **File Naming**: ISO format in local timezone (YYYY-MM-DD_HH-mm-ss)
+
 ## Configuration
 
 ### Pipeline Settings

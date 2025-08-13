@@ -99,7 +99,7 @@ start_react() {
     if kill -0 $react_pid 2>/dev/null; then
         print_success "React app started (PID: $react_pid)"
         print_status "Logs: tail -f $REACT_LOG_FILE"
-        print_status "URL: http://localhost:3002/"
+        print_status "URL: http://localhost:3000/"
     else
         print_error "Failed to start React app"
         return 1
@@ -143,7 +143,7 @@ stop_react() {
     
     # Get both npm and vite processes related to the React app
     local npm_pids=$(get_pids "npm start")
-    local vite_pids=$(get_pids "vite.*300")
+    local vite_pids=$(get_pids "vite.*3000")
     local esbuild_pids=$(get_pids "esbuild")
     
     # Combine all PIDs
@@ -194,10 +194,10 @@ status() {
     # Check React app
     if check_process "npm start" && [ -f "$REACT_APP_DIR/package.json" ]; then
         local npm_pids=$(get_pids "npm start")
-        local vite_pids=$(get_pids "vite.*300")
+        local vite_pids=$(get_pids "vite.*3000")
         local react_pids="$npm_pids $vite_pids"
         print_success "React Web App: RUNNING (PIDs: $react_pids)"
-        print_status "  ↳ URL: http://localhost:3002/"
+        print_status "  ↳ URL: http://localhost:3000/"
     else
         print_warning "React Web App: STOPPED"
     fi
@@ -212,10 +212,10 @@ status() {
         print_status "  ↳ Port 8080: AVAILABLE"
     fi
     
-    if lsof -ti:3002 > /dev/null 2>&1; then
-        print_status "  ↳ Port 3002: IN USE (React App)"
+    if lsof -ti:3000 > /dev/null 2>&1; then
+        print_status "  ↳ Port 3000: IN USE (React App)"
     else
-        print_status "  ↳ Port 3002: AVAILABLE"
+        print_status "  ↳ Port 3000: AVAILABLE"
     fi
 }
 

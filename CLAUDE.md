@@ -132,3 +132,4 @@ flink run target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar
 - Each feed is fetched every minute and parsed using the Google GTFS-RT protobuf library
 - Watermarks are configured for 1-minute out-of-order tolerance
 - Table API sinks can be easily reconfigured for different output formats (Kafka, databases, etc.)
+- always generate junit test on new features

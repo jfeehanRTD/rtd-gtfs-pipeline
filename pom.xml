@@ -17,7 +17,7 @@
         <maven.compiler.source>24</maven.compiler.source>
         <maven.compiler.target>24</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <flink.version>2.0.0</flink.version>
+        <flink.version>2.1.0</flink.version>
         <kafka.version>4.0.0</kafka.version>
         <slf4j.version>2.0.16</slf4j.version>
         <junit.version>5.11.0</junit.version>
@@ -113,6 +113,31 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5.14</version>
+        </dependency>
+
+        <!-- Flink File System Connectors -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-parquet</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-csv</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+        
+        <!-- Scala Dependencies for Table API -->
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>2.12.18</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-compiler</artifactId>
+            <version>2.12.18</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- JSON Processing -->

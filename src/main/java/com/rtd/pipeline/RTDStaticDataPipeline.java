@@ -1,6 +1,8 @@
 package com.rtd.pipeline;
 
 import com.rtd.pipeline.source.RTDRowSource;
+import com.rtd.pipeline.source.GTFSScheduleSource;
+import com.rtd.pipeline.model.GTFSScheduleData;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
@@ -32,7 +34,9 @@ public class RTDStaticDataPipeline {
     private static final Logger LOG = LoggerFactory.getLogger(RTDStaticDataPipeline.class);
     
     private static final String VEHICLE_POSITIONS_URL = "https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/VehiclePosition.pb";
+    private static final String GTFS_SCHEDULE_URL = "https://www.rtd-denver.com/files/gtfs/google_transit.zip";
     private static volatile long FETCH_INTERVAL_SECONDS = 60L;
+    private static final long GTFS_SCHEDULE_FETCH_INTERVAL_SECONDS = 3600L; // Fetch GTFS schedule every hour
     private static final int HTTP_SERVER_PORT = 8080;
     
     // Shared data for HTTP endpoints
@@ -40,22 +44,33 @@ public class RTDStaticDataPipeline {
     private static final AtomicReference<String> latestJsonData = new AtomicReference<>();
     private static final AtomicReference<Long> lastUpdateTime = new AtomicReference<>(System.currentTimeMillis());
     
-    // Scheduler for data fetching
-    private static ScheduledExecutorService scheduler;
+    // GTFS Schedule data
+    private static final AtomicReference<List<GTFSScheduleData>> latestScheduleData = new AtomicReference<>();
+    private static final AtomicReference<String> latestScheduleJsonData = new AtomicReference<>();
+    private static final AtomicReference<Long> lastScheduleUpdateTime = new AtomicReference<>(System.currentTimeMillis());
+    
+    // Schedulers for data fetching
+    private static ScheduledExecutorService rtScheduler;
+    private static ScheduledExecutorService gtfsScheduler;
     
     public static void main(String[] args) throws Exception {
         
-        System.out.println("=== RTD Static Data Pipeline with Web Server ===");
-        System.out.println("Live RTD data integration serving React web app");
-        System.out.println("Fetching RTD data every " + FETCH_INTERVAL_SECONDS + " seconds");
+        System.out.println("=== RTD Complete Data Pipeline with Web Server ===");
+        System.out.println("Live RTD real-time + GTFS schedule data integration serving React web app");
+        System.out.println("Fetching RTD real-time data every " + FETCH_INTERVAL_SECONDS + " seconds");
+        System.out.println("Fetching GTFS schedule data every " + GTFS_SCHEDULE_FETCH_INTERVAL_SECONDS + " seconds");
         System.out.println("HTTP server on port " + HTTP_SERVER_PORT + "\n");
         
         // Start HTTP server first
         startHttpServer();
         
-        // Create a simple scheduler to fetch RTD data periodically
-        scheduler = Executors.newSingleThreadScheduledExecutor();
+        // Create schedulers to fetch RTD data periodically
+        rtScheduler = Executors.newSingleThreadScheduledExecutor();
+        gtfsScheduler = Executors.newSingleThreadScheduledExecutor();
         RTDRowSource dataSource = new RTDRowSource(VEHICLE_POSITIONS_URL, FETCH_INTERVAL_SECONDS);
+        
+        // Start GTFS schedule fetching
+        startGTFSScheduleFetching();
         
         // Counter for demonstration
         final int[] fetchCount = {0};
@@ -64,8 +79,8 @@ public class RTDStaticDataPipeline {
             System.out.println("=== Starting RTD Data Fetching ===");
             System.out.println("Press Ctrl+C to stop\n");
             
-            // Schedule periodic data fetching with dynamic interval
-            scheduler.scheduleWithFixedDelay(() -> {
+            // Schedule periodic real-time data fetching with dynamic interval
+            rtScheduler.scheduleWithFixedDelay(() -> {
                 try {
                     fetchCount[0]++;
                     System.out.printf("=== Fetch #%d (every %ds) ===\n", fetchCount[0], FETCH_INTERVAL_SECONDS);
@@ -151,13 +166,18 @@ public class RTDStaticDataPipeline {
         } catch (InterruptedException e) {
             System.out.println("\n=== Shutting Down RTD Pipeline ===");
         } finally {
-            scheduler.shutdown();
+            rtScheduler.shutdown();
+            gtfsScheduler.shutdown();
             try {
-                if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
-                    scheduler.shutdownNow();
+                if (!rtScheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                    rtScheduler.shutdownNow();
+                }
+                if (!gtfsScheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                    gtfsScheduler.shutdownNow();
                 }
             } catch (InterruptedException e) {
-                scheduler.shutdownNow();
+                rtScheduler.shutdownNow();
+                gtfsScheduler.shutdownNow();
             }
         }
         
@@ -167,7 +187,198 @@ public class RTDStaticDataPipeline {
         System.out.println("✅ Used Flink Row data types for structured data");
         System.out.println("✅ Avoided Flink execution serialization issues");
         System.out.println("✅ Served live data to React web app via HTTP");
-        System.out.println("💡 This shows the core RTD integration works - Flink 2.0.0 execution is the blocker");
+        System.out.println("✅ Integrated GTFS schedule data alongside real-time feeds");
+        System.out.println("💡 This shows the complete RTD integration works - Flink 2.0.0 execution is the blocker");
+    }
+    
+    private static void startGTFSScheduleFetching() {
+        System.out.println("=== Starting GTFS Schedule Data Fetching ===");
+        
+        // Schedule periodic GTFS schedule fetching
+        gtfsScheduler.scheduleWithFixedDelay(() -> {
+            try {
+                System.out.println("🗓️ Fetching GTFS schedule data...");
+                
+                // Create a simple GTFS schedule fetcher (similar to RTDRowSource approach)
+                java.util.List<GTFSScheduleData> scheduleData = fetchGTFSScheduleData();
+                
+                if (!scheduleData.isEmpty()) {
+                    System.out.printf("✅ Retrieved %d GTFS schedule files from RTD\n", scheduleData.size());
+                    
+                    // Update shared data for HTTP server
+                    latestScheduleData.set(scheduleData);
+                    latestScheduleJsonData.set(convertScheduleToJson(scheduleData));
+                    lastScheduleUpdateTime.set(System.currentTimeMillis());
+                    
+                    // Display summary of what was fetched
+                    System.out.println("GTFS Schedule Files Retrieved:");
+                    scheduleData.forEach(data -> 
+                        System.out.printf("  - %s (%d bytes)\n", 
+                            data.getFileType(), 
+                            data.getFileContent() != null ? data.getFileContent().length() : 0)
+                    );
+                } else {
+                    System.out.println("❌ No GTFS schedule data retrieved from RTD");
+                }
+                
+                System.out.printf("Next GTFS schedule fetch in %d seconds...\n\n", GTFS_SCHEDULE_FETCH_INTERVAL_SECONDS);
+                
+            } catch (Exception e) {
+                System.err.printf("❌ Error fetching GTFS schedule data: %s\n", e.getMessage());
+                e.printStackTrace();
+            }
+        }, 0, GTFS_SCHEDULE_FETCH_INTERVAL_SECONDS, TimeUnit.SECONDS);
+    }
+    
+    private static java.util.List<GTFSScheduleData> fetchGTFSScheduleData() {
+        java.util.List<GTFSScheduleData> scheduleDataList = new java.util.ArrayList<>();
+        
+        try {
+            // Use GTFSScheduleSource logic directly without Flink execution
+            try (org.apache.http.impl.client.CloseableHttpClient httpClient = 
+                    org.apache.http.impl.client.HttpClients.createDefault()) {
+                
+                org.apache.http.client.methods.HttpGet request = 
+                    new org.apache.http.client.methods.HttpGet(GTFS_SCHEDULE_URL);
+                request.setHeader("User-Agent", "RTD-GTFS-Pipeline/1.0");
+                
+                org.apache.http.HttpResponse response = httpClient.execute(request);
+                
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    byte[] zipData = org.apache.http.util.EntityUtils.toByteArray(response.getEntity());
+                    
+                    System.out.printf("📦 Downloaded GTFS schedule zip (%d bytes) from %s\n", 
+                            zipData.length, GTFS_SCHEDULE_URL);
+                    
+                    // Process the ZIP file
+                    processGTFSZip(zipData, scheduleDataList);
+                    
+                    System.out.printf("✅ Processed GTFS schedule zip with %d files\n", scheduleDataList.size());
+                    
+                } else {
+                    System.err.printf("❌ Failed to download GTFS schedule. HTTP Status: %d\n", 
+                            response.getStatusLine().getStatusCode());
+                }
+            }
+            
+        } catch (Exception e) {
+            System.err.printf("❌ Error in fetchGTFSScheduleData: %s\n", e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return scheduleDataList;
+    }
+    
+    private static void processGTFSZip(byte[] zipData, java.util.List<GTFSScheduleData> dataList) throws Exception {
+        long downloadTimestamp = java.time.Instant.now().toEpochMilli();
+        String feedVersion = null;
+        String agencyName = null;
+        String feedStartDate = null;
+        String feedEndDate = null;
+        
+        System.out.printf("🔍 Processing GTFS ZIP file with %d bytes...\n", zipData.length);
+        
+        try (java.util.zip.ZipInputStream zipInputStream = 
+                new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(zipData))) {
+            
+            java.util.zip.ZipEntry entry;
+            int entryCount = 0;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                entryCount++;
+                System.out.printf("📄 Found ZIP entry %d: %s (size: %d, compressed: %d)\n", 
+                    entryCount, entry.getName(), entry.getSize(), entry.getCompressedSize());
+                
+                if (entry.isDirectory()) {
+                    continue;
+                }
+                
+                String fileName = entry.getName();
+                System.out.printf("📄 Processing GTFS file: %s\n", fileName);
+                
+                StringBuilder content = new StringBuilder();
+                try (java.io.BufferedReader reader = new java.io.BufferedReader(
+                        new java.io.InputStreamReader(zipInputStream, java.nio.charset.StandardCharsets.UTF_8))) {
+                    
+                    String line;
+                    int lineCount = 0;
+                    while ((line = reader.readLine()) != null && lineCount < 10000) {
+                        content.append(line).append("\n");
+                        lineCount++;
+                        
+                        // Extract metadata from specific files
+                        if (fileName.equals("feed_info.txt") && lineCount == 2) {
+                            String[] parts = line.split(",");
+                            if (parts.length >= 4) {
+                                feedVersion = parts[1].replace("\"", "").trim();
+                                feedStartDate = parts[2].replace("\"", "").trim();
+                                feedEndDate = parts[3].replace("\"", "").trim();
+                            }
+                        }
+                        
+                        if (fileName.equals("agency.txt") && lineCount == 2) {
+                            String[] parts = line.split(",");
+                            if (parts.length >= 2) {
+                                agencyName = parts[1].replace("\"", "").trim();
+                            }
+                        }
+                    }
+                    
+                    if (lineCount >= 10000) {
+                        System.out.printf("⚠️ File %s was truncated at %d lines to prevent memory issues\n", fileName, lineCount);
+                    }
+                }
+                
+                GTFSScheduleData scheduleData = GTFSScheduleData.builder()
+                        .fileType(fileName)
+                        .fileContent(content.toString())
+                        .downloadTimestamp(downloadTimestamp)
+                        .feedVersion(feedVersion)
+                        .agencyName(agencyName)
+                        .feedStartDate(feedStartDate)
+                        .feedEndDate(feedEndDate)
+                        .build();
+                
+                dataList.add(scheduleData);
+            }
+        }
+        
+        System.out.printf("✅ Completed processing GTFS schedule zip with %d files\n", dataList.size());
+    }
+    
+    private static String convertScheduleToJson(java.util.List<GTFSScheduleData> scheduleData) {
+        StringBuilder json = new StringBuilder();
+        json.append("{\n");
+        json.append("  \"gtfs_schedule_files\": [\n");
+        
+        for (int i = 0; i < scheduleData.size(); i++) {
+            GTFSScheduleData data = scheduleData.get(i);
+            
+            json.append("    {\n");
+            json.append("      \"file_type\": \"").append(data.getFileType() != null ? data.getFileType() : "").append("\",\n");
+            json.append("      \"feed_version\": \"").append(data.getFeedVersion() != null ? data.getFeedVersion() : "").append("\",\n");
+            json.append("      \"agency_name\": \"").append(data.getAgencyName() != null ? data.getAgencyName() : "").append("\",\n");
+            json.append("      \"feed_start_date\": \"").append(data.getFeedStartDate() != null ? data.getFeedStartDate() : "").append("\",\n");
+            json.append("      \"feed_end_date\": \"").append(data.getFeedEndDate() != null ? data.getFeedEndDate() : "").append("\",\n");
+            json.append("      \"content_length\": ").append(data.getFileContent() != null ? data.getFileContent().length() : 0).append(",\n");
+            json.append("      \"download_timestamp\": ").append(data.getDownloadTimestamp() != null ? data.getDownloadTimestamp() : 0).append(",\n");
+            json.append("      \"last_updated\": \"").append(java.time.Instant.now().toString()).append("\"\n");
+            json.append("    }");
+            
+            if (i < scheduleData.size() - 1) {
+                json.append(",");
+            }
+            json.append("\n");
+        }
+        
+        json.append("  ],\n");
+        json.append("  \"metadata\": {\n");
+        json.append("    \"total_files\": ").append(scheduleData.size()).append(",\n");
+        json.append("    \"last_update\": \"").append(java.time.Instant.ofEpochMilli(lastScheduleUpdateTime.get()).toString()).append("\",\n");
+        json.append("    \"source\": \"RTD GTFS Schedule Feed\"\n");
+        json.append("  }\n");
+        json.append("}");
+        
+        return json.toString();
     }
     
     private static void startHttpServer() throws IOException {
@@ -175,6 +386,7 @@ public class RTDStaticDataPipeline {
         
         // Set up endpoints
         server.createContext("/api/vehicles", new VehiclesHandler());
+        server.createContext("/api/schedule", new ScheduleHandler());
         server.createContext("/api/health", new HealthHandler());
         server.createContext("/api/config/interval", new IntervalConfigHandler());
         server.createContext("/", new CorsHandler()); // CORS preflight
@@ -185,6 +397,7 @@ public class RTDStaticDataPipeline {
         
         System.out.printf("✅ HTTP server started at http://localhost:%d\n", HTTP_SERVER_PORT);
         System.out.printf("📍 Vehicle data: http://localhost:%d/api/vehicles\n", HTTP_SERVER_PORT);
+        System.out.printf("🗓️ Schedule data: http://localhost:%d/api/schedule\n", HTTP_SERVER_PORT);
         System.out.printf("🏥 Health check: http://localhost:%d/api/health\n\n", HTTP_SERVER_PORT);
         
         // Add shutdown hook for HTTP server
@@ -284,6 +497,34 @@ public class RTDStaticDataPipeline {
             String jsonData = latestJsonData.get();
             if (jsonData == null) {
                 jsonData = "{\"vehicles\": [], \"metadata\": {\"total_count\": 0, \"error\": \"No data available\"}}";
+            }
+            
+            byte[] response = jsonData.getBytes();
+            exchange.sendResponseHeaders(200, response.length);
+            
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
+        }
+    }
+    
+    static class ScheduleHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // Add CORS headers
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+            
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(200, -1);
+                return;
+            }
+            
+            String jsonData = latestScheduleJsonData.get();
+            if (jsonData == null) {
+                jsonData = "{\"gtfs_schedule_files\": [], \"metadata\": {\"total_files\": 0, \"error\": \"No schedule data available\"}}";
             }
             
             byte[] response = jsonData.getBytes();
