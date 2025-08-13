@@ -1,0 +1,335 @@
+{ 
+ "msg_time" : "2025-08-13 20:58:09", 
+"trains" : [ 
+{ 
+ "last_movement_time" : "2025-08-13 20:58:09", 
+ "service_date" : "2025-08-13", 
+ "run" : "35", 
+ "destination_name" : "RIDGEGATE", 
+ "destination_id" : "47", 
+ "trip" : "10", 
+ "direction" : "South", 
+ "train" : "35", 
+"train_consist" : [ 
+{ 
+ "car" : "129", 
+ "order" : "1" 
+}, 
+{ 
+ "car" : "148", 
+ "order" : "2" 
+} 
+], 
+ "source" : "TRACK_CIRCUIT", 
+ "position" : "1127T Track", 
+ "latitude" : "39.64683382380", 
+ "longitude" : "-104.91532832000", 
+ "scheduled_time_to_next" : "80", 
+ "scheduled_stop_time" : "2025-08-13 20:59:30", 
+ "schedule_adherence" : "84", 
+ "prev_stop" : "SOUTH", 
+ "next_stop" : "BELL"
+} 
+] 
+} 
+
+{ 
+ "msg_time" : "2025-08-13 20:58:15", 
+"trains" : [ 
+{ 
+ "last_movement_time" : "2025-08-13 20:58:15", 
+ "service_date" : "2025-08-13", 
+ "run" : "78", 
+ "destination_name" : "JEFF", 
+ "destination_id" : "61", 
+ "trip" : "10", 
+ "direction" : "South", 
+ "train" : "78", 
+"train_consist" : [ 
+{ 
+ "car" : "299", 
+ "order" : "1" 
+}, 
+{ 
+ "car" : "212", 
+ "order" : "2" 
+} 
+], 
+ "source" : "TRACK_CIRCUIT", 
+ "position" : "635BZT Track", 
+ "latitude" : "39.73668589750", 
+ "longitude" : "-105.08062852200", 
+ "scheduled_time_to_next" : "210", 
+ "scheduled_stop_time" : "2025-08-13 21:01:45", 
+ "schedule_adherence" : "45", 
+ "prev_stop" : "LAMAR", 
+ "current_stop" : "WADS", 
+ "next_stop" : "GARR"
+} 
+] 
+} 
+
+{ 
+ "msg_time" : "2025-08-13 20:58:13", 
+"trains" : [ 
+{ 
+ "last_movement_time" : "2025-08-13 20:58:13", 
+ "service_date" : "2025-08-13", 
+ "run" : "12", 
+ "destination_name" : "MIN", 
+ "destination_id" : "99", 
+ "trip" : "13", 
+ "direction" : "South", 
+ "train" : "12", 
+"train_consist" : [ 
+{ 
+ "car" : "268", 
+ "order" : "1" 
+}, 
+{ 
+ "car" : "206", 
+ "order" : "2" 
+} 
+], 
+ "source" : "TRACK_CIRCUIT", 
+ "position" : "587ZT Track", 
+ "latitude" : "39.69268943620", 
+ "longitude" : "-104.98910604800", 
+ "scheduled_time_to_next" : "-117", 
+ "scheduled_stop_time" : "2025-08-13 20:56:15", 
+ "schedule_adherence" : "-111", 
+ "prev_stop" : "I-25", 
+ "next_stop" : "EVANS"
+} 
+] 
+} 
+
+{ 
+ "msg_time" : "2025-08-13 20:58:11", 
+"trains" : [ 
+{ 
+ "last_movement_time" : "2025-08-13 20:58:11", 
+ "service_date" : "2025-08-13", 
+ "run" : "8", 
+ "destination_name" : "16/ST", 
+ "destination_id" : "99", 
+ "trip" : "17", 
+ "direction" : "South", 
+ "train" : "8", 
+"train_consist" : [ 
+{ 
+ "car" : "351", 
+ "order" : "1" 
+} 
+], 
+ "source" : "TRACK_CIRCUIT", 
+ "position" : "65AT Track", 
+ "latitude" : "39.70535501890", 
+ "longitude" : "-104.99104687600", 
+ "scheduled_time_to_next" : "-6460", 
+ "scheduled_stop_time" : "2025-08-13 19:10:30", 
+ "schedule_adherence" : "-6456", 
+ "prev_stop" : "20TH", 
+ "next_stop" : "18/ST"
+} 
+] 
+} 
+
+{ 
+ "msg_time" : "2025-08-13 20:58:17", 
+"trains" : [ 
+{ 
+ "last_movement_time" : "2025-08-13 20:58:17", 
+ "service_date" : "2025-08-13", 
+ "run" : "56", 
+ "destination_name" : "18/CAL", 
+ "trip" : "11", 
+ "direction" : "South", 
+ "train" : "56", 
+ "source" : "TRACK_CIRCUIT", 
+ "position" : "1744ZT Track", 
+ "latitude" : "39.6727773551", 
+ "longitude" : "-104.8274278180", 
+ "scheduled_time_to_next" : "193", 
+ "scheduled_stop_time" : "2025-08-13 21:01:30", 
+ "schedule_adherence" : "193", 
+ "prev_stop" : "ILIFF", 
+ "next_stop" : "NINE"
+} 
+] 
+} 
+
+{ 
+ "msg_time" : "2025-08-13 20:58:18", 
+"trains" : [ 
+{ 
+ "last_movement_time" : "2025-08-13 20:58:18", 
+ "service_date" : "2025-08-13", 
+ "run" : "35", 
+ "destination_name" : "RIDGEGATE", 
+ "destination_id" : "47", 
+ "trip" : "10", 
+ "direction" : "South", 
+ "train" : "35", 
+"train_consist" : [ 
+{ 
+ "car" : "129", 
+ "order" : "1" 
+}, 
+{ 
+ "car" : "148", 
+ "order" : "2" 
+} 
+], 
+ "source" : "TWC", 
+ "position" : "TWC-1135", 
+ "latitude" : "39.64592085520", 
+ "longitude" : "-104.91479144100", 
+ "scheduled_time_to_next" : "72", 
+ "scheduled_stop_time" : "2025-08-13 20:59:30", 
+ "schedule_adherence" : "84", 
+ "prev_stop" : "SOUTH", 
+ "next_stop" : "BELL"
+} 
+] 
+} 
+
+{ 
+ "msg_time" : "2025-08-13 20:58:19", 
+"trains" : [ 
+{ 
+ "last_movement_time" : "2025-08-13 20:58:19", 
+ "service_date" : "2025-08-13", 
+ "run" : "8", 
+ "destination_name" : "16/ST", 
+ "destination_id" : "99", 
+ "trip" : "17", 
+ "direction" : "South", 
+ "train" : "8", 
+"train_consist" : [ 
+{ 
+ "car" : "351", 
+ "order" : "1" 
+} 
+], 
+ "source" : "TRACK_CIRCUIT", 
+ "position" : "495AZT Track", 
+ "latitude" : "39.70485750040", 
+ "longitude" : "-104.99088658600", 
+ "scheduled_time_to_next" : "-6468", 
+ "scheduled_stop_time" : "2025-08-13 19:10:30", 
+ "schedule_adherence" : "-6456", 
+ "prev_stop" : "20TH", 
+ "next_stop" : "18/ST"
+} 
+] 
+} 
+
+{ 
+ "msg_time" : "2025-08-13 20:58:22", 
+"trains" : [ 
+{ 
+ "last_movement_time" : "2025-08-13 20:58:22", 
+ "service_date" : "2025-08-13", 
+ "run" : "55", 
+ "destination_name" : "FLORIDA", 
+ "destination_id" : "55", 
+ "trip" : "12", 
+ "direction" : "North", 
+ "train" : "55", 
+"train_consist" : [ 
+{ 
+ "car" : "267", 
+ "order" : "1" 
+}, 
+{ 
+ "car" : "301", 
+ "order" : "2" 
+} 
+], 
+ "source" : "TWC", 
+ "position" : "TWC-126A1", 
+ "latitude" : "39.74688682960", 
+ "longitude" : "-104.98992237900", 
+ "scheduled_time_to_next" : "128", 
+ "scheduled_stop_time" : "2025-08-13 21:00:30", 
+ "schedule_adherence" : "0", 
+ "next_stop" : "18/ST"
+} 
+] 
+} 
+
+{ 
+ "msg_time" : "2025-08-13 20:58:23", 
+"trains" : [ 
+{ 
+ "last_movement_time" : "2025-08-13 20:58:23", 
+ "service_date" : "2025-08-13", 
+ "run" : "72", 
+ "destination_name" : "JEFF", 
+ "destination_id" : "61", 
+ "trip" : "12", 
+ "direction" : "South", 
+ "train" : "72", 
+"train_consist" : [ 
+{ 
+ "car" : "234", 
+ "order" : "1" 
+}, 
+{ 
+ "car" : "225", 
+ "order" : "2" 
+} 
+], 
+ "source" : "TRACK_CIRCUIT", 
+ "position" : "140B Track", 
+ "latitude" : "39.74336666060", 
+ "longitude" : "-105.01244531900", 
+ "scheduled_time_to_next" : "-82", 
+ "scheduled_stop_time" : "2025-08-13 20:57:00", 
+ "schedule_adherence" : "-66", 
+ "prev_stop" : "PEPSI", 
+ "next_stop" : "MIHI"
+} 
+] 
+} 
+
+{ 
+ "msg_time" : "2025-08-13 20:58:24", 
+"trains" : [ 
+{ 
+ "last_movement_time" : "2025-08-13 20:58:24", 
+ "service_date" : "2025-08-13", 
+ "run" : "35", 
+ "destination_name" : "RIDGEGATE", 
+ "destination_id" : "47", 
+ "trip" : "10", 
+ "direction" : "South", 
+ "train" : "35", 
+"train_consist" : [ 
+{ 
+ "car" : "129", 
+ "order" : "1" 
+}, 
+{ 
+ "car" : "148", 
+ "order" : "2" 
+} 
+], 
+ "source" : "TRACK_CIRCUIT", 
+ "position" : "1135ZT Track", 
+ "latitude" : "39.64519745030", 
+ "longitude" : "-104.91436447900", 
+ "scheduled_time_to_next" : "66", 
+ "scheduled_stop_time" : "2025-08-13 20:59:30", 
+ "schedule_adherence" : "84", 
+ "prev_stop" : "SOUTH", 
+ "next_stop" : "BELL"
+} 
+] 
+} 
+
+
+Total messages consumed: 10
+
+Shutting down consumer...

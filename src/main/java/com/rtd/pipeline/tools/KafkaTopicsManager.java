@@ -199,7 +199,8 @@ public class KafkaTopicsManager {
             new NewTopic("rtd.vehicle.tracking", 2, (short) 1),
             new NewTopic("rtd.vehicle.positions", 2, (short) 1),
             new NewTopic("rtd.trip.updates", 2, (short) 1),
-            new NewTopic("rtd.alerts", 1, (short) 1)
+            new NewTopic("rtd.alerts", 1, (short) 1),
+            new NewTopic("rtd.rail.comm", 2, (short) 1)
         );
         
         for (NewTopic topic : topics) {

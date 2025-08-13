@@ -1,0 +1,15 @@
+{
+  "msg_time": "2025-08-13 21:00:00",
+  "trains": [
+    {
+      "last_movement_time": "2025-08-10 16:24:35",
+      "run": "5",
+      "direction": "South",
+      "train": "5",
+      "source": "TIMER",
+      "position": "661ZT-SW Track",
+      "latitude": "39.68211474890",
+      "longitude": "-104.99173029900"
+    }
+  ]
+}

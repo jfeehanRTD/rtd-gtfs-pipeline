@@ -522,6 +522,52 @@ main() {
         "cleanup")
             cleanup
             ;;
+        "rail-comm")
+            case "${2:-run}" in
+                "run")
+                    print_status "Starting RTD Rail Communication Pipeline..."
+                    if ! check_process "RTDRailCommPipeline"; then
+                        mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDRailCommPipeline"
+                    else
+                        print_warning "Rail comm pipeline is already running"
+                    fi
+                    ;;
+                "receiver")
+                    print_status "Starting RTD Rail Comm HTTP Receiver..."
+                    if ! check_process "RailCommHTTPReceiver"; then
+                        mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RailCommHTTPReceiver"
+                    else
+                        print_warning "Rail comm HTTP receiver is already running"
+                    fi
+                    ;;
+                "test")
+                    print_status "Testing RTD Rail Communication Pipeline..."
+                    ./scripts/test-rail-comm.sh send
+                    ;;
+                "monitor")
+                    print_status "Monitoring rail comm topic..."
+                    ./scripts/test-rail-comm.sh monitor
+                    ;;
+                "subscribe")
+                    print_status "Subscribing to rail comm proxy feed..."
+                    ./scripts/proxy-subscribe.sh send
+                    ;;
+                "unsubscribe")
+                    print_status "Unsubscribing from rail comm proxy feed..."
+                    ./scripts/proxy-subscribe.sh unsubscribe
+                    ;;
+                *)
+                    print_error "Usage: $0 rail-comm [run|receiver|test|monitor|subscribe|unsubscribe]"
+                    print_status "  run         - Start the rail comm pipeline"
+                    print_status "  receiver    - Start HTTP receiver for proxy data"
+                    print_status "  test        - Send test JSON payloads"
+                    print_status "  monitor     - Monitor rail comm topic"
+                    print_status "  subscribe   - Subscribe to proxy rail comm feed"
+                    print_status "  unsubscribe - Unsubscribe from proxy rail comm feed"
+                    exit 1
+                    ;;
+            esac
+            ;;
         "help"|"-h"|"--help")
             echo "RTD Pipeline Control Script"
             echo
@@ -534,6 +580,7 @@ main() {
             echo "  docker [start|stop|status] Run with Docker/Kafka (recommended)"
             echo "  status                    Show status of all services"
             echo "  logs [java|react]         Show real-time logs"
+            echo "  rail-comm [run|test|monitor] Rail communication pipeline commands"
             echo "  cleanup                   Clean up log files and temp directories"
             echo "  help                      Show this help message"
             echo
@@ -551,6 +598,14 @@ main() {
             echo "  $0 status                 # Check status"
             echo "  $0 logs java              # Follow Java logs"
             echo "  $0 cleanup                # Clean up files"
+            echo
+            echo "Rail Communication Pipeline:"
+            echo "  $0 rail-comm run          # Start rail comm pipeline"
+            echo "  $0 rail-comm receiver     # Start HTTP receiver for proxy data"
+            echo "  $0 rail-comm test         # Send test JSON payloads"
+            echo "  $0 rail-comm monitor      # Monitor rail comm topic"
+            echo "  $0 rail-comm subscribe    # Subscribe to proxy feed"
+            echo "  $0 rail-comm unsubscribe  # Unsubscribe from proxy feed"
             echo
             echo "Docker Mode (Recommended for full features):"
             echo "  - RTD API at http://localhost:8080"

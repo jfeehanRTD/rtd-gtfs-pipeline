@@ -102,8 +102,13 @@ public class KafkaConsumerManager {
     }
     
     public void consumeMessages(String topicName, boolean fromBeginning, int maxMessages, String groupId) {
-        Properties props = new Properties(consumerProps);
+        Properties props = new Properties();
+        props.putAll(consumerProps);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        
+        // Ensure deserializers are explicitly set
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         
         if (fromBeginning) {
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

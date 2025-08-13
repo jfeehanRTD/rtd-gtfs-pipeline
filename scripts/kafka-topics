@@ -74,6 +74,7 @@ show_usage() {
     echo "  ./kafka-topics --create --topic rtd.vehicle.positions --partitions 2" 
     echo "  ./kafka-topics --create --topic rtd.trip.updates --partitions 2"
     echo "  ./kafka-topics --create --topic rtd.alerts --partitions 1"
+    echo "  ./kafka-topics --create --topic rtd.rail.comm --partitions 2"
     echo
     echo "Examples:"
     echo "  # List all topics"
