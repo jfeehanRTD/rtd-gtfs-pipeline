@@ -4,12 +4,20 @@ A real-time transit data processing pipeline built with Apache Flink that downlo
 
 ## Overview
 
-This application processes three types of real-time transit data from RTD Denver:
+This application processes real-time transit data from RTD Denver through two primary data sources:
+
+### GTFS-RT Public Feeds
 - **Vehicle Positions**: Real-time location and status of transit vehicles
 - **Trip Updates**: Schedule adherence and delay information
 - **Service Alerts**: Disruptions, detours, and other service announcements
 
-The pipeline fetches data from RTD's public endpoints every minute, processes it using Apache Flink's streaming capabilities, and outputs structured data that can be easily integrated with databases, message queues, or other downstream systems.
+### Rail Communication System (New!)
+- **Live Train Tracking**: Direct integration with RTD's internal rail communication system
+- **Detailed Train Data**: Car consists, precise positioning, operator messages
+- **Real-time Updates**: Live data from track circuits and train control systems
+- **End-to-End Pipeline**: HTTP receiver → Kafka → Flink → File persistence
+
+The pipeline fetches data from RTD's public endpoints every minute and processes internal rail communication data in real-time, using Apache Flink's streaming capabilities to output structured data for databases, message queues, or other downstream systems.
 
 ## Architecture
 
@@ -158,6 +166,49 @@ docker-compose down                 # Stop containers
 docker-compose logs kafka           # View Kafka logs
 ```
 
+### 🚆 Rail Communication Pipeline (New!)
+
+**Complete rail communication system integration with proxy subscription and real-time data processing:**
+
+```bash
+# Complete rail comm setup (run these in separate terminals)
+
+# Terminal 1: Start Kafka and create topic
+./rtd-control.sh docker start
+
+# Terminal 2: Start HTTP receiver for proxy data
+./rtd-control.sh rail-comm receiver
+
+# Terminal 3: Start Flink rail comm pipeline
+./rtd-control.sh rail-comm run
+
+# Terminal 4: Subscribe to proxy feed (auto-detected IP)
+./rtd-control.sh rail-comm subscribe
+
+# Monitor live rail communication data
+./rtd-control.sh rail-comm monitor
+
+# Send test data (for development)
+./rtd-control.sh rail-comm test
+
+# Unsubscribe when done
+./rtd-control.sh rail-comm unsubscribe
+```
+
+**Rail Communication Data Features:**
+- **Live Train Data**: Real-time train positions from RTD's internal systems
+- **Car Consists**: Individual rail car tracking and consist composition
+- **Track Circuits**: Precise position data from track-side sensors
+- **Schedule Adherence**: Real-time delay calculations and predictions
+- **Operator Messages**: Live operator communications and status updates
+- **File Persistence**: Rolling file output every 15 minutes in `./data/rail-comm/`
+
+**Data Endpoints:**
+- Proxy Subscription: `http://10.4.51.37:80/rtd/tli/consumer/tim`
+- HTTP Receiver: `http://localhost:8081/rail-comm`
+- Kafka Topic: `rtd.rail.comm`
+- File Output: `./data/rail-comm/YYYY-MM-DD--HH/`
+
 **Topic Creation:**
 The Docker mode automatically creates RTD topics when starting. You can also create them manually:
 
@@ -172,6 +223,7 @@ The Docker mode automatically creates RTD topics when starting. You can also cre
 ./scripts/kafka-topics --create --topic rtd.vehicle.positions --partitions 2
 ./scripts/kafka-topics --create --topic rtd.trip.updates --partitions 2
 ./scripts/kafka-topics --create --topic rtd.alerts --partitions 1
+./scripts/kafka-topics --create --topic rtd.rail.comm --partitions 2
 
 # Verify topics were created
 ./scripts/kafka-topics --list
@@ -312,6 +364,9 @@ The project includes built-in Kafka tools so you don't need to install Kafka sep
 # Monitor alerts
 ./scripts/kafka-console-consumer --topic rtd.alerts --from-beginning
 
+# Monitor rail communication data (NEW!)
+./scripts/kafka-console-consumer --topic rtd.rail.comm --from-beginning
+
 # Monitor with custom settings
 ./scripts/kafka-console-consumer --topic rtd.route.summary --max-messages 20 --timeout-ms 5000
 ```
@@ -369,6 +424,29 @@ Static schedule data is stored with **daily partitioning**:
 data/schedule/json/2025/08/13/2025-08-13_11-00-04.json
 data/schedule/table/2025/08/13/2025-08-13_11-00-04.table
 ```
+
+### Rail Communication Data Files (NEW!)
+
+Live rail communication data is stored with **rolling file policies** for continuous operation:
+
+```
+./data/rail-comm/
+└── YYYY-MM-DD--HH/
+    ├── part-<uuid>-0
+    ├── part-<uuid>-1
+    └── .part-<uuid>-<n>.inprogress  (temporary files during writes)
+```
+
+**Example Files:**
+```bash
+data/rail-comm/2025-08-13--21/part-a1b2c3d4-e5f6-7890-abcd-ef1234567890-0
+data/rail-comm/2025-08-13--21/part-a1b2c3d4-e5f6-7890-abcd-ef1234567890-1
+```
+
+**Rolling Policy:**
+- New file every 15 minutes OR 128MB size limit
+- Files close after 5 minutes of inactivity
+- JSON format with one message per line
 
 ### Data Format Details
 
@@ -461,6 +539,9 @@ The pipeline outputs to six Kafka topics organized in two categories:
 - **rtd.trip.updates**: Schedule adherence and delay information
 - **rtd.alerts**: Service disruption alerts
 
+**Rail Communication Data Stream (NEW!):**
+- **rtd.rail.comm**: Internal rail system data with precise train tracking
+
 Default Kafka settings:
 - **Bootstrap Servers**: `localhost:9092`
 - **Format**: JSON
@@ -546,6 +627,24 @@ Enhanced vehicle-specific data:
 - `url`: Additional information link
 - `active_period_start`, `active_period_end`: Validity timeframe
 
+**Rail Communication Data (NEW!):**
+- `msg_time`: Message timestamp from rail control system
+- `trains`: Array of active train objects with:
+  - `train`: Train identifier number
+  - `run`: Service run number
+  - `direction`: North/South/East/West
+  - `latitude`, `longitude`: Precise GPS coordinates
+  - `position`: Track circuit position identifier
+  - `source`: Data source (TRACK_CIRCUIT, TWC, TIMER)
+  - `train_consist`: Array of rail car numbers and order
+  - `service_date`: Operating service date
+  - `destination_name`, `destination_id`: Final destination
+  - `trip`: Trip number within service run
+  - `scheduled_stop_time`: Next scheduled stop arrival
+  - `schedule_adherence`: Seconds ahead/behind schedule (negative = late)
+  - `prev_stop`, `current_stop`, `next_stop`: Station progression
+  - `last_movement_time`: Timestamp of last position update
+
 ## Built-in Tools
 
 The project includes several convenient command-line tools:
@@ -567,6 +666,13 @@ The project includes several convenient command-line tools:
 - **Local Mode**: Simple pipeline + React App without Kafka
 - **Kafka UI**: Web interface at http://localhost:8090 for visual management (Docker mode)
 - **One-command setup**: `./rtd-control.sh docker start` launches everything
+- **Rail Communication**: Full rail comm pipeline management with proxy integration
+
+### Rail Communication Tools (NEW!)
+- **`./rtd-control.sh rail-comm`**: Complete rail communication pipeline management
+- **`./scripts/proxy-subscribe.sh`**: Subscribe/unsubscribe to RTD rail proxy feed
+- **`./scripts/test-rail-comm.sh`**: Send test JSON payloads and monitor topics
+- **Mock Data System**: Comprehensive test data for pipeline development
 
 ### Usage Examples
 ```bash
@@ -580,7 +686,14 @@ The project includes several convenient command-line tools:
 
 # Monitor raw Kafka streams  
 ./scripts/kafka-console-consumer --topic rtd.alerts --from-beginning
+./scripts/kafka-console-consumer --topic rtd.rail.comm --from-beginning
 ./scripts/kafka-topics --list
+
+# Rail communication pipeline (NEW!)
+./rtd-control.sh rail-comm receiver     # Start HTTP receiver
+./rtd-control.sh rail-comm run          # Start Flink pipeline
+./rtd-control.sh rail-comm subscribe    # Subscribe to proxy feed
+./rtd-control.sh rail-comm monitor      # Monitor live data
 
 # Service management
 ./rtd-control.sh docker status          # Check all services
@@ -649,6 +762,9 @@ mvn test -Dtest="*ScheduleAdherenceTest,EnhancedScheduleAdherenceTest"
 # Run service disruption tests
 mvn test -Dtest="ServiceDisruptionPatternTest"
 
+# Run rail communication pipeline tests (NEW!)
+mvn test -Dtest="RailCommPipelineTest"
+
 # Clean test runner script (suppresses warnings)
 ./test-clean.sh                                    # Run all tests
 ./test-clean.sh -Dtest="*ValidationTest"          # Run specific tests
@@ -679,6 +795,12 @@ mvn test -Dtest="ServiceDisruptionPatternTest"
 **Historical Analysis Tests:**
 - `HistoricalDataModelTest`: Tests data structures for tracking service history
 - `RTDLightRailTrackingTest`: Comprehensive light rail service monitoring
+
+**Rail Communication Tests (NEW!):**
+- `RailCommPipelineTest`: Validates rail communication data structure and processing
+- **Mock Data Coverage**: On-time trains, delayed trains, multiple trains, minimal data, empty arrays
+- **Test Utilities**: `RailCommMockData` class with scenario generation
+- **Integration Testing**: End-to-end proxy → HTTP → Kafka → Flink → File pipeline
 
 ### Service Monitoring Capabilities
 
@@ -911,6 +1033,10 @@ java -cp target/classes:$(mvn dependency:build-classpath -q -Dmdep.outputFile=/d
 
 # 🎉 NEW: Protocol Buffer-based Flink pipeline (FIXES SERIALIZATION)
 mvn exec:java -Dexec.mainClass="com.rtd.pipeline.ProtobufRTDPipeline"
+
+# 🚆 NEW: Rail Communication Pipeline (LIVE TRAIN DATA)
+mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDRailCommPipeline"
+mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RailCommHTTPReceiver"
 
 # ⚠️ Legacy pipelines (serialization problems):
 mvn exec:java -Dexec.mainClass="com.rtd.pipeline.FlinkSinkTest"
