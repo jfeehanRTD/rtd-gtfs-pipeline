@@ -50,7 +50,7 @@ show_usage() {
     echo
     echo "Service Information:"
     echo "  Kafka:      localhost:9092"
-    echo "  Kafka UI:   http://localhost:8080"
+    echo "  Kafka UI:   http://localhost:8090"
     echo "  Network:    rtd-gtfs-network"
     echo
     echo "Examples:"
@@ -211,7 +211,7 @@ show_service_info() {
     echo
     echo "Services:"
     echo "  📊 Kafka:      localhost:9092"
-    echo "  🖥️  Kafka UI:   http://localhost:8080"
+    echo "  🖥️  Kafka UI:   http://localhost:8090"
     echo
     echo "Docker Runtime:"
     if command -v colima &> /dev/null && colima status &> /dev/null; then
@@ -231,12 +231,12 @@ show_service_info() {
 open_ui() {
     if command -v open &> /dev/null; then
         print_status "Opening Kafka UI in browser..."
-        open http://localhost:8080
+        open http://localhost:8090
     elif command -v xdg-open &> /dev/null; then
         print_status "Opening Kafka UI in browser..."
-        xdg-open http://localhost:8080
+        xdg-open http://localhost:8090
     else
-        print_status "Please open http://localhost:8080 in your browser"
+        print_status "Please open http://localhost:8090 in your browser"
     fi
 }
 

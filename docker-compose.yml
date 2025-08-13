@@ -54,7 +54,7 @@ services:
     restart: unless-stopped
     platform: linux/amd64  # Force x86_64 platform for compatibility
     ports:
-      - "8080:8080"
+      - "8090:8080"  # Changed from 8080 to 8090 to avoid conflict with RTD API
     environment:
       KAFKA_CLUSTERS_0_NAME: rtd-kafka-cluster
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092

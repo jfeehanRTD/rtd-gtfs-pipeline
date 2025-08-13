@@ -59,6 +59,27 @@ This version includes major improvements for live RTD data integration:
 
 ## Quick Start
 
+### 🚀 Fastest Setup (Recommended)
+
+```bash
+# Build the project
+mvn clean package
+
+# Start everything with Docker mode (Kafka + Pipeline + React App)
+./rtd-control.sh docker start
+
+# Access the services:
+# - RTD API: http://localhost:8080/api/health  (412+ live vehicles)
+# - React Map: http://localhost:3000           (Interactive transit map)
+# - Kafka UI: http://localhost:8090            (Message queue management)
+
+# Check status
+./rtd-control.sh docker status
+
+# Stop everything
+./rtd-control.sh docker stop
+```
+
 ### 1. Build the Application
 
 ```bash
@@ -77,47 +98,68 @@ For faster builds without tests:
 mvn clean package -DskipTests
 ```
 
-### 2. Set Up Kafka 4.0.0 Environment
+### 2. Start Services with Unified Control Script
 
-The project includes a complete Docker setup for Kafka 4.0.0 with KRaft (no ZooKeeper).
+The project includes a unified control script that manages both local and Docker-based deployments.
 
-**Prerequisites (macOS):**
+**Prerequisites (for Docker mode):**
 ```bash
-# Install Colima (lightweight Docker alternative)
+# Install Docker or Colima (lightweight Docker alternative for macOS)
 brew install colima docker docker-compose
 
-# Start Colima VM
-./scripts/docker-setup colima start
-# or manually: colima start --cpu 4 --memory 8
+# Start Colima VM (if using Colima)
+colima start --cpu 4 --memory 8
 ```
 
-**Quick Setup:**
+**Quick Start - Docker Mode (Recommended):**
 ```bash
-# Complete setup: Start Kafka and create all RTD topics
-./scripts/docker-setup setup
+# Complete setup: Start Kafka + RTD Pipeline + React App
+./rtd-control.sh docker start
 
-# Or step by step:
-./scripts/docker-setup start        # Start Kafka 4.0.0
-./scripts/docker-setup status       # Check if running
-./scripts/kafka-topics --create-rtd-topics  # Create topics
+# Check status of all services
+./rtd-control.sh docker status
 
-# Other useful commands:
-./scripts/docker-setup stop         # Stop services
-./scripts/docker-setup clean        # Stop and remove all data
-./scripts/docker-setup logs         # View logs
-./scripts/docker-setup ui           # Open Kafka UI (http://localhost:8080)
-./scripts/docker-setup colima       # Manage Colima VM
+# View services:
+# - RTD API: http://localhost:8080
+# - Kafka UI: http://localhost:8090  
+# - React App: http://localhost:3000
+
+# Stop all services
+./rtd-control.sh docker stop
+
+# Restart services
+./rtd-control.sh docker restart
 ```
 
-Manual Docker Compose (if preferred):
+**Alternative - Local Mode (No Kafka):**
 ```bash
-docker-compose up -d                # Start services
-docker-compose down                 # Stop services
+# Start pipeline and React app locally (no Docker/Kafka)
+./rtd-control.sh start
+
+# Stop local services
+./rtd-control.sh stop
+
+# Check status
+./rtd-control.sh status
+```
+
+**Advanced Docker Management:**
+```bash
+# View logs
+./rtd-control.sh logs java          # Pipeline logs
+./rtd-control.sh logs react         # React app logs
+
+# Clean up logs and temp files
+./rtd-control.sh cleanup
+
+# Manual Docker Compose (if needed)
+docker-compose up -d                # Start Kafka containers
+docker-compose down                 # Stop containers
 docker-compose logs kafka           # View Kafka logs
 ```
 
 **Topic Creation:**
-The `./scripts/docker-setup setup` command automatically creates all RTD topics, or you can create them manually:
+The Docker mode automatically creates RTD topics when starting. You can also create them manually:
 
 ```bash
 # Create all RTD topics at once (recommended)
@@ -519,17 +561,18 @@ The project includes several convenient command-line tools:
 - **Kafka 4.0.0 Compatible**: Uses Java Admin/Consumer APIs instead of deprecated command-line tools
 - Includes RTD-specific shortcuts and helpful usage examples
 
-### Docker Environment Management
-- **`./scripts/docker-setup`**: Complete Docker environment management for Kafka 4.0.0
-- **KRaft Mode**: Modern Kafka without ZooKeeper dependency
-- **Kafka UI**: Web interface at http://localhost:8080 for visual management
-- **One-command setup**: `./scripts/docker-setup setup` starts everything
+### Unified Control Script
+- **`./rtd-control.sh`**: Complete environment management for both local and Docker modes
+- **Docker Mode**: Runs Kafka + Pipeline + React App with full integration
+- **Local Mode**: Simple pipeline + React App without Kafka
+- **Kafka UI**: Web interface at http://localhost:8090 for visual management (Docker mode)
+- **One-command setup**: `./rtd-control.sh docker start` launches everything
 
 ### Usage Examples
 ```bash
-# Complete environment setup
-./scripts/docker-setup setup           # Start Kafka + create topics
-./scripts/rtd-query health             # Verify connectivity
+# Complete environment setup (Docker mode)
+./rtd-control.sh docker start          # Start Kafka + Pipeline + React
+./scripts/rtd-query health              # Verify connectivity
 
 # Query structured data
 ./scripts/rtd-query routes 20
@@ -539,10 +582,10 @@ The project includes several convenient command-line tools:
 ./scripts/kafka-console-consumer --topic rtd.alerts --from-beginning
 ./scripts/kafka-topics --list
 
-# Docker management
-./scripts/docker-setup status          # Check services
-./scripts/docker-setup ui              # Open Kafka UI
-./scripts/docker-setup clean           # Clean shutdown
+# Service management
+./rtd-control.sh docker status          # Check all services
+./rtd-control.sh logs java              # View pipeline logs
+./rtd-control.sh docker stop            # Clean shutdown
 ```
 
 ## Monitoring

@@ -2,14 +2,17 @@
 
 # RTD Pipeline Control Script
 # Manages Java pipeline and React web app processes
+# Supports both local and Docker containerized execution
 
 set -e
 
 # Configuration
 JAVA_MAIN_CLASS="com.rtd.pipeline.RTDStaticDataPipeline"
+KAFKA_MAIN_CLASS="com.rtd.pipeline.RTDStaticDataPipeline"  # Use API-enabled pipeline for Docker mode too
 REACT_APP_DIR="rtd-maps-app"
 JAVA_LOG_FILE="rtd-pipeline.log"
 REACT_LOG_FILE="react-app.log"
+DOCKER_SETUP_SCRIPT="./scripts/docker-setup"
 
 # Colors for output
 RED='\033[0;31m'
@@ -219,6 +222,141 @@ status() {
     fi
 }
 
+# Docker-related functions
+
+# Check if Docker is running
+check_docker() {
+    if ! command -v docker &> /dev/null; then
+        print_error "Docker is not installed"
+        print_status "Install Docker or Colima: brew install docker colima"
+        return 1
+    fi
+    
+    if ! docker info &> /dev/null; then
+        print_error "Docker daemon is not running"
+        if command -v colima &> /dev/null; then
+            print_status "Start Colima: colima start"
+        else
+            print_status "Start Docker Desktop or install Colima"
+        fi
+        return 1
+    fi
+    
+    return 0
+}
+
+# Start Docker services (Kafka) and pipeline
+start_docker() {
+    print_status "Starting RTD Pipeline in Docker mode..."
+    
+    if ! check_docker; then
+        return 1
+    fi
+    
+    # Start Kafka using docker-compose
+    if [ -f "$DOCKER_SETUP_SCRIPT" ]; then
+        print_status "Starting Kafka services..."
+        $DOCKER_SETUP_SCRIPT start
+        
+        # Wait for Kafka to be ready
+        print_status "Waiting for Kafka to be ready..."
+        sleep 10
+        
+        # Create topics if needed
+        print_status "Creating RTD topics..."
+        if [ -f "./scripts/kafka-topics" ]; then
+            ./scripts/kafka-topics --create-rtd-topics || true
+        fi
+        
+        # Start the Kafka-enabled pipeline
+        print_status "Starting RTD Kafka Pipeline..."
+        nohup mvn exec:java -Dexec.mainClass="$KAFKA_MAIN_CLASS" -q > "$JAVA_LOG_FILE" 2>&1 &
+        local pipeline_pid=$!
+        
+        sleep 5
+        
+        if kill -0 $pipeline_pid 2>/dev/null; then
+            print_success "RTD Pipeline started (PID: $pipeline_pid)"
+            print_status "RTD API is available at http://localhost:8080"
+            print_status "Kafka is available at localhost:9092"
+            print_status "Kafka UI is available at http://localhost:8090"
+            print_status "Pipeline logs: tail -f $JAVA_LOG_FILE"
+        else
+            print_error "Failed to start Kafka pipeline"
+            print_status "Check logs: tail -f $JAVA_LOG_FILE"
+            return 1
+        fi
+    else
+        print_error "Docker setup script not found: $DOCKER_SETUP_SCRIPT"
+        return 1
+    fi
+}
+
+# Stop Docker services
+stop_docker() {
+    print_status "Stopping RTD Pipeline in Docker mode..."
+    
+    # Stop pipeline
+    local pids=$(get_pids "$KAFKA_MAIN_CLASS")
+    if [ -n "$pids" ]; then
+        for pid in $pids; do
+            print_status "Stopping Kafka pipeline (PID: $pid)"
+            kill -TERM $pid 2>/dev/null || true
+            sleep 2
+            if kill -0 $pid 2>/dev/null; then
+                kill -KILL $pid 2>/dev/null || true
+            fi
+        done
+    fi
+    
+    # Stop Kafka
+    if [ -f "$DOCKER_SETUP_SCRIPT" ]; then
+        print_status "Stopping Kafka services..."
+        $DOCKER_SETUP_SCRIPT stop
+    fi
+    
+    print_success "Docker services stopped"
+}
+
+# Status for Docker services
+status_docker() {
+    print_status "Docker Services Status"
+    echo
+    
+    # Check Docker
+    if check_docker; then
+        print_success "Docker: RUNNING"
+    else
+        print_warning "Docker: NOT RUNNING"
+        return
+    fi
+    
+    # Check Kafka
+    if docker ps | grep -q "rtd-kafka" > /dev/null 2>&1; then
+        print_success "Kafka: RUNNING (localhost:9092)"
+        print_status "  ↳ Kafka UI: http://localhost:8090"
+    else
+        print_warning "Kafka: STOPPED"
+    fi
+    
+    # Check pipeline
+    if check_process "$KAFKA_MAIN_CLASS"; then
+        local pids=$(get_pids "$KAFKA_MAIN_CLASS")
+        print_success "Kafka Pipeline: RUNNING (PIDs: $pids)"
+    else
+        print_warning "Kafka Pipeline: STOPPED"
+    fi
+    
+    # Show Kafka topics if available
+    if docker ps | grep -q "rtd-kafka" > /dev/null 2>&1; then
+        echo
+        print_status "Kafka Topics:"
+        if [ -f "./scripts/kafka-topics" ]; then
+            ./scripts/kafka-topics --list 2>/dev/null | head -10 || true
+        fi
+    fi
+}
+
 # Function to clean up logs and temp files
 cleanup() {
     print_status "Cleaning up RTD Pipeline files..."
@@ -343,6 +481,35 @@ main() {
                     ;;
             esac
             ;;
+        "docker")
+            case "${2:-}" in
+                "start")
+                    start_docker
+                    sleep 3
+                    start_react
+                    ;;
+                "stop")
+                    stop_docker
+                    stop_react
+                    ;;
+                "restart")
+                    stop_docker
+                    stop_react
+                    sleep 3
+                    start_docker
+                    sleep 3
+                    start_react
+                    ;;
+                "status")
+                    status_docker
+                    ;;
+                *)
+                    print_error "Usage: $0 docker [start|stop|restart|status]"
+                    print_status "Docker mode runs Kafka + Pipeline + React App"
+                    exit 1
+                    ;;
+            esac
+            ;;
         "restart")
             restart "${2:-all}"
             ;;
@@ -361,15 +528,22 @@ main() {
             echo "Usage: $0 COMMAND [OPTIONS]"
             echo
             echo "Commands:"
-            echo "  start [java|react|all]    Start services (default: all)"
+            echo "  start [java|react|all]    Start services locally (default: all)"
             echo "  stop [java|react|all]     Stop services (default: all)"
             echo "  restart [java|react|all]  Restart services (default: all)"
+            echo "  docker [start|stop|status] Run with Docker/Kafka (recommended)"
             echo "  status                    Show status of all services"
             echo "  logs [java|react]         Show real-time logs"
             echo "  cleanup                   Clean up log files and temp directories"
             echo "  help                      Show this help message"
             echo
-            echo "Examples:"
+            echo "Docker Mode:"
+            echo "  $0 docker start           # Start Kafka + Pipeline + React"
+            echo "  $0 docker stop            # Stop all Docker services"
+            echo "  $0 docker status          # Show Docker services status"
+            echo "  $0 docker restart         # Restart Docker services"
+            echo
+            echo "Local Mode Examples:"
             echo "  $0 start                  # Start both Java pipeline and React app"
             echo "  $0 start java             # Start only Java pipeline"
             echo "  $0 stop react             # Stop only React app"
@@ -377,6 +551,13 @@ main() {
             echo "  $0 status                 # Check status"
             echo "  $0 logs java              # Follow Java logs"
             echo "  $0 cleanup                # Clean up files"
+            echo
+            echo "Docker Mode (Recommended for full features):"
+            echo "  - RTD API at http://localhost:8080"
+            echo "  - Kafka at localhost:9092"
+            echo "  - Kafka UI at http://localhost:8090"
+            echo "  - RTD Pipeline provides real-time data"
+            echo "  - React app displays live vehicle positions"
             ;;
         *)
             print_error "Unknown command: ${1:-}"
