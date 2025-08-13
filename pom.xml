@@ -262,6 +262,93 @@
                                         <exclude>META-INF/maven/**</exclude>
                                     </excludes>
                                 </filter>
+                                <!-- Exclude commons-compiler classes from flink-table-runtime -->
+                                <filter>
+                                    <artifact>org.apache.flink:flink-table-runtime</artifact>
+                                    <excludes>
+                                        <exclude>org/codehaus/commons/compiler/**</exclude>
+                                        <exclude>org/codehaus/janino/**</exclude>
+                                        <exclude>org/codehaus/commons/nullanalysis/**</exclude>
+                                        <exclude>org.codehaus.commons.compiler.properties</exclude>
+                                    </excludes>
+                                </filter>
+                                <!-- Exclude duplicate value classes -->
+                                <filter>
+                                    <artifact>org.immutables:value</artifact>
+                                    <excludes>
+                                        <exclude>org/immutables/value/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <!-- Keep only newer Jackson version -->
+                                <filter>
+                                    <artifact>org.apache.flink:flink-shaded-jackson</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/versions/**</exclude>
+                                        <exclude>META-INF/FastDoubleParser-*</exclude>
+                                    </excludes>
+                                </filter>
+                                <!-- Exclude overlapping Kafka version properties -->
+                                <filter>
+                                    <artifact>org.apache.kafka:kafka-*</artifact>
+                                    <excludes>
+                                        <exclude>kafka/kafka-version.properties</exclude>
+                                    </excludes>
+                                </filter>
+                                <!-- Keep only one Kafka version properties file -->
+                                <filter>
+                                    <artifact>org.apache.kafka:kafka-clients</artifact>
+                                    <includes>
+                                        <include>**</include>
+                                    </includes>
+                                </filter>
+                                <!-- Exclude duplicate Netty resources and ProGuard configs -->
+                                <filter>
+                                    <artifact>org.apache.flink:flink-shaded-zookeeper-3</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/io.netty.versions.properties</exclude>
+                                        <exclude>META-INF/native-image/**</exclude>
+                                        <exclude>META-INF/proguard/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <!-- Exclude duplicate commons-math3 resources and ProGuard configs -->
+                                <filter>
+                                    <artifact>org.apache.flink:flink-table-planner_2.12</artifact>
+                                    <excludes>
+                                        <exclude>assets/org/apache/commons/**</exclude>
+                                        <exclude>META-INF/proguard/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <!-- Handle Scala overlapping resources -->
+                                <filter>
+                                    <artifact>org.scala-lang:scala-compiler</artifact>
+                                    <excludes>
+                                        <exclude>rootdoc.txt</exclude>
+                                        <exclude>LICENSE</exclude>
+                                        <exclude>NOTICE</exclude>
+                                    </excludes>
+                                </filter>
+                                <!-- Exclude LICENSE and NOTICE from all Kafka modules except kafka-clients -->
+                                <filter>
+                                    <artifact>org.apache.kafka:kafka-coordinator-common</artifact>
+                                    <excludes>
+                                        <exclude>LICENSE</exclude>
+                                        <exclude>NOTICE</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.kafka:kafka-group-coordinator</artifact>
+                                    <excludes>
+                                        <exclude>LICENSE</exclude>
+                                        <exclude>NOTICE</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.kafka:kafka_2.13</artifact>
+                                    <excludes>
+                                        <exclude>LICENSE</exclude>
+                                        <exclude>NOTICE</exclude>
+                                    </excludes>
+                                </filter>
                             </filters>
                             <transformers>
                                 <!-- Merge service files -->
