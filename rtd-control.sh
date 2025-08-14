@@ -222,34 +222,73 @@ status() {
     fi
 }
 
-# Docker-related functions
+# Container runtime functions (Docker/Podman)
 
-# Check if Docker is running
-check_docker() {
-    if ! command -v docker &> /dev/null; then
-        print_error "Docker is not installed"
-        print_status "Install Docker or Colima: brew install docker colima"
-        return 1
+# Detect available container runtime
+detect_container_runtime() {
+    # Check if user specified runtime
+    if [ -n "$CONTAINER_RUNTIME" ]; then
+        echo "$CONTAINER_RUNTIME"
+        return
     fi
     
-    if ! docker info &> /dev/null; then
-        print_error "Docker daemon is not running"
-        if command -v colima &> /dev/null; then
-            print_status "Start Colima: colima start"
-        else
-            print_status "Start Docker Desktop or install Colima"
-        fi
-        return 1
+    # Auto-detect runtime
+    if command -v podman &> /dev/null && podman info &> /dev/null; then
+        echo "podman"
+    elif command -v docker &> /dev/null && docker info &> /dev/null; then
+        echo "docker"
+    else
+        echo "none"
     fi
-    
-    return 0
 }
 
-# Start Docker services (Kafka) and pipeline
-start_docker() {
-    print_status "Starting RTD Pipeline in Docker mode..."
+# Check if container runtime is available
+check_container_runtime() {
+    local runtime=$(detect_container_runtime)
     
-    if ! check_docker; then
+    case "$runtime" in
+        "podman")
+            if ! podman info &> /dev/null; then
+                print_error "Podman is not running properly"
+                print_status "Check Podman: podman info"
+                return 1
+            fi
+            print_status "Using Podman as container runtime"
+            return 0
+            ;;
+        "docker")
+            if ! docker info &> /dev/null; then
+                print_error "Docker daemon is not running"
+                if command -v colima &> /dev/null; then
+                    print_status "Start Colima: colima start"
+                else
+                    print_status "Start Docker Desktop or install Colima"
+                fi
+                return 1
+            fi
+            print_status "Using Docker as container runtime"
+            return 0
+            ;;
+        *)
+            print_error "No container runtime found"
+            print_status "Install Docker: brew install docker colima"
+            print_status "Or install Podman: brew install podman"
+            return 1
+            ;;
+    esac
+}
+
+# Legacy function for compatibility
+check_docker() {
+    check_container_runtime
+}
+
+# Start container services (Kafka) and pipeline
+start_docker() {
+    local runtime=$(detect_container_runtime)
+    print_status "Starting RTD Pipeline in container mode (${runtime})..."
+    
+    if ! check_container_runtime; then
         return 1
     fi
     
@@ -318,21 +357,23 @@ stop_docker() {
     print_success "Docker services stopped"
 }
 
-# Status for Docker services
+# Status for container services
 status_docker() {
-    print_status "Docker Services Status"
+    local runtime=$(detect_container_runtime)
+    print_status "Container Services Status (${runtime})"
     echo
     
-    # Check Docker
-    if check_docker; then
-        print_success "Docker: RUNNING"
+    # Check container runtime
+    if check_container_runtime; then
+        print_success "${runtime^}: RUNNING"
     else
-        print_warning "Docker: NOT RUNNING"
+        print_warning "${runtime^}: NOT RUNNING"
         return
     fi
     
-    # Check Kafka
-    if docker ps | grep -q "rtd-kafka" > /dev/null 2>&1; then
+    # Check Kafka (works with both docker and podman)
+    local container_cmd="${runtime}"
+    if ${container_cmd} ps | grep -q "rtd-kafka" > /dev/null 2>&1; then
         print_success "Kafka: RUNNING (localhost:9092)"
         print_status "  ↳ Kafka UI: http://localhost:8090"
     else
@@ -348,7 +389,7 @@ status_docker() {
     fi
     
     # Show Kafka topics if available
-    if docker ps | grep -q "rtd-kafka" > /dev/null 2>&1; then
+    if ${container_cmd} ps | grep -q "rtd-kafka" > /dev/null 2>&1; then
         echo
         print_status "Kafka Topics:"
         if [ -f "./scripts/kafka-topics" ]; then
@@ -481,7 +522,11 @@ main() {
                     ;;
             esac
             ;;
-        "docker")
+        "docker"|"podman")
+            # Set runtime based on command
+            if [ "$1" = "podman" ]; then
+                export CONTAINER_RUNTIME="podman"
+            fi
             case "${2:-}" in
                 "start")
                     start_docker
@@ -504,8 +549,8 @@ main() {
                     status_docker
                     ;;
                 *)
-                    print_error "Usage: $0 docker [start|stop|restart|status]"
-                    print_status "Docker mode runs Kafka + Pipeline + React App"
+                    print_error "Usage: $0 ${1} [start|stop|restart|status]"
+                    print_status "${1^} mode runs Kafka + Pipeline + React App"
                     exit 1
                     ;;
             esac
@@ -578,17 +623,19 @@ main() {
             echo "  stop [java|react|all]     Stop services (default: all)"
             echo "  restart [java|react|all]  Restart services (default: all)"
             echo "  docker [start|stop|status] Run with Docker/Kafka (recommended)"
+            echo "  podman [start|stop|status] Run with Podman/Kafka (Docker alternative)"
             echo "  status                    Show status of all services"
             echo "  logs [java|react]         Show real-time logs"
             echo "  rail-comm [run|test|monitor] Rail communication pipeline commands"
             echo "  cleanup                   Clean up log files and temp directories"
             echo "  help                      Show this help message"
             echo
-            echo "Docker Mode:"
-            echo "  $0 docker start           # Start Kafka + Pipeline + React"
-            echo "  $0 docker stop            # Stop all Docker services"
-            echo "  $0 docker status          # Show Docker services status"
-            echo "  $0 docker restart         # Restart Docker services"
+            echo "Container Mode (Docker/Podman):"
+            echo "  $0 docker start           # Start with Docker (auto-detected)"
+            echo "  $0 podman start           # Start with Podman (force Podman)"
+            echo "  $0 docker stop            # Stop all container services"
+            echo "  $0 docker status          # Show container services status"
+            echo "  $0 docker restart         # Restart container services"
             echo
             echo "Local Mode Examples:"
             echo "  $0 start                  # Start both Java pipeline and React app"
@@ -607,11 +654,13 @@ main() {
             echo "  $0 rail-comm subscribe    # Subscribe to proxy feed"
             echo "  $0 rail-comm unsubscribe  # Unsubscribe from proxy feed"
             echo
-            echo "Docker Mode (Recommended for full features):"
+            echo "Container Mode Features (Docker/Podman):"
             echo "  - RTD API at http://localhost:8080"
             echo "  - Kafka at localhost:9092"
             echo "  - Kafka UI at http://localhost:8090"
             echo "  - RTD Pipeline provides real-time data"
+            echo "  - Auto-detects Docker or Podman runtime"
+            echo "  - Use CONTAINER_RUNTIME=podman to force Podman"
             echo "  - React app displays live vehicle positions"
             ;;
         *)

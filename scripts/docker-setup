@@ -1,11 +1,42 @@
 #!/bin/bash
 
-# Docker Setup Script for RTD GTFS-RT Pipeline
+# Container Setup Script for RTD GTFS-RT Pipeline
 # Manages Kafka 4.0.0 with KRaft (no ZooKeeper)
+# Supports both Docker and Podman
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Detect container runtime
+detect_container_runtime() {
+    if [ -n "$CONTAINER_RUNTIME" ]; then
+        echo "$CONTAINER_RUNTIME"
+    elif command -v podman &> /dev/null && podman info &> /dev/null; then
+        echo "podman"
+    elif command -v docker &> /dev/null && docker info &> /dev/null; then
+        echo "docker"
+    else
+        echo "none"
+    fi
+}
+
+# Set container runtime and compose command
+RUNTIME=$(detect_container_runtime)
+if [ "$RUNTIME" = "podman" ]; then
+    DOCKER_CMD="podman"
+    COMPOSE_CMD="podman-compose"
+    # Check if podman-compose is installed
+    if ! command -v podman-compose &> /dev/null; then
+        COMPOSE_CMD="podman compose"  # Try podman compose subcommand
+    fi
+elif [ "$RUNTIME" = "docker" ]; then
+    DOCKER_CMD="docker"
+    COMPOSE_CMD="docker-compose"
+else
+    echo "Error: No container runtime found (Docker or Podman)"
+    exit 1
+fi
 
 # Colors for output
 RED='\033[0;31m'
@@ -28,7 +59,8 @@ print_error() {
 
 print_header() {
     echo -e "${BLUE}================================${NC}"
-    echo -e "${BLUE}RTD GTFS-RT Docker Environment${NC}"
+    echo -e "${BLUE}RTD GTFS-RT Container Environment${NC}"
+    echo -e "${BLUE}Container Runtime: ${RUNTIME^}${NC}"
     echo -e "${BLUE}================================${NC}"
 }
 
@@ -59,39 +91,53 @@ show_usage() {
     echo "  ./docker-setup status    # Check if running"
 }
 
-check_docker() {
-    if ! command -v docker &> /dev/null; then
-        print_error "Docker is not installed or not in PATH"
-        print_error "Please install Docker or Colima:"
-        print_error "  macOS: brew install docker colima"
-        print_error "  Linux: Follow Docker installation guide"
+check_container_runtime() {
+    print_status "Using container runtime: ${RUNTIME}"
+    
+    if [ "$RUNTIME" = "none" ]; then
+        print_error "No container runtime found"
+        print_error "Please install Docker or Podman:"
+        print_error "  Docker: brew install docker colima"
+        print_error "  Podman: brew install podman"
         exit 1
     fi
 
-    if ! docker info &> /dev/null; then
-        print_error "Docker daemon is not running"
+    if ! $DOCKER_CMD info &> /dev/null; then
+        print_error "${RUNTIME} daemon is not running"
         
-        # Check if Colima is available
-        if command -v colima &> /dev/null; then
-            print_error "Please start Colima: colima start"
-            print_status "Colima commands:"
-            print_status "  colima start              # Start VM"
-            print_status "  colima start --cpu 4      # Start with 4 CPUs"
-            print_status "  colima start --memory 8   # Start with 8GB RAM"
-            print_status "  colima status              # Check status"
-        else
-            print_error "Please start Docker daemon or install Colima"
-            print_error "  macOS: brew install colima && colima start"
+        if [ "$RUNTIME" = "docker" ]; then
+            # Check if Colima is available
+            if command -v colima &> /dev/null; then
+                print_error "Please start Colima: colima start"
+                print_status "Colima commands:"
+                print_status "  colima start              # Start VM"
+                print_status "  colima start --cpu 4      # Start with 4 CPUs"
+                print_status "  colima start --memory 8   # Start with 8GB RAM"
+                print_status "  colima status              # Check status"
+            else
+                print_error "Please start Docker daemon or install Colima"
+                print_error "  macOS: brew install colima && colima start"
+            fi
+        elif [ "$RUNTIME" = "podman" ]; then
+            print_error "Please start Podman machine:"
+            print_status "  podman machine init       # Initialize VM"
+            print_status "  podman machine start      # Start VM"
+            print_status "  podman machine list       # Check status"
         fi
         exit 1
     fi
 }
 
+# Legacy function for compatibility
+check_docker() {
+    check_container_runtime
+}
+
 start_services() {
-    print_status "Starting RTD Kafka environment..."
+    print_status "Starting RTD Kafka environment with ${RUNTIME}..."
     cd "$PROJECT_DIR"
     
-    docker-compose up -d
+    $COMPOSE_CMD up -d
     
     if [ $? -eq 0 ]; then
         print_status "Services started successfully!"
@@ -101,7 +147,7 @@ start_services() {
         timeout=120
         counter=0
         while [ $counter -lt $timeout ]; do
-            if docker-compose ps | grep -q "healthy"; then
+            if $COMPOSE_CMD ps | grep -q "healthy\|running"; then
                 print_status "Kafka is ready!"
                 break
             fi
@@ -126,7 +172,7 @@ stop_services() {
     print_status "Stopping RTD Kafka environment..."
     cd "$PROJECT_DIR"
     
-    docker-compose down
+    $COMPOSE_CMD down
     print_status "Services stopped"
 }
 
@@ -134,8 +180,8 @@ restart_services() {
     print_status "Restarting RTD Kafka environment..."
     cd "$PROJECT_DIR"
     
-    docker-compose down
-    docker-compose up -d
+    $COMPOSE_CMD down
+    $COMPOSE_CMD up -d
     print_status "Services restarted"
 }
 
@@ -145,11 +191,11 @@ show_status() {
     cd "$PROJECT_DIR"
     
     print_status "Docker Compose Services:"
-    docker-compose ps
+    $COMPOSE_CMD ps
     echo
     
     print_status "Service Health:"
-    docker-compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
+    $COMPOSE_CMD ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
     echo
 }
 
@@ -158,10 +204,10 @@ show_logs() {
     
     if [ $# -eq 0 ]; then
         print_status "Showing logs for all services..."
-        docker-compose logs -f
+        $COMPOSE_CMD logs -f
     else
         print_status "Showing logs for service: $1"
-        docker-compose logs -f "$1"
+        $COMPOSE_CMD logs -f "$1"
     fi
 }
 
@@ -201,7 +247,7 @@ clean_environment() {
     print_status "Cleaning RTD Kafka environment..."
     cd "$PROJECT_DIR"
     
-    docker-compose down -v --remove-orphans
+    $COMPOSE_CMD down -v --remove-orphans
     docker volume prune -f
     print_status "Environment cleaned (all data removed)"
 }
