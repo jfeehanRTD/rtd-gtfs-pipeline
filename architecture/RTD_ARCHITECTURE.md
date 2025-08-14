@@ -34,7 +34,7 @@ graph TB
         end
     end
     
-    subgraph "Apache Flink 1.19.1"
+    subgraph "Apache Flink 2.1.0"
         VPR[Vehicle Processor]
         TPR[Trip Processor]
         APR[Alert Processor]
@@ -457,7 +457,7 @@ The Mermaid diagrams in this markdown file can be viewed:
 - Strong ecosystem support
 
 ### ADR-002: Flink for Stream Processing
-**Decision**: Use Apache Flink 1.19.1 for stream processing
+**Decision**: Use Apache Flink 2.1.0 for stream processing
 **Rationale**:
 - True stream processing (not micro-batching)
 - Exactly-once semantics
