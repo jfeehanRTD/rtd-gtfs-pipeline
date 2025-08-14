@@ -585,6 +585,14 @@ main() {
                         print_warning "Rail comm HTTP receiver is already running"
                     fi
                     ;;
+                "bridge")
+                    print_status "Starting RTD Direct Kafka Bridge..."
+                    if ! check_process "DirectKafkaBridge"; then
+                        mvn exec:java -Dexec.mainClass="com.rtd.pipeline.DirectKafkaBridge"
+                    else
+                        print_warning "Direct Kafka Bridge is already running"
+                    fi
+                    ;;
                 "test")
                     print_status "Testing RTD Rail Communication Pipeline..."
                     ./scripts/test-rail-comm.sh send
@@ -594,21 +602,53 @@ main() {
                     ./scripts/test-rail-comm.sh monitor
                     ;;
                 "subscribe")
-                    print_status "Subscribing to rail comm proxy feed..."
+                    print_status "Subscribing to rail comm proxy feed (original)..."
                     ./scripts/proxy-subscribe.sh send
+                    ;;
+                "subscribe-bridge")
+                    print_status "Subscribing to rail comm proxy feed (Direct Kafka Bridge)..."
+                    ./scripts/proxy-subscribe-bridge.sh bridge
+                    ;;
+                "subscribe-kafka")
+                    print_status "Subscribing to rail comm proxy feed (Direct Kafka endpoint)..."
+                    ./scripts/proxy-subscribe-bridge.sh kafka
+                    ;;
+                "test-endpoints")
+                    print_status "Testing all rail comm endpoints..."
+                    ./scripts/proxy-subscribe-bridge.sh test
+                    ;;
+                "benchmark")
+                    print_status "Benchmarking rail comm endpoints..."
+                    ./scripts/proxy-subscribe-bridge.sh benchmark
                     ;;
                 "unsubscribe")
                     print_status "Unsubscribing from rail comm proxy feed..."
                     ./scripts/proxy-subscribe.sh unsubscribe
                     ;;
+                "unsubscribe-all")
+                    print_status "Unsubscribing from all rail comm endpoints..."
+                    ./scripts/proxy-subscribe-bridge.sh unsubscribe
+                    ;;
                 *)
-                    print_error "Usage: $0 rail-comm [run|receiver|test|monitor|subscribe|unsubscribe]"
-                    print_status "  run         - Start the rail comm pipeline"
-                    print_status "  receiver    - Start HTTP receiver for proxy data"
-                    print_status "  test        - Send test JSON payloads"
-                    print_status "  monitor     - Monitor rail comm topic"
-                    print_status "  subscribe   - Subscribe to proxy rail comm feed"
-                    print_status "  unsubscribe - Unsubscribe from proxy rail comm feed"
+                    print_error "Usage: $0 rail-comm [COMMAND]"
+                    echo
+                    print_status "Core Services:"
+                    print_status "  run              - Start the rail comm pipeline"
+                    print_status "  receiver         - Start HTTP receiver for proxy data (original)"
+                    print_status "  bridge           - Start Direct Kafka Bridge (optimized)"
+                    echo
+                    print_status "Testing & Monitoring:"
+                    print_status "  test             - Send test JSON payloads"
+                    print_status "  monitor          - Monitor rail comm topic"
+                    print_status "  test-endpoints   - Test connectivity to all endpoints"
+                    print_status "  benchmark        - Benchmark performance of all endpoints"
+                    echo
+                    print_status "Proxy Subscription:"
+                    print_status "  subscribe        - Subscribe using original HTTP receiver"
+                    print_status "  subscribe-bridge - Subscribe using Direct Kafka Bridge"
+                    print_status "  subscribe-kafka  - Subscribe using direct Kafka endpoint"
+                    print_status "  unsubscribe      - Unsubscribe from original endpoint"
+                    print_status "  unsubscribe-all  - Unsubscribe from all endpoints"
                     exit 1
                     ;;
             esac
