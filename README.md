@@ -388,7 +388,7 @@ The pipeline stores all data files in a time-partitioned directory structure und
 
 **Full Absolute Path:**
 ```
-/Users/jamesfeehan/gen/rtd/rtd-gtfs-pipeline-refArch1/data/
+<project-root>/data/
 ```
 
 ### Vehicle Data Files
