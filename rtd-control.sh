@@ -365,9 +365,9 @@ status_docker() {
     
     # Check container runtime
     if check_container_runtime; then
-        print_success "${runtime^}: RUNNING"
+        print_success "$(echo ${runtime} | tr '[:lower:]' '[:upper:]'): RUNNING"
     else
-        print_warning "${runtime^}: NOT RUNNING"
+        print_warning "$(echo ${runtime} | tr '[:lower:]' '[:upper:]'): NOT RUNNING"
         return
     fi
     
@@ -653,6 +653,66 @@ main() {
                     ;;
             esac
             ;;
+        "bus-comm")
+            case "${2:-run}" in
+                "run")
+                    print_status "Starting RTD Bus Communication Pipeline (SIRI Simple Table API)..."
+                    if ! check_process "RTDBusCommSimplePipeline"; then
+                        mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDBusCommSimplePipeline"
+                    else
+                        print_warning "Bus comm pipeline is already running"
+                    fi
+                    ;;
+                "receiver")
+                    print_status "Starting RTD Bus SIRI HTTP Receiver..."
+                    if ! check_process "BusCommHTTPReceiver"; then
+                        mvn exec:java -Dexec.mainClass="com.rtd.pipeline.BusCommHTTPReceiver"
+                    else
+                        print_warning "Bus SIRI HTTP receiver is already running"
+                    fi
+                    ;;
+                "subscribe")
+                    print_status "Subscribing to SIRI bus feed..."
+                    if [ -f "./scripts/bus-siri-subscribe.sh" ]; then
+                        ./scripts/bus-siri-subscribe.sh "$3" "$4" "$5"
+                    else
+                        print_error "Bus SIRI subscription script not found"
+                    fi
+                    ;;
+                "test")
+                    print_status "Testing Bus SIRI Communication..."
+                    if [ -f "./scripts/bus-siri-subscribe.sh" ]; then
+                        ./scripts/bus-siri-subscribe.sh
+                    else
+                        print_error "Bus SIRI test script not found"
+                    fi
+                    ;;
+                "monitor")
+                    print_status "Monitoring bus SIRI topic..."
+                    ./scripts/kafka-console-consumer.sh --topic rtd.bus.siri
+                    ;;
+                "status")
+                    print_status "Checking Bus SIRI status..."
+                    curl -s "http://localhost:8082/status" | jq . 2>/dev/null || curl -s "http://localhost:8082/status"
+                    ;;
+                *)
+                    print_error "Usage: $0 bus-comm [COMMAND]"
+                    echo
+                    print_status "Core Services:"
+                    print_status "  run              - Start the bus SIRI pipeline"
+                    print_status "  receiver         - Start HTTP receiver for SIRI data"
+                    echo
+                    print_status "SIRI Subscription:"
+                    print_status "  subscribe [host] [service] [ttl] - Subscribe to SIRI feed"
+                    print_status "  test             - Test SIRI subscription with defaults"
+                    echo
+                    print_status "Monitoring:"
+                    print_status "  monitor          - Monitor bus SIRI topic"
+                    print_status "  status           - Check receiver status"
+                    exit 1
+                    ;;
+            esac
+            ;;
         "help"|"-h"|"--help")
             echo "RTD Pipeline Control Script"
             echo
@@ -694,6 +754,14 @@ main() {
             echo "  $0 rail-comm subscribe    # Subscribe to proxy feed"
             echo "  $0 rail-comm unsubscribe  # Unsubscribe from proxy feed"
             echo
+            echo "Bus Communication Pipeline (SIRI):"
+            echo "  $0 bus-comm run           # Start bus SIRI pipeline"
+            echo "  $0 bus-comm receiver      # Start SIRI HTTP receiver"
+            echo "  $0 bus-comm subscribe     # Subscribe to SIRI bus feed"
+            echo "  $0 bus-comm test          # Test SIRI subscription"
+            echo "  $0 bus-comm monitor       # Monitor bus SIRI topic"
+            echo "  $0 bus-comm status        # Check receiver status"
+            echo
             echo "Container Mode Features (Docker/Podman):"
             echo "  - RTD API at http://localhost:8080"
             echo "  - Kafka at localhost:9092"
@@ -702,6 +770,12 @@ main() {
             echo "  - Auto-detects Docker or Podman runtime"
             echo "  - Use CONTAINER_RUNTIME=podman to force Podman"
             echo "  - React app displays live vehicle positions"
+            echo ""
+            echo "Colima Management (Docker on macOS):"
+            echo "  ./scripts/colima-control.sh start    # Start optimized Colima"
+            echo "  ./scripts/colima-control.sh stop     # Stop Colima"
+            echo "  ./scripts/colima-control.sh status   # Check status"
+            echo "  ./scripts/colima-control.sh cleanup  # Clean up resources"
             ;;
         *)
             print_error "Unknown command: ${1:-}"

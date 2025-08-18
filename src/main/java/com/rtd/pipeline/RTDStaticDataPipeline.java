@@ -296,37 +296,40 @@ public class RTDStaticDataPipeline {
                 System.out.printf("📄 Processing GTFS file: %s\n", fileName);
                 
                 StringBuilder content = new StringBuilder();
-                try (java.io.BufferedReader reader = new java.io.BufferedReader(
-                        new java.io.InputStreamReader(zipInputStream, java.nio.charset.StandardCharsets.UTF_8))) {
+                // Don't close the ZipInputStream - use a non-closing wrapper
+                java.io.BufferedReader reader = new java.io.BufferedReader(
+                        new java.io.InputStreamReader(zipInputStream, java.nio.charset.StandardCharsets.UTF_8));
+                
+                String line;
+                int lineCount = 0;
+                while ((line = reader.readLine()) != null && lineCount < 10000) {
+                    content.append(line).append("\n");
+                    lineCount++;
                     
-                    String line;
-                    int lineCount = 0;
-                    while ((line = reader.readLine()) != null && lineCount < 10000) {
-                        content.append(line).append("\n");
-                        lineCount++;
-                        
-                        // Extract metadata from specific files
-                        if (fileName.equals("feed_info.txt") && lineCount == 2) {
-                            String[] parts = line.split(",");
-                            if (parts.length >= 4) {
-                                feedVersion = parts[1].replace("\"", "").trim();
-                                feedStartDate = parts[2].replace("\"", "").trim();
-                                feedEndDate = parts[3].replace("\"", "").trim();
-                            }
-                        }
-                        
-                        if (fileName.equals("agency.txt") && lineCount == 2) {
-                            String[] parts = line.split(",");
-                            if (parts.length >= 2) {
-                                agencyName = parts[1].replace("\"", "").trim();
-                            }
+                    // Extract metadata from specific files
+                    if (fileName.equals("feed_info.txt") && lineCount == 2) {
+                        String[] parts = line.split(",");
+                        if (parts.length >= 4) {
+                            feedVersion = parts[1].replace("\"", "").trim();
+                            feedStartDate = parts[2].replace("\"", "").trim();
+                            feedEndDate = parts[3].replace("\"", "").trim();
                         }
                     }
                     
-                    if (lineCount >= 10000) {
-                        System.out.printf("⚠️ File %s was truncated at %d lines to prevent memory issues\n", fileName, lineCount);
+                    if (fileName.equals("agency.txt") && lineCount == 2) {
+                        String[] parts = line.split(",");
+                        if (parts.length >= 2) {
+                            agencyName = parts[1].replace("\"", "").trim();
+                        }
                     }
                 }
+                
+                if (lineCount >= 10000) {
+                    System.out.printf("⚠️ File %s was truncated at %d lines to prevent memory issues\n", fileName, lineCount);
+                }
+                
+                // Close the entry, not the stream
+                zipInputStream.closeEntry();
                 
                 GTFSScheduleData scheduleData = GTFSScheduleData.builder()
                         .fileType(fileName)
