@@ -5,6 +5,7 @@ import VehicleSelector from './VehicleSelector';
 import DataSourcePanel from './DataSourcePanel';
 import VehicleTracker from './VehicleTracker';
 import UpdateIntervalControl from './UpdateIntervalControl';
+import UserProfile from './UserProfile';
 import { useRTDData } from '../hooks/useRTDData';
 import { EnhancedVehicleData, MapFilters } from '../types/rtd';
 import { VehicleHistory } from '../services/dataQueryService';
@@ -18,7 +19,8 @@ import {
   Layers,
   Target,
   Navigation,
-  Settings2
+  Settings2,
+  User
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -31,6 +33,7 @@ const MapView = () => {
   const [showDataSources, setShowDataSources] = useState(false);
   const [showTracker, setShowTracker] = useState(false);
   const [showIntervalControl, setShowIntervalControl] = useState(false);
+  const [showUserProfile, setShowUserProfile] = useState(false);
   const [filters, setFilters] = useState<MapFilters>({
     showBuses: true,
     showTrains: true,
@@ -117,6 +120,31 @@ const MapView = () => {
     await setUpdateInterval(intervalSeconds);
   }, [setUpdateInterval]);
 
+  // Handle user profile route selection
+  const handleSelectRoute = useCallback((routeId: string, type: 'bus' | 'train') => {
+    // Filter vehicles to show only selected route
+    const newFilters = {
+      ...filters,
+      selectedRoutes: [routeId],
+      showBuses: type === 'bus' || filters.showBuses,
+      showTrains: type === 'train' || filters.showTrains
+    };
+    setFilters(newFilters);
+    applyFilters(newFilters);
+  }, [filters, applyFilters]);
+
+  // Handle filtering to show multiple saved routes
+  const handleFilterRoutes = useCallback((routeIds: string[]) => {
+    const newFilters = {
+      ...filters,
+      selectedRoutes: routeIds,
+      showBuses: true,
+      showTrains: true
+    };
+    setFilters(newFilters);
+    applyFilters(newFilters);
+  }, [filters, applyFilters]);
+
   return (
     <div className="h-screen relative bg-gray-100 font-sans">
       {/* Status Bar */}
@@ -198,6 +226,16 @@ const MapView = () => {
                 title="Update Interval"
               >
                 <Settings2 className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => setShowUserProfile(!showUserProfile)}
+                className={`p-2 rounded-md transition-colors ${
+                  showUserProfile ? 'bg-rtd-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+                title="My Transit Profile"
+              >
+                <User className="w-4 h-4" />
               </button>
             </div>
             
@@ -319,6 +357,15 @@ const MapView = () => {
           vehicle={selectedVehicle}
           onClose={() => setSelectedVehicle(null)}
         />
+
+        {/* User Profile Panel */}
+        {showUserProfile && (
+          <UserProfile
+            onClose={() => setShowUserProfile(false)}
+            onSelectRoute={handleSelectRoute}
+            onFilterRoutes={handleFilterRoutes}
+          />
+        )}
       </div>
 
       {/* Footer */}
