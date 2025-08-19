@@ -7,7 +7,7 @@
 set -e
 
 # Configuration
-JAVA_MAIN_CLASS="com.rtd.pipeline.RTDApiApplication"
+JAVA_MAIN_CLASS="com.rtd.pipeline.RTDStaticDataPipeline"
 KAFKA_MAIN_CLASS="com.rtd.pipeline.RTDApiApplication"  # Use Spring Boot API server
 REACT_APP_DIR="rtd-maps-app"
 JAVA_LOG_FILE="rtd-api-server.log"
