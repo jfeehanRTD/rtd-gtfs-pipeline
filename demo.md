@@ -251,7 +251,7 @@ cd ..
 
 # Run the pipeline (Windows)
 # Note: May need to adapt rtd-control.sh for Windows or use:
-mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDStaticDataPipeline"
+mvn "exec:java" "-Dexec.mainClass=com.rtd.pipeline.RTDStaticDataPipeline"
 ```
 
 #### Using WSL2:
@@ -379,7 +379,7 @@ New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name
 5. **Run tests**: `mvn test`
 6. **Start the pipeline and React app**:
    - macOS/Linux: `./rtd-control.sh start`
-   - Windows: `mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDApiApplication"` and in another terminal: `cd rtd-maps-app && npm start`
+   - Windows: `mvn "exec:java" "-Dexec.mainClass=com.rtd.pipeline.RTDApiApplication"` and in another terminal: `cd rtd-maps-app && npm start`
 
 ---
 
