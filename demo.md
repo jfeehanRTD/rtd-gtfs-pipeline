@@ -7,6 +7,7 @@ This guide provides step-by-step installation instructions for setting up the de
 - **Java 24 OpenJDK**
 - **Git**
 - **Maven 3.6+**
+- **Node.js and npm** (for React app)
 - **Docker Environment**
 
 ---
@@ -63,7 +64,17 @@ brew install maven
 mvn --version
 ```
 
-### 5. Install Docker Environment with Colima
+### 5. Install Node.js and npm
+```bash
+# Install via Homebrew
+brew install node
+
+# Verify installation
+node --version
+npm --version
+```
+
+### 6. Install Docker Environment with Colima
 
 #### Install Colima (Recommended for macOS)
 ```bash
@@ -81,7 +92,7 @@ colima start rtd-pipeline --cpu 4 --memory 8 --disk 50
 ```
 
 
-### 6. Clone and Run the Project
+### 7. Clone and Run the Project
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -90,7 +101,12 @@ cd rtd-gtfs-pipeline-refArch1
 # Build the project
 mvn clean compile
 
-# Run the pipeline
+# Install React app dependencies
+cd rtd-maps-app
+npm install
+cd ..
+
+# Run the pipeline and React app
 ./rtd-control.sh start
 ```
 
@@ -154,7 +170,24 @@ mvn --version
    - `MAVEN_HOME`: `C:\Program Files\Apache\maven`
    - Add `%MAVEN_HOME%\bin` to PATH
 
-### 4. Install Docker Environment
+### 4. Install Node.js and npm
+
+#### Option A: Using Scoop
+```powershell
+scoop install nodejs
+
+# Verify installation
+node --version
+npm --version
+```
+
+#### Option B: Direct Installation
+1. Download Node.js from [nodejs.org](https://nodejs.org/)
+2. Run the MSI installer
+3. Restart PowerShell/Command Prompt
+4. Verify: `node --version` and `npm --version`
+
+### 5. Install Docker Environment
 
 #### Option A: Podman (Recommended - No License Restrictions)
 ```powershell
@@ -200,7 +233,7 @@ docker --version
 #### Option C: Docker Desktop (Note: Commercial License Required)
 **Important:** Docker Desktop requires a paid subscription for commercial use in organizations with more than 250 employees or $10 million in revenue. Consider using Podman (Option A) to avoid licensing fees.
 
-### 5. Clone and Run the Project
+### 6. Clone and Run the Project
 
 #### Using Git Bash or PowerShell:
 ```bash
@@ -210,6 +243,11 @@ cd rtd-gtfs-pipeline-refArch1
 
 # Build the project
 mvn clean compile
+
+# Install React app dependencies
+cd rtd-maps-app
+npm install
+cd ..
 
 # Run the pipeline (Windows)
 # Note: May need to adapt rtd-control.sh for Windows or use:
@@ -222,6 +260,11 @@ mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDStaticDataPipeline"
 cd /mnt/c/Users/YourUsername/Documents
 git clone <repository-url>
 cd rtd-gtfs-pipeline-refArch1
+
+# Install React app dependencies
+cd rtd-maps-app
+npm install
+cd ..
 
 # Use Linux commands
 ./rtd-control.sh start
@@ -245,6 +288,10 @@ git --version
 # Check Maven
 mvn --version
 
+# Check Node.js and npm
+node --version
+npm --version
+
 # Check Docker
 docker --version
 docker-compose --version
@@ -262,6 +309,10 @@ git --version
 
 # Check Maven
 mvn --version
+
+# Check Node.js and npm
+node --version
+npm --version
 
 # Check Docker/Podman
 docker --version
@@ -324,10 +375,11 @@ New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name
 1. **Verify all tools are installed** using the verification commands above
 2. **Clone the repository**
 3. **Build the project**: `mvn clean compile`
-4. **Run tests**: `mvn test`
-5. **Start the pipeline**:
+4. **Install React dependencies**: `cd rtd-maps-app && npm install && cd ..`
+5. **Run tests**: `mvn test`
+6. **Start the pipeline and React app**:
    - macOS/Linux: `./rtd-control.sh start`
-   - Windows: `mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDStaticDataPipeline"`
+   - Windows: `mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDApiApplication"` and in another terminal: `cd rtd-maps-app && npm start`
 
 ---
 
