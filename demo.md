@@ -33,7 +33,7 @@ java --version
 ```
 
 #### Option B: Manual Installation
-1. Download OpenJDK 24 from [Adoptium](https://adoptium.net/) or [Oracle](https://jdk.java.net/24/)
+1. Download OpenJDK 24 from [Adoptium](https://adoptium.net/) or [OpenJDK](https://jdk.java.net/24/)
 2. Run the installer package
 3. Add to PATH in `~/.zshrc` or `~/.bash_profile`:
 ```bash
@@ -119,7 +119,7 @@ java --version
 ```
 
 #### Option B: Manual Installation
-1. Download OpenJDK 24 from [Adoptium](https://adoptium.net/) or [Oracle](https://jdk.java.net/24/)
+1. Download OpenJDK 24 from [Adoptium](https://adoptium.net/) or [OpenJDK](https://jdk.java.net/24/)
 2. Run the MSI installer
 3. Add to System Environment Variables:
    - `JAVA_HOME`: `C:\Program Files\Eclipse Adoptium\jdk-24`
