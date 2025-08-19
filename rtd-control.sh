@@ -713,6 +713,57 @@ main() {
                     ;;
             esac
             ;;
+        "gtfs-table")
+            case "${2:-interactive}" in
+                "interactive")
+                    print_status "Starting RTD GTFS Interactive Table System..."
+                    mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDGTFSInteractiveTable"
+                    ;;
+                "processor")
+                    print_status "Running RTD GTFS Table Processor..."
+                    mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDGTFSTableProcessor"
+                    ;;
+                "api")
+                    print_status "Running RTD GTFS Table API Analysis..."
+                    mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDGTFSTableAPI"
+                    ;;
+                "test")
+                    print_status "Running GTFS Table tests..."
+                    mvn test -Dtest="RTDGTFSTableTest"
+                    ;;
+                "validate")
+                    print_status "Running comprehensive GTFS validation..."
+                    mvn test -Dtest="GTFSValidationTest"
+                    ;;
+                "analyze")
+                    print_status "Running RTD runboard change analysis..."
+                    MAVEN_OPTS="-Xmx2G" mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDRunboardAnalyzer"
+                    ;;
+                "demo")
+                    print_status "Running RTD GTFS Table API Demo..."
+                    mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDGTFSTableDemo"
+                    ;;
+                *)
+                    print_error "Usage: $0 gtfs-table [COMMAND]"
+                    echo
+                    print_status "Available Commands:"
+                    print_status "  demo             - Run RTD GTFS Table API demonstration"
+                    print_status "  interactive      - Interactive SQL query system for RTD GTFS data"
+                    print_status "  processor        - Process and create tables from RTD GTFS static files"
+                    print_status "  api              - Run comprehensive GTFS Table API analysis"
+                    print_status "  test             - Run GTFS table processing tests"
+                    print_status "  validate         - Comprehensive GTFS file validation and integrity checks"
+                    print_status "  analyze          - RTD runboard change analysis (Aug 25, 2025 focus)"
+                    echo
+                    print_status "Features:"
+                    print_status "  - Downloads RTD GTFS static data (routes, stops, schedules)"
+                    print_status "  - Creates Flink tables with proper schemas"
+                    print_status "  - Provides SQL query interface for transit network analysis"
+                    print_status "  - Supports complex joins and aggregations"
+                    exit 1
+                    ;;
+            esac
+            ;;
         "help"|"-h"|"--help")
             echo "RTD Pipeline Control Script"
             echo
@@ -727,6 +778,8 @@ main() {
             echo "  status                    Show status of all services"
             echo "  logs [java|react]         Show real-time logs"
             echo "  rail-comm [run|test|monitor] Rail communication pipeline commands"
+            echo "  bus-comm [run|receiver|monitor] Bus communication pipeline (SIRI)"
+            echo "  gtfs-table [interactive|processor|api] GTFS static data table system"
             echo "  cleanup                   Clean up log files and temp directories"
             echo "  help                      Show this help message"
             echo
@@ -761,6 +814,12 @@ main() {
             echo "  $0 bus-comm test          # Test SIRI subscription"
             echo "  $0 bus-comm monitor       # Monitor bus SIRI topic"
             echo "  $0 bus-comm status        # Check receiver status"
+            echo ""
+            echo "GTFS Static Data Table System:"
+            echo "  $0 gtfs-table interactive # Interactive SQL query system"
+            echo "  $0 gtfs-table processor   # Process all RTD GTFS files into tables"
+            echo "  $0 gtfs-table api         # Run comprehensive transit network analysis"
+            echo "  $0 gtfs-table test        # Run GTFS table processing tests"
             echo
             echo "Container Mode Features (Docker/Podman):"
             echo "  - RTD API at http://localhost:8080"

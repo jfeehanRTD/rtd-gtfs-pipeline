@@ -124,20 +124,198 @@ When clicking a vehicle, shows:
 - Real-time vs cached data indicator
 - Trip and vehicle IDs for debugging
 
+## 🔧 Admin Dashboard
+
+The RTD Live Transit Map includes a comprehensive admin dashboard for managing data feeds, monitoring system health, and controlling subscriptions to RTD communication services.
+
+### Access the Admin Dashboard
+
+Navigate to `/admin` in the application to access the administrative interface with the following sections:
+
+### 📊 Statistics Overview
+
+Real-time metrics dashboard showing:
+- **Active Subscriptions**: Count of currently active data feed subscriptions
+- **Live Feeds**: Number of feeds actively receiving data
+- **Total Messages**: Aggregate message count across all subscriptions  
+- **Error Count**: Total system errors requiring attention
+
+### 🔔 Subscription Management
+
+Complete subscription lifecycle management with:
+
+#### Quick Subscribe Actions
+```bash
+# Rail Communication Options
+./rtd-control.sh rail-comm subscribe           # Original endpoint
+./rtd-control.sh rail-comm subscribe-bridge    # Direct Kafka Bridge (recommended)
+./rtd-control.sh rail-comm subscribe-kafka     # Direct Kafka endpoint
+
+# Bus SIRI Options  
+./scripts/bus-siri-subscribe.sh                # Default subscription
+./scripts/bus-siri-subscribe.sh [host] [service] [ttl]  # Custom parameters
+```
+
+#### Individual Subscription Controls
+- **🔗 Subscribe Button**: Blue link icon for inactive rail-comm and bus-siri feeds
+- **🔓 Unsubscribe Button**: Orange unlink icon for active subscriptions
+- **⏸️ Pause/Resume**: Yellow pause or green play buttons for temporary control
+- **🗑️ Delete**: Red trash icon for permanent removal
+
+#### Bulk Operations
+- **Subscribe All Feeds**: Sequential subscription to both rail and bus feeds
+- **Unsubscribe All Rail Comm**: Batch unsubscribe from all rail communication endpoints
+- **Unsubscribe All Bus SIRI**: Batch unsubscribe from all bus SIRI services
+- **Unsubscribe All Feeds**: Complete disconnection from all specialized feeds
+
+### 📡 Live Feed Monitoring
+
+Real-time monitoring of all data sources:
+
+#### Health Status Indicators
+- **🟢 Healthy**: Feed active with recent data
+- **🟡 Warning**: Feed active but experiencing issues
+- **🔴 Error**: Feed offline or encountering failures
+
+#### Feed Types Monitored
+1. **Kafka Vehicle Feed** - Real-time vehicle position data
+2. **Direct RTD API** - Trip updates and schedule adherence  
+3. **RTD Alerts Feed** - Service disruptions and announcements
+4. **Rail Communication Bridge** - Train-to-infrastructure communication
+5. **Bus SIRI Receiver** - SIRI standard bus monitoring data
+
+#### Sample Data Viewer
+- **Expandable Data Sections**: Click to view raw message content
+- **JSON Formatting**: Syntax-highlighted message payloads
+- **Copy to Clipboard**: One-click copy of message data for debugging
+- **Message Metadata**: Timestamps, size, and source information
+
+### 🚂 Rail Communication Bridge
+
+Detailed message history and subscription management for RTD's rail communication system:
+
+#### Message History (Last 20 Messages)
+- **Message Types**: Position updates, status reports, alerts, and heartbeat messages
+- **Train Information**: Train IDs, routes (A-Line, B-Line, etc.), speed, passenger counts
+- **Location Data**: GPS coordinates, station information, direction
+- **System Status**: Equipment health, communication strength, maintenance data
+
+#### Message Type Breakdown
+- **🔵 Position**: Real-time train location and movement data
+- **🟢 Status**: Operational status, delays, door status, boarding information  
+- **🔴 Alert**: Service disruptions, delays, equipment issues
+- **⚪ Heartbeat**: System health checks and communication verification
+
+#### Subscription Commands
+```bash
+# Subscribe to rail communication feeds
+./rtd-control.sh rail-comm subscribe           # Original HTTP receiver
+./rtd-control.sh rail-comm subscribe-bridge    # Direct Kafka Bridge (optimized)  
+./rtd-control.sh rail-comm subscribe-kafka     # Direct Kafka endpoint
+
+# Unsubscribe from feeds
+./rtd-control.sh rail-comm unsubscribe         # Original endpoint
+./rtd-control.sh rail-comm unsubscribe-all     # All rail communication endpoints
+
+# Monitor and test
+./rtd-control.sh rail-comm test                # Send test JSON payloads
+./rtd-control.sh rail-comm monitor             # Monitor rail comm topic
+```
+
+### 🚌 Bus SIRI Feed Control
+
+SIRI (Service Interface for Real Time Information) standard bus communication:
+
+#### SIRI Service Types
+- **StopMonitoring**: Real-time arrival predictions at bus stops
+- **VehicleMonitoring**: Live bus positions and operational status
+- **Default Subscription**: Automated subscription with optimal settings
+
+#### Subscription Options
+```bash
+# Subscribe to SIRI services
+./scripts/bus-siri-subscribe.sh                # Default: localhost StopMonitoring 3600
+./scripts/bus-siri-subscribe.sh [host] [service] [ttl]  # Custom parameters
+
+# Service-specific subscriptions
+./scripts/bus-siri-subscribe.sh localhost StopMonitoring 7200
+./scripts/bus-siri-subscribe.sh localhost VehicleMonitoring 3600
+
+# Unsubscribe and status
+./scripts/bus-siri-subscribe.sh unsubscribe    # Unsubscribe from SIRI feed
+./rtd-control.sh bus-comm status               # Check receiver status
+```
+
+### ❌ Error Messages & System Health
+
+Comprehensive error tracking and resolution:
+
+#### Error Classification System
+- **🔴 Connection**: Network connectivity issues (15 total errors)
+- **🟠 Parsing**: Data format and structure problems (8 total errors)
+- **🟡 Validation**: Data integrity and validation failures (23 total errors)  
+- **🟣 Timeout**: Request/response timing issues (22 total errors)
+- **🩷 Authentication**: Security and API key problems (1 total error)
+- **🔵 Rate Limit**: API throttling and usage restrictions (12 total errors)
+
+#### Error Management Features
+- **Sortable Error List**: Sort by error type, count, severity, or timestamp
+- **Error Details**: Full JSON error payloads with technical details
+- **Resolution Status**: Track resolved vs. unresolved errors
+- **Error Frequency**: Color-coded badges showing error occurrence count
+- **Copy to Clipboard**: Easy sharing of error details for debugging
+
+#### Severity Levels
+- **🔴 Critical**: System-breaking errors requiring immediate attention
+- **🟠 High**: Important errors affecting functionality
+- **🟡 Medium**: Moderate errors with potential impact
+- **🟢 Low**: Minor errors or warnings
+
+### 🎛️ Feed Subscription Control Panel
+
+Dedicated interface for managing rail communication and bus SIRI subscriptions:
+
+#### Rail Communication Control
+- **Three-Endpoint Support**: Original, Bridge, and Kafka connection options
+- **Active Subscription Display**: Real-time list of active rail subscriptions
+- **Quick Subscribe Buttons**: One-click subscription to different endpoints
+- **Command Reference**: Complete command documentation with usage examples
+
+#### Bus SIRI Control  
+- **Service Selection**: Choose between StopMonitoring and VehicleMonitoring
+- **Parameter Customization**: Configure host, service type, and TTL settings
+- **Default Quick Start**: Instant subscription with optimized defaults
+- **Status Monitoring**: Real-time connection and data flow status
+
+#### Safety Features
+- **Confirmation Dialogs**: Prevent accidental bulk unsubscribe operations
+- **Non-Destructive Actions**: Subscriptions are paused rather than deleted
+- **Easy Recovery**: Simple reactivation of paused subscriptions
+- **Real-time Feedback**: Immediate visual confirmation of actions
+
+### 📈 Usage Statistics
+
+The admin dashboard tracks and displays:
+- **Subscription Statistics**: Rail Comm (1), Bus SIRI (1), Active (2), Unsubscribed (0)
+- **Message Throughput**: Real-time message rates and processing statistics
+- **Error Frequency**: Historical error patterns and resolution tracking
+- **System Health**: Overall platform health and performance metrics
+
 ## ⚙️ Configuration
 
 ### Environment Variables
 
 ```bash
-# Required
-VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-
 # Optional (with defaults)
 VITE_KAFKA_BROKERS=localhost:9092
 VITE_RTD_API_BASE=https://nodejs-prod.rtd-denver.com/api
 VITE_UPDATE_INTERVAL_MS=30000
 VITE_DEBUG_MODE=false
 VITE_MOCK_DATA=false
+
+# Application URLs
+# Main Map: http://localhost:3000/
+# Admin Dashboard: http://localhost:3000/admin
 ```
 
 ### OpenStreetMap Benefits
@@ -172,12 +350,19 @@ The app attempts to connect to Kafka topics first, then falls back to direct RTD
 ```
 src/
 ├── components/
-│   ├── GoogleMap.tsx           # Main map component
+│   ├── OpenStreetMap.tsx       # Main map component (OpenStreetMap + Leaflet)
+│   ├── MapView.tsx             # Map page container
+│   ├── AdminDashboard.tsx      # Admin dashboard with subscription management
 │   ├── MapControls.tsx         # Filter and control UI
 │   ├── VehicleMarker.tsx       # Individual vehicle markers
-│   └── VehicleDetailsPanel.tsx # Vehicle info sidebar
+│   ├── VehicleDetailsPanel.tsx # Vehicle info sidebar
+│   ├── VehicleSelector.tsx     # Vehicle selection and tracking
+│   ├── VehicleTracker.tsx      # Vehicle tracking and history
+│   ├── DataSourcePanel.tsx     # Data source monitoring
+│   └── UpdateIntervalControl.tsx # Update frequency control
 ├── services/
-│   └── rtdDataService.ts       # Data fetching and Kafka integration
+│   ├── rtdDataService.ts       # Data fetching and Kafka integration
+│   └── dataQueryService.ts     # Query and analytics service
 ├── hooks/
 │   └── useRTDData.ts          # React hook for RTD data management
 ├── types/
