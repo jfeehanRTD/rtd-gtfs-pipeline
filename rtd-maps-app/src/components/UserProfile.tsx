@@ -107,9 +107,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose, onSelectRoute, onFil
       { id: '38', name: 'Route 38 - 38th Avenue' },
       { id: '52', name: 'Route 52 - University' },
       { id: 'AB', name: 'Route AB - Airport Blvd' },
-      { id: 'FF1', name: 'Flatiron Flyer - Boulder/Denver' },
-      { id: 'FF2', name: 'Flatiron Flyer - Boulder/Denver' },
-      { id: 'FF3', name: 'Flatiron Flyer - Boulder/Denver' }
+      { id: 'FF1', name: 'FF1 - Flatiron Flyer US 36 & Table Mesa' },
+      { id: 'FF2', name: 'FF2 - Flatiron Flyer US 36 & 28th Street' },
+      { id: 'FF3', name: 'FF3 - Flatiron Flyer Louisville & Broomfield' }
     ]
   };
 
@@ -384,10 +384,36 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose, onSelectRoute, onFil
             
             {/* Quick Select */}
             <div className="mb-3">
-              <p className="text-xs text-gray-600 mb-2">Quick Select:</p>
+              <p className="text-xs text-gray-600 mb-2">Quick Select Popular Routes:</p>
+              
+              {/* Featured Routes Section */}
+              <div className="mb-2">
+                <p className="text-xs font-medium text-green-700 mb-1">🔥 Flatiron Flyer (Boulder-Denver)</p>
+                <div className="flex gap-1 mb-2">
+                  <button
+                    onClick={() => handleQuickAdd({ id: 'FF1', name: 'FF1 - Flatiron Flyer US 36 & Table Mesa' }, 'bus')}
+                    className="px-2 py-1 text-xs bg-green-100 border border-green-300 rounded hover:bg-green-200 font-medium text-green-800"
+                  >
+                    FF1
+                  </button>
+                  <button
+                    onClick={() => handleQuickAdd({ id: 'FF2', name: 'FF2 - Flatiron Flyer US 36 & 28th Street' }, 'bus')}
+                    className="px-2 py-1 text-xs bg-green-100 border border-green-300 rounded hover:bg-green-200 font-medium text-green-800"
+                  >
+                    FF2
+                  </button>
+                  <button
+                    onClick={() => handleQuickAdd({ id: 'FF3', name: 'FF3 - Flatiron Flyer Louisville & Broomfield' }, 'bus')}
+                    className="px-2 py-1 text-xs bg-green-100 border border-green-300 rounded hover:bg-green-200 font-medium text-green-800"
+                  >
+                    FF3
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <div>
-                  <p className="text-xs font-medium text-gray-700 mb-1">Trains</p>
+                  <p className="text-xs font-medium text-gray-700 mb-1">Light Rail</p>
                   <div className="flex flex-wrap gap-1">
                     {commonRoutes.trains.slice(0, 6).map(train => (
                       <button
@@ -402,9 +428,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose, onSelectRoute, onFil
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-gray-700 mb-1">Buses</p>
+                  <p className="text-xs font-medium text-gray-700 mb-1">Popular Buses</p>
                   <div className="flex flex-wrap gap-1">
-                    {commonRoutes.buses.slice(0, 6).map(bus => (
+                    {commonRoutes.buses.filter(bus => ['0', '15', '15L', '16', '20', 'AB'].includes(bus.id)).map(bus => (
                       <button
                         key={bus.id}
                         onClick={() => handleQuickAdd(bus, 'bus')}
