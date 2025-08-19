@@ -156,7 +156,26 @@ mvn --version
 
 ### 4. Install Docker Environment
 
-#### Option A: WSL2 with Docker (Recommended)
+#### Option A: Podman (Recommended - No License Restrictions)
+```powershell
+# Using Scoop
+scoop install podman
+
+# Or download installer from https://podman.io/getting-started/installation
+# Configure podman machine
+podman machine init
+podman machine start
+
+# Create Docker compatibility alias
+Set-Alias -Name docker -Value podman
+
+# Verify
+podman --version
+```
+
+**Note:** Podman is recommended for Windows users as it's free and open-source without licensing restrictions. It provides Docker-compatible commands and can run containers without requiring Docker Desktop's paid subscription for commercial use.
+
+#### Option B: WSL2 with Docker (Alternative)
 ```powershell
 # Enable WSL2
 wsl --install
@@ -178,20 +197,8 @@ sudo service docker start
 docker --version
 ```
 
-
-#### Option C: Podman (Alternative)
-```powershell
-# Using Scoop
-scoop install podman
-
-# Or download installer from podman.io
-# Configure podman machine
-podman machine init
-podman machine start
-
-# Verify
-podman --version
-```
+#### Option C: Docker Desktop (Note: Commercial License Required)
+**Important:** Docker Desktop requires a paid subscription for commercial use in organizations with more than 250 employees or $10 million in revenue. Consider using Podman (Option A) to avoid licensing fees.
 
 ### 5. Clone and Run the Project
 
