@@ -80,10 +80,6 @@ docker run hello-world
 colima start rtd-pipeline --cpu 4 --memory 8 --disk 50
 ```
 
-#### Alternative: Docker Desktop
-1. Download Docker Desktop from [docker.com](https://www.docker.com/products/docker-desktop/)
-2. Install and launch Docker Desktop
-3. Verify with: `docker --version`
 
 ### 6. Clone and Run the Project
 ```bash
@@ -182,11 +178,6 @@ sudo service docker start
 docker --version
 ```
 
-#### Option B: Docker Desktop
-1. Download Docker Desktop from [docker.com](https://www.docker.com/products/docker-desktop/)
-2. Enable WSL2 backend during installation
-3. Launch Docker Desktop
-4. Verify: `docker --version`
 
 #### Option C: Podman (Alternative)
 ```powershell
