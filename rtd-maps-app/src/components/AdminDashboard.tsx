@@ -33,9 +33,22 @@ import {
   Ban,
   UserPlus,
   Link,
-  Radio
+  Radio,
+  BarChart3,
+  Target,
+  TrendingUp,
+  Calendar,
+  Route,
+  Users2
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { 
+  OccupancyAnalysisService, 
+  OccupancyAccuracyMetric, 
+  OccupancyDistribution, 
+  VehicleTypeAnalysis,
+  OccupancyAnalysisStatus
+} from '../services/occupancyAnalysisService';
 
 interface Subscription {
   id: string;
@@ -93,6 +106,7 @@ interface ErrorMessage {
   resolved: boolean;
 }
 
+
 const AdminDashboard = () => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [feedStatuses, setFeedStatuses] = useState<FeedStatus[]>([]);
@@ -111,6 +125,18 @@ const AdminDashboard = () => {
   const [errorMessages, setErrorMessages] = useState<ErrorMessage[]>([]);
   const [showErrorHistory, setShowErrorHistory] = useState(false);
   const [errorSortBy, setErrorSortBy] = useState<'type' | 'count' | 'severity' | 'timestamp'>('count');
+  const [occupancyMetrics, setOccupancyMetrics] = useState<OccupancyAccuracyMetric[]>([]);
+  const [occupancyDistributions, setOccupancyDistributions] = useState<OccupancyDistribution[]>([]);
+  const [vehicleTypeAnalysis, setVehicleTypeAnalysis] = useState<VehicleTypeAnalysis[]>([]);
+  const [occupancyAnalysisStatus, setOccupancyAnalysisStatus] = useState<OccupancyAnalysisStatus>({
+    isRunning: false,
+    lastUpdate: null,
+    totalRecordsProcessed: 0,
+    error: null
+  });
+  const [showOccupancyAnalysis, setShowOccupancyAnalysis] = useState(false);
+  const [occupancyAnalysisFilter, setOccupancyAnalysisFilter] = useState<'all' | 'overall' | 'by_date' | 'by_route'>('all');
+  const [occupancyService] = useState(() => OccupancyAnalysisService.getInstance());
 
   // Mock initial data
   useEffect(() => {
@@ -847,27 +873,111 @@ const AdminDashboard = () => {
     setRailCommMessages(allRailCommMessages);
     setBusSiriMessages(allBusSiriMessages);
     setErrorMessages(mockErrorMessages);
+
+    // Load live occupancy analysis data
+    loadOccupancyAnalysisData();
   }, []);
+
+  const loadOccupancyAnalysisData = useCallback(async () => {
+    try {
+      console.log('🔄 Loading live occupancy analysis data...');
+      
+      // Load all occupancy analysis data in parallel
+      const [status, metrics, distributions, vehicleTypes] = await Promise.all([
+        occupancyService.getAnalysisStatus(),
+        occupancyService.getAccuracyMetrics(),
+        occupancyService.getOccupancyDistributions(),
+        occupancyService.getVehicleTypeAnalysis()
+      ]);
+      
+      setOccupancyAnalysisStatus(status);
+      setOccupancyMetrics(metrics);
+      setOccupancyDistributions(distributions);
+      setVehicleTypeAnalysis(vehicleTypes);
+      
+      console.log(`✅ Loaded occupancy analysis data: ${metrics.length} metrics, ${distributions.length} distributions, ${vehicleTypes.length} vehicle types`);
+      
+    } catch (error) {
+      console.error('❌ Failed to load occupancy analysis data:', error);
+      setOccupancyAnalysisStatus({
+        isRunning: false,
+        lastUpdate: null,
+        totalRecordsProcessed: 0,
+        error: 'Failed to connect to occupancy analysis service'
+      });
+    }
+  }, [occupancyService]);
 
   const refreshData = useCallback(async () => {
     setIsRefreshing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Update last message times
-    setFeedStatuses(prev => prev.map(feed => ({
-      ...feed,
-      lastMessage: feed.isLive ? new Date(Date.now() - Math.random() * 60000) : feed.lastMessage
-    })));
+    try {
+      // Refresh occupancy analysis data along with other data
+      await Promise.all([
+        loadOccupancyAnalysisData(),
+        new Promise(resolve => setTimeout(resolve, 1000)) // Simulate other API calls
+      ]);
+      
+      // Update last message times
+      setFeedStatuses(prev => prev.map(feed => ({
+        ...feed,
+        lastMessage: feed.isLive ? new Date(Date.now() - Math.random() * 60000) : feed.lastMessage
+      })));
 
-    setSubscriptions(prev => prev.map(sub => ({
-      ...sub,
-      lastUpdate: sub.status === 'active' ? new Date(Date.now() - Math.random() * 120000) : sub.lastUpdate,
-      messageCount: sub.status === 'active' ? sub.messageCount + Math.floor(Math.random() * 10) : sub.messageCount
-    })));
+      setSubscriptions(prev => prev.map(sub => ({
+        ...sub,
+        lastUpdate: sub.status === 'active' ? new Date(Date.now() - Math.random() * 120000) : sub.lastUpdate,
+        messageCount: sub.status === 'active' ? sub.messageCount + Math.floor(Math.random() * 10) : sub.messageCount
+      })));
+      
+    } catch (error) {
+      console.error('Failed to refresh data:', error);
+    }
 
     setIsRefreshing(false);
-  }, []);
+  }, [loadOccupancyAnalysisData]);
+
+  const startOccupancyAnalysis = useCallback(async () => {
+    try {
+      const result = await occupancyService.startAnalysis();
+      if (result.success) {
+        console.log('✅ Occupancy analysis started');
+        await loadOccupancyAnalysisData(); // Refresh data
+      } else {
+        console.error('❌ Failed to start occupancy analysis:', result.message);
+      }
+    } catch (error) {
+      console.error('❌ Error starting occupancy analysis:', error);
+    }
+  }, [occupancyService, loadOccupancyAnalysisData]);
+
+  const stopOccupancyAnalysis = useCallback(async () => {
+    try {
+      const result = await occupancyService.stopAnalysis();
+      if (result.success) {
+        console.log('⏹️ Occupancy analysis stopped');
+        await loadOccupancyAnalysisData(); // Refresh data
+      } else {
+        console.error('❌ Failed to stop occupancy analysis:', result.message);
+      }
+    } catch (error) {
+      console.error('❌ Error stopping occupancy analysis:', error);
+    }
+  }, [occupancyService, loadOccupancyAnalysisData]);
+
+  const refreshOccupancyAnalysis = useCallback(async () => {
+    try {
+      const result = await occupancyService.refreshAnalysis();
+      if (result.success) {
+        console.log('🔄 Occupancy analysis refreshed');
+        await loadOccupancyAnalysisData(); // Refresh data
+      } else {
+        console.error('❌ Failed to refresh occupancy analysis:', result.message);
+      }
+    } catch (error) {
+      console.error('❌ Error refreshing occupancy analysis:', error);
+    }
+  }, [occupancyService, loadOccupancyAnalysisData]);
 
   const toggleSubscription = useCallback((subscriptionId: string) => {
     setSubscriptions(prev => prev.map(sub => 
@@ -2131,6 +2241,339 @@ const AdminDashboard = () => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* RTD Real-Time Vehicle Occupancy Accuracy Analysis */}
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <BarChart3 className="w-6 h-6 text-blue-600" />
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">RTD Real-Time Vehicle Occupancy Accuracy Analysis</h2>
+                  <div className="flex items-center space-x-4 mt-1">
+                    <p className="text-sm text-gray-600">Live Pipeline Status</p>
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-2 h-2 rounded-full ${occupancyAnalysisStatus.isRunning ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                      <span className={`text-xs font-medium ${occupancyAnalysisStatus.isRunning ? 'text-green-700' : 'text-red-700'}`}>
+                        {occupancyAnalysisStatus.isRunning ? 'Running' : 'Stopped'}
+                      </span>
+                      {occupancyAnalysisStatus.lastUpdate && (
+                        <span className="text-xs text-gray-500">
+                          • Updated {formatDistanceToNow(occupancyAnalysisStatus.lastUpdate, { addSuffix: true })}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {occupancyAnalysisStatus.error && (
+                    <p className="text-sm text-red-600 mt-1">⚠️ {occupancyAnalysisStatus.error}</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                {/* Pipeline Control Buttons */}
+                {occupancyAnalysisStatus.isRunning ? (
+                  <button
+                    onClick={stopOccupancyAnalysis}
+                    className="flex items-center space-x-2 px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                    title="Stop occupancy analysis pipeline"
+                  >
+                    <Pause className="w-4 h-4" />
+                    <span>Stop</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={startOccupancyAnalysis}
+                    className="flex items-center space-x-2 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                    title="Start occupancy analysis pipeline"
+                  >
+                    <Play className="w-4 h-4" />
+                    <span>Start</span>
+                  </button>
+                )}
+                
+                <button
+                  onClick={refreshOccupancyAnalysis}
+                  className="flex items-center space-x-2 px-3 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
+                  title="Refresh occupancy analysis data"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Refresh</span>
+                </button>
+
+                <select
+                  value={occupancyAnalysisFilter}
+                  onChange={(e) => setOccupancyAnalysisFilter(e.target.value as any)}
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Categories</option>
+                  <option value="overall">Overall</option>
+                  <option value="by_date">By Date</option>
+                  <option value="by_route">By Route</option>
+                </select>
+                
+                <button
+                  onClick={() => setShowOccupancyAnalysis(!showOccupancyAnalysis)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Eye className="w-4 h-4" />
+                  <span>{showOccupancyAnalysis ? 'Hide' : 'Show'} Analysis</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Key Performance Metrics */}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-blue-700">Overall Accuracy</p>
+                    <p className="text-2xl font-bold text-blue-900">
+                      {occupancyMetrics.find(m => m.category === 'overall')?.accuracyPercentage.toFixed(1) || '0.0'}%
+                    </p>
+                  </div>
+                  <Target className="w-8 h-8 text-blue-600" />
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-green-700">Data Joining Rate</p>
+                    <p className="text-2xl font-bold text-green-900">
+                      {occupancyMetrics.find(m => m.category === 'overall')?.joinedPercentage.toFixed(1) || '0.0'}%
+                    </p>
+                  </div>
+                  <TrendingUp className="w-8 h-8 text-green-600" />
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-purple-700">Total Records</p>
+                    <p className="text-2xl font-bold text-purple-900">
+                      {(occupancyMetrics.find(m => m.category === 'overall')?.totalVPRecords || 0).toLocaleString()}
+                    </p>
+                  </div>
+                  <Users2 className="w-8 h-8 text-purple-600" />
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-4 rounded-lg border border-amber-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-amber-700">Analysis Period</p>
+                    <p className="text-lg font-bold text-amber-900">Aug 15-18</p>
+                    <p className="text-xs text-amber-700">2023</p>
+                  </div>
+                  <Calendar className="w-8 h-8 text-amber-600" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {showOccupancyAnalysis && (
+            <div className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Accuracy Metrics Table */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Accuracy Metrics by Category</h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Category
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            VP Records
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Joined %
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Accuracy %
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {occupancyMetrics
+                          .filter(metric => occupancyAnalysisFilter === 'all' || metric.category === occupancyAnalysisFilter)
+                          .map((metric) => (
+                            <tr key={metric.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  {metric.category === 'overall' && <Target className="w-4 h-4 text-blue-500 mr-2" />}
+                                  {metric.category === 'by_date' && <Calendar className="w-4 h-4 text-green-500 mr-2" />}
+                                  {metric.category === 'by_route' && <Route className="w-4 h-4 text-purple-500 mr-2" />}
+                                  <div>
+                                    <div className="text-sm font-medium text-gray-900">{metric.subcategory}</div>
+                                    <div className="text-xs text-gray-500 capitalize">{metric.category.replace('_', ' ')}</div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {metric.totalVPRecords.toLocaleString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <div className="flex-1">
+                                    <div className="text-sm font-medium text-gray-900">
+                                      {metric.joinedPercentage.toFixed(1)}%
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                      <div 
+                                        className="bg-green-600 h-2 rounded-full" 
+                                        style={{ width: `${metric.joinedPercentage}%` }}
+                                      ></div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <div className="flex-1">
+                                    <div className="text-sm font-medium text-gray-900">
+                                      {metric.accuracyPercentage.toFixed(1)}%
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                      <div 
+                                        className={`h-2 rounded-full ${
+                                          metric.accuracyPercentage >= 80 ? 'bg-green-600' :
+                                          metric.accuracyPercentage >= 60 ? 'bg-yellow-600' : 'bg-red-600'
+                                        }`}
+                                        style={{ width: `${metric.accuracyPercentage}%` }}
+                                      ></div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Vehicle Type Analysis */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Vehicle Type Analysis</h3>
+                  <div className="space-y-4">
+                    {vehicleTypeAnalysis.map((vehicle, index) => (
+                      <div key={index} className="bg-gray-50 p-4 rounded-lg border">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-gray-900">{vehicle.vehicleType}</h4>
+                          <span className="text-sm text-gray-500">{vehicle.recordCount.toLocaleString()} records</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-600">Seats:</span>
+                            <span className="ml-2 font-medium">{vehicle.maxSeats}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Standing:</span>
+                            <span className="ml-2 font-medium">{vehicle.maxStands}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Total Capacity:</span>
+                            <span className="ml-2 font-medium">{vehicle.totalCapacity}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Avg Occupancy:</span>
+                            <span className="ml-2 font-medium">{(vehicle.averageOccupancy * 100).toFixed(1)}%</span>
+                          </div>
+                        </div>
+                        <div className="mt-2">
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full" 
+                              style={{ width: `${vehicle.averageOccupancy * 100}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Occupancy Distribution Comparison */}
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Occupancy Status Distribution Comparison</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {occupancyDistributions.map((distribution, index) => (
+                    <div key={index} className="bg-gray-50 p-4 rounded-lg border">
+                      <h4 className="font-medium text-gray-900 mb-3 text-center">
+                        {distribution.feedType} Feed
+                        <span className="text-sm text-gray-500 ml-2">
+                          ({distribution.totalRecords.toLocaleString()} records)
+                        </span>
+                      </h4>
+                      <div className="space-y-2">
+                        {[
+                          { label: 'Empty', value: distribution.empty, color: 'bg-gray-500' },
+                          { label: 'Many Seats Available', value: distribution.manySeatsAvailable, color: 'bg-green-500' },
+                          { label: 'Few Seats Available', value: distribution.fewSeatsAvailable, color: 'bg-yellow-500' },
+                          { label: 'Standing Room Only', value: distribution.standingRoomOnly, color: 'bg-orange-500' },
+                          { label: 'Crushed Standing Room', value: distribution.crushedStandingRoomOnly, color: 'bg-red-500' },
+                          { label: 'Full', value: distribution.full, color: 'bg-red-800' }
+                        ].map((status) => {
+                          const percentage = (status.value / distribution.totalRecords) * 100;
+                          return (
+                            <div key={status.label} className="flex items-center space-x-3">
+                              <div className="w-32 text-xs text-gray-600">{status.label}</div>
+                              <div className="flex-1">
+                                <div className="flex justify-between text-xs mb-1">
+                                  <span>{status.value.toLocaleString()}</span>
+                                  <span>{percentage.toFixed(1)}%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                  <div 
+                                    className={`${status.color} h-2 rounded-full`}
+                                    style={{ width: `${percentage}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Study Information */}
+              <div className="mt-8 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <div className="flex items-start space-x-3">
+                  <Activity className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium text-blue-900 mb-2">About This Analysis</h4>
+                    <p className="text-sm text-blue-800 mb-2">
+                      This occupancy accuracy analysis is based on the methodology developed by Arcadis IBI Group 
+                      for RTD Denver's real-time vehicle position feeds. The study compared GTFS-RT occupancy 
+                      status with Automatic Passenger Counter (APC) data from August 15-18, 2023.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium text-blue-900">Target Accuracy:</span>
+                        <span className="ml-2 text-blue-800">78.5%</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-blue-900">Data Joining Rate:</span>
+                        <span className="ml-2 text-blue-800">89.4%</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-blue-900">Total Records:</span>
+                        <span className="ml-2 text-blue-800">333,755</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Subscribe/Unsubscribe Control Panel */}

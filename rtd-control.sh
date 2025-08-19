@@ -7,10 +7,10 @@
 set -e
 
 # Configuration
-JAVA_MAIN_CLASS="com.rtd.pipeline.RTDStaticDataPipeline"
-KAFKA_MAIN_CLASS="com.rtd.pipeline.RTDStaticDataPipeline"  # Use API-enabled pipeline for Docker mode too
+JAVA_MAIN_CLASS="com.rtd.pipeline.RTDApiApplication"
+KAFKA_MAIN_CLASS="com.rtd.pipeline.RTDApiApplication"  # Use Spring Boot API server
 REACT_APP_DIR="rtd-maps-app"
-JAVA_LOG_FILE="rtd-pipeline.log"
+JAVA_LOG_FILE="rtd-api-server.log"
 REACT_LOG_FILE="react-app.log"
 DOCKER_SETUP_SCRIPT="./scripts/docker-setup"
 
@@ -50,12 +50,12 @@ get_pids() {
     pgrep -f "$pattern" 2>/dev/null || true
 }
 
-# Function to start the Java pipeline
+# Function to start the Spring Boot API server
 start_java() {
-    print_status "Starting RTD Java Pipeline..."
+    print_status "Starting RTD Spring Boot API Server..."
     
     if check_process "$JAVA_MAIN_CLASS"; then
-        print_warning "Java pipeline is already running"
+        print_warning "API server is already running"
         return 0
     fi
     
@@ -64,13 +64,14 @@ start_java() {
     local java_pid=$!
     
     # Wait a moment to check if it started successfully
-    sleep 3
+    sleep 5  # Spring Boot takes a bit longer to start
     
     if kill -0 $java_pid 2>/dev/null; then
-        print_success "Java pipeline started (PID: $java_pid)"
+        print_success "Spring Boot API server started (PID: $java_pid)"
+        print_status "API: http://localhost:8080/api/health"
         print_status "Logs: tail -f $JAVA_LOG_FILE"
     else
-        print_error "Failed to start Java pipeline"
+        print_error "Failed to start Spring Boot API server"
         return 1
     fi
 }
@@ -111,16 +112,16 @@ start_react() {
 
 # Function to stop Java pipeline
 stop_java() {
-    print_status "Stopping RTD Java Pipeline..."
+    print_status "Stopping RTD Spring Boot API Server..."
     
     local pids=$(get_pids "$JAVA_MAIN_CLASS")
     if [ -z "$pids" ]; then
-        print_warning "No Java pipeline processes found"
+        print_warning "No API server processes found"
         return 0
     fi
     
     for pid in $pids; do
-        print_status "Killing Java process $pid"
+        print_status "Killing API server process $pid"
         kill -TERM $pid 2>/dev/null || true
         
         # Wait up to 10 seconds for graceful shutdown
@@ -137,7 +138,7 @@ stop_java() {
         fi
     done
     
-    print_success "Java pipeline stopped"
+    print_success "Spring Boot API server stopped"
 }
 
 # Function to stop React app
@@ -185,13 +186,14 @@ status() {
     print_status "RTD Pipeline Status"
     echo
     
-    # Check Java pipeline
+    # Check Spring Boot API server
     if check_process "$JAVA_MAIN_CLASS"; then
         local java_pids=$(get_pids "$JAVA_MAIN_CLASS")
-        print_success "Java Pipeline: RUNNING (PIDs: $java_pids)"
-        print_status "  ↳ API: http://localhost:8080/api/health"
+        print_success "Spring Boot API Server: RUNNING (PIDs: $java_pids)"
+        print_status "  ↳ Health: http://localhost:8080/api/health"
+        print_status "  ↳ Occupancy: http://localhost:8080/api/occupancy/status"
     else
-        print_warning "Java Pipeline: STOPPED"
+        print_warning "Spring Boot API Server: STOPPED"
     fi
     
     # Check React app

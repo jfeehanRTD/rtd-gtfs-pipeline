@@ -133,3 +133,26 @@ flink run target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar
 - Watermarks are configured for 1-minute out-of-order tolerance
 - Table API sinks can be easily reconfigured for different output formats (Kafka, databases, etc.)
 - always generate junit test on new features
+
+## State Management for Subagents
+
+**CRITICAL**: After each successful task completion, update `context.md` to maintain state across subagents and conversations.
+
+### Context Update Requirements
+- Update `context.md` immediately after completing any task
+- Include current git status, branch, and recent actions
+- Document active files and components being worked on
+- Note any important project state changes
+- Provide context for future subagents or conversation resumption
+
+### Context File Usage
+- Read `context.md` at the start of complex tasks to understand current state
+- Use context information to avoid duplicate work
+- Maintain continuity across different agent invocations
+- Include relevant file paths and next steps for handoff
+
+**Example Update Pattern**:
+```bash
+# After completing a task, always update context
+# Include: current branch, last action, files modified, next steps
+```
