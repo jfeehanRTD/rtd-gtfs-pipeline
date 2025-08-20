@@ -20,11 +20,14 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Queue;
 
 /**
  * HTTP Receiver for Bus Communication Data (SIRI)
@@ -46,12 +49,15 @@ public class BusCommHTTPReceiver {
     private String siriHost = "http://172.23.4.136:8080";
     private String siriService = "siri";
     private long ttl = 90000; // 90 seconds default TTL
+    private String authUsername = null;
+    private String authPassword = null;
     
     private final KafkaProducer<String, String> kafkaProducer;
     private final HttpServer httpServer;
     private final ScheduledExecutorService scheduler;
     private final AtomicBoolean subscriptionActive;
     private final ObjectMapper objectMapper;
+    private final Queue<String> latestSiriData;
     
     public BusCommHTTPReceiver() throws IOException {
         // Initialize Kafka producer
@@ -61,6 +67,7 @@ public class BusCommHTTPReceiver {
         this.httpServer = HttpServer.create(new InetSocketAddress(HTTP_PORT), 0);
         this.httpServer.createContext(HTTP_PATH, new BusSIRIHandler());
         this.httpServer.createContext(SUBSCRIPTION_PATH, new SubscriptionHandler());
+        this.httpServer.createContext("/bus-siri/latest", new LatestDataHandler());
         this.httpServer.createContext("/health", new HealthHandler());
         this.httpServer.createContext("/status", new StatusHandler());
         this.httpServer.setExecutor(Executors.newFixedThreadPool(10));
@@ -69,6 +76,7 @@ public class BusCommHTTPReceiver {
         this.scheduler = Executors.newScheduledThreadPool(2);
         this.subscriptionActive = new AtomicBoolean(false);
         this.objectMapper = new ObjectMapper();
+        this.latestSiriData = new ConcurrentLinkedQueue<>();
         
         LOG.info("Bus SIRI HTTP Receiver initialized");
         LOG.info("HTTP Server: http://localhost:{}{}", HTTP_PORT, HTTP_PATH);
@@ -141,6 +149,17 @@ public class BusCommHTTPReceiver {
     }
     
     /**
+     * Configure authentication for SIRI subscription
+     */
+    public void configureAuthentication(String username, String password) {
+        this.authUsername = username;
+        this.authPassword = password;
+        if (username != null && password != null) {
+            LOG.info("Authentication configured for SIRI subscription");
+        }
+    }
+    
+    /**
      * Send subscription request to SIRI endpoint
      */
     private void sendSubscriptionRequest() {
@@ -161,6 +180,14 @@ public class BusCommHTTPReceiver {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
+            
+            // Add Basic Authentication if credentials are provided
+            if (authUsername != null && authPassword != null) {
+                String auth = authUsername + ":" + authPassword;
+                String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
+                conn.setRequestProperty("Authorization", "Basic " + encodedAuth);
+            }
+            
             conn.setDoOutput(true);
             
             try (OutputStream os = conn.getOutputStream()) {
@@ -224,6 +251,13 @@ public class BusCommHTTPReceiver {
                 
                 // Determine if it's XML or JSON and process accordingly
                 String processedPayload = processSIRIPayload(siriPayload);
+                
+                // Store latest data for React app
+                latestSiriData.offer(processedPayload);
+                // Keep only the last 10 entries to prevent memory issues
+                while (latestSiriData.size() > 10) {
+                    latestSiriData.poll();
+                }
                 
                 // Send to Kafka topic
                 ProducerRecord<String, String> record = new ProducerRecord<>(BUS_COMM_TOPIC, processedPayload);
@@ -397,6 +431,39 @@ public class BusCommHTTPReceiver {
         }
     }
     
+    /**
+     * Latest Data Handler - Serves the most recent SIRI data to React app
+     */
+    private class LatestDataHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String method = exchange.getRequestMethod();
+            
+            if ("GET".equals(method)) {
+                // Return the latest SIRI data as JSON array
+                String response;
+                if (latestSiriData.isEmpty()) {
+                    response = "[]";
+                } else {
+                    StringBuilder jsonArray = new StringBuilder("[");
+                    boolean first = true;
+                    for (String data : latestSiriData) {
+                        if (!first) {
+                            jsonArray.append(",");
+                        }
+                        jsonArray.append(data);
+                        first = false;
+                    }
+                    jsonArray.append("]");
+                    response = jsonArray.toString();
+                }
+                sendJsonResponse(exchange, 200, response);
+            } else {
+                sendErrorResponse(exchange, 405, "Method not allowed. Use GET to retrieve latest SIRI data.");
+            }
+        }
+    }
+    
     private void sendJsonResponse(HttpExchange exchange, int statusCode, String response) throws IOException {
         exchange.getResponseHeaders().set("Content-Type", "application/json");
         exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
@@ -426,6 +493,42 @@ public class BusCommHTTPReceiver {
                 String service = args[1];
                 long ttl = Long.parseLong(args[2]);
                 receiver.configureSIRISubscription(host, service, ttl);
+                
+                // First check environment variables for credentials (most secure)
+                String envUsername = System.getenv("TIS_PROXY_USERNAME");
+                String envPassword = System.getenv("TIS_PROXY_PASSWORD");
+                
+                if (envUsername != null && envPassword != null) {
+                    receiver.configureAuthentication(envUsername, envPassword);
+                    LOG.info("Using authentication credentials from environment variables");
+                } 
+                // Fall back to command line arguments if no env vars (less secure)
+                else if (args.length >= 5) {
+                    String username = args[3];
+                    String password = args[4];
+                    receiver.configureAuthentication(username, password);
+                    LOG.warn("Using authentication credentials from command line arguments (consider using environment variables instead)");
+                } else {
+                    LOG.info("No authentication credentials provided (neither env vars nor command line)");
+                }
+            } else {
+                // Check if we can use environment variables for everything
+                String envHost = System.getenv("TIS_PROXY_HOST");
+                String envService = System.getenv("TIS_PROXY_SERVICE");
+                String envTtl = System.getenv("TIS_PROXY_TTL");
+                String envUsername = System.getenv("TIS_PROXY_USERNAME");
+                String envPassword = System.getenv("TIS_PROXY_PASSWORD");
+                
+                if (envHost != null) {
+                    String service = envService != null ? envService : "siri";
+                    long ttl = envTtl != null ? Long.parseLong(envTtl) : 90000;
+                    receiver.configureSIRISubscription(envHost, service, ttl);
+                    
+                    if (envUsername != null && envPassword != null) {
+                        receiver.configureAuthentication(envUsername, envPassword);
+                    }
+                    LOG.info("Configuration loaded from environment variables");
+                }
             }
             
             // Add shutdown hook for graceful shutdown

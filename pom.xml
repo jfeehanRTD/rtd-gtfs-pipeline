@@ -175,19 +175,16 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j2-impl</artifactId>
             <version>2.24.3</version>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>2.24.3</version>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>2.24.3</version>
-            <scope>runtime</scope>
         </dependency>
 
         <!-- Test Dependencies -->
@@ -483,12 +480,12 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <commandlineArgs>
-                        --add-opens=java.base/sun.misc=ALL-UNNAMED
-                        --add-opens=java.base/java.nio=ALL-UNNAMED
-                        --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
-                        --add-opens=java.base/java.io=ALL-UNNAMED
-                    </commandlineArgs>
+                    <options>
+                        <option>--add-opens=java.base/sun.misc=ALL-UNNAMED</option>
+                        <option>--add-opens=java.base/java.nio=ALL-UNNAMED</option>
+                        <option>--add-opens=java.base/sun.nio.ch=ALL-UNNAMED</option>
+                        <option>--add-opens=java.base/java.io=ALL-UNNAMED</option>
+                    </options>
                     <classpathScope>compile</classpathScope>
                 </configuration>
             </plugin>

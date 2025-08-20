@@ -26,6 +26,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+import com.rtd.pipeline.util.DataRetentionManager;
+
 /**
  * RTD Bus Communication Pipeline
  * Consumes SIRI XML/JSON payloads from Kafka topic and processes them through Flink with data sinks
@@ -57,6 +59,16 @@ public class RTDBusCommPipeline {
         // Enable checkpointing for fault tolerance
         env.enableCheckpointing(60000); // Checkpoint every minute
         
+        // Start data retention manager for 1-day cleanup
+        DataRetentionManager retentionManager = DataRetentionManager.createForRTDPipelines();
+        retentionManager.startCleanupScheduler();
+        
+        // Add shutdown hook to cleanup retention manager
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LOG.info("Shutting down data retention manager");
+            retentionManager.stopCleanupScheduler();
+        }));
+        
         try {
             // Create Kafka source for consuming SIRI payloads
             KafkaSource<String> kafkaSource;
@@ -82,18 +94,18 @@ public class RTDBusCommPipeline {
                 .filter(new NonNullRowFilter())
                 .name("Parse SIRI Bus Data");
             
-            // Add file sink for data persistence
+            // Add file sink for data persistence with 1-day retention
             busCommStream
                 .map(new JSONFormattingFunction())
                 .sinkTo(FileSink
-                    .forRowFormat(new Path("./data/bus-comm/"), new SimpleStringEncoder<String>("UTF-8"))
+                    .forRowFormat(new Path("./data/bus-siri/"), new SimpleStringEncoder<String>("UTF-8"))
                     .withRollingPolicy(DefaultRollingPolicy.builder()
-                        .withRolloverInterval(Duration.ofMinutes(15))
-                        .withInactivityInterval(Duration.ofMinutes(5))
-                        .withMaxPartSize(MemorySize.ofMebiBytes(128))
+                        .withRolloverInterval(Duration.ofDays(1))  // Roll over daily
+                        .withInactivityInterval(Duration.ofHours(1))  // Roll if inactive for 1 hour
+                        .withMaxPartSize(MemorySize.ofMebiBytes(512))  // Larger files for daily storage
                         .build())
                     .build())
-                .name("Bus SIRI File Sink");
+                .name("Bus SIRI Daily File Sink");
             
             // Add console sink for real-time monitoring and data verification
             busCommStream
@@ -110,9 +122,10 @@ public class RTDBusCommPipeline {
             LOG.info("✅ SIRI parsing and Row conversion enabled");
             LOG.info("✅ File sink configured for data persistence");
             LOG.info("✅ Console sink configured for real-time monitoring");
+            LOG.info("✅ Data retention manager started (1-day retention, cleanup every 6 hours)");
             LOG.info("");
             LOG.info("Pipeline is now consuming SIRI payloads from Kafka...");
-            LOG.info("Data will be persisted to: ./data/bus-comm/");
+            LOG.info("Data will be persisted to: ./data/bus-siri/ (daily rotation with 1-day retention)");
             LOG.info("Monitor console output for real-time bus communication data");
             
             // Execute the pipeline

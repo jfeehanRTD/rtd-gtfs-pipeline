@@ -3,15 +3,18 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import MapView from './components/MapView';
 import AdminDashboard from './components/AdminDashboard';
+import LiveTransitMap from './components/LiveTransitMap';
 import { 
   MapPin,
-  Settings
+  Settings,
+  Radio
 } from 'lucide-react';
 
 // Navigation component to show current route
 const Navigation = () => {
   const location = useLocation();
   const isAdmin = location.pathname === '/admin';
+  const isLive = location.pathname === '/live';
   
   return (
     <div className="absolute top-0 left-0 right-0 bg-white border-b border-gray-200 px-4 py-2 z-50">
@@ -27,12 +30,23 @@ const Navigation = () => {
             <Link
               to="/"
               className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                !isAdmin 
+                !isAdmin && !isLive
                   ? 'bg-rtd-primary text-white' 
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
             >
-              Map View
+              Static Map
+            </Link>
+            <Link
+              to="/live"
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors flex items-center space-x-1 ${
+                isLive
+                  ? 'bg-rtd-primary text-white' 
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+            >
+              <Radio className="w-4 h-4" />
+              <span>Live Transit</span>
             </Link>
             <Link
               to="/admin"
@@ -50,7 +64,7 @@ const Navigation = () => {
 
         {/* Right: Current page indicator */}
         <div className="text-sm text-gray-600">
-          {isAdmin ? 'Developer Admin Dashboard' : 'Live Transit Map'}
+          {isAdmin ? 'Developer Admin Dashboard' : isLive ? 'Live SIRI & Rail Feed Map' : 'Static Transit Map'}
         </div>
       </div>
     </div>
@@ -65,6 +79,7 @@ function App() {
         <div className="pt-16 h-full">
           <Routes>
             <Route path="/" element={<MapView />} />
+            <Route path="/live" element={<LiveTransitMap />} />
             <Route path="/admin" element={<AdminDashboard />} />
           </Routes>
         </div>

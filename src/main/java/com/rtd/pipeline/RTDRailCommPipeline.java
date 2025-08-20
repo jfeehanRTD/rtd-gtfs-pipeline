@@ -27,6 +27,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+import com.rtd.pipeline.util.DataRetentionManager;
+
 /**
  * RTD Rail Communication Pipeline
  * Consumes JSON payloads from Kafka topic and processes them through Flink with data sinks
@@ -60,6 +62,16 @@ public class RTDRailCommPipeline {
         // Create Table Environment for SQL-like operations
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
         
+        // Start data retention manager for 1-day cleanup
+        DataRetentionManager retentionManager = DataRetentionManager.createForRTDPipelines();
+        retentionManager.startCleanupScheduler();
+        
+        // Add shutdown hook to cleanup retention manager
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LOG.info("Shutting down data retention manager");
+            retentionManager.stopCleanupScheduler();
+        }));
+        
         try {
             // Create Kafka source for consuming JSON payloads
             KafkaSource<String> kafkaSource = createKafkaSource();
@@ -78,18 +90,18 @@ public class RTDRailCommPipeline {
                 .filter(row -> row != null)
                 .name("Parse Rail Comm JSON");
             
-            // Add file sink for data persistence
+            // Add file sink for data persistence with 1-day retention
             railCommStream
                 .map(row -> formatRowAsJson(row))
                 .sinkTo(FileSink
                     .forRowFormat(new Path("./data/rail-comm/"), new SimpleStringEncoder<String>("UTF-8"))
                     .withRollingPolicy(DefaultRollingPolicy.builder()
-                        .withRolloverInterval(Duration.ofMinutes(15))
-                        .withInactivityInterval(Duration.ofMinutes(5))
-                        .withMaxPartSize(MemorySize.ofMebiBytes(128))
+                        .withRolloverInterval(Duration.ofDays(1))  // Roll over daily
+                        .withInactivityInterval(Duration.ofHours(1))  // Roll if inactive for 1 hour
+                        .withMaxPartSize(MemorySize.ofMebiBytes(512))  // Larger files for daily storage
                         .build())
                     .build())
-                .name("Rail Comm File Sink");
+                .name("Rail Comm Daily File Sink");
             
             // Add console sink for real-time monitoring and data verification
             railCommStream
@@ -106,9 +118,10 @@ public class RTDRailCommPipeline {
             LOG.info("✅ JSON parsing and Row conversion enabled");
             LOG.info("✅ File sink configured for data persistence");
             LOG.info("✅ Console sink configured for real-time monitoring");
+            LOG.info("✅ Data retention manager started (1-day retention, cleanup every 6 hours)");
             LOG.info("");
             LOG.info("Pipeline is now consuming JSON payloads from Kafka...");
-            LOG.info("Data will be persisted to: ./data/rail-comm/");
+            LOG.info("Data will be persisted to: ./data/rail-comm/ (daily rotation with 1-day retention)");
             LOG.info("Monitor console output for real-time rail communication data");
             
             // Execute the pipeline

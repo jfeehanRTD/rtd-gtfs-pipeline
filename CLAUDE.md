@@ -47,34 +47,81 @@ mvn clean package
 mvn clean package -DskipTests
 ```
 
+## Security Configuration
+
+### TIS Proxy Authentication
+The Bus SIRI and Rail Communication pipelines require authentication to connect to RTD's TIS Proxy. For security, credentials are managed via environment variables.
+
+#### Initial Setup (Required)
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env` with your actual credentials:
+   ```bash
+   # RTD TIS Proxy Configuration
+   TIS_PROXY_USERNAME=your_actual_username
+   TIS_PROXY_PASSWORD=your_actual_password
+   TIS_PROXY_HOST=http://tisproxy.rtd-denver.com
+   TIS_PROXY_SERVICE=siri
+   TIS_PROXY_TTL=90000
+   ```
+
+3. **IMPORTANT**: The `.env` file is automatically excluded from Git commits for security.
+
+#### Alternative: Export Environment Variables
+```bash
+export TIS_PROXY_USERNAME="your_username"
+export TIS_PROXY_PASSWORD="your_password"
+export TIS_PROXY_HOST="http://tisproxy.rtd-denver.com"
+```
+
 ### Run Commands
 
-#### RTD Control Script (Recommended)
-The easiest way to manage the RTD pipeline and React web app:
+#### Secure Startup (Recommended)
+Use the secure startup scripts that load credentials from environment variables:
+```bash
+# Bus SIRI pipeline
+./start-bus-siri-secure.sh
+
+# Rail Communication pipeline  
+./start-railcomm-secure.sh
+```
+
+#### RTD Control Script (General Pipeline Management)
+The easiest way to manage the RTD pipeline, React web app, and HTTP receivers:
 
 ```bash
-# Start both Java pipeline and React app
-./rtd-control.sh start
+# Start all services (Java, React, Bus & Rail receivers)
+./rtd-control.sh start all
 
-# Start only specific services
-./rtd-control.sh start java    # Java pipeline only
-./rtd-control.sh start react   # React app only
+# Start specific services
+./rtd-control.sh start java       # Java pipeline only
+./rtd-control.sh start react      # React app only
+./rtd-control.sh start bus        # Bus SIRI HTTP receiver only
+./rtd-control.sh start rail       # Rail Communication HTTP receiver only
+./rtd-control.sh start receivers  # Both HTTP receivers only
 
 # Check status of all services
 ./rtd-control.sh status
 
 # Stop services
-./rtd-control.sh stop          # Stop both
-./rtd-control.sh stop java     # Stop Java only
-./rtd-control.sh stop react    # Stop React only
+./rtd-control.sh stop all         # Stop everything
+./rtd-control.sh stop receivers   # Stop both HTTP receivers
+./rtd-control.sh stop bus         # Stop Bus SIRI receiver only
+./rtd-control.sh stop rail        # Stop Rail Communication receiver only
 
 # Restart services
-./rtd-control.sh restart       # Restart both
-./rtd-control.sh restart java  # Restart Java only
+./rtd-control.sh restart all      # Restart everything
+./rtd-control.sh restart receivers # Restart both HTTP receivers
+./rtd-control.sh restart bus      # Restart Bus SIRI receiver only
 
 # View real-time logs
-./rtd-control.sh logs java     # Java pipeline logs
-./rtd-control.sh logs react    # React app logs
+./rtd-control.sh logs java        # Java pipeline logs
+./rtd-control.sh logs react       # React app logs
+./rtd-control.sh logs bus         # Bus SIRI receiver logs
+./rtd-control.sh logs rail        # Rail Communication receiver logs
 
 # Clean up log files and temp directories
 ./rtd-control.sh cleanup
@@ -84,6 +131,34 @@ The easiest way to manage the RTD pipeline and React web app:
 ```
 
 #### Manual Commands (Alternative)
+
+**Bus SIRI Pipeline (Secure)**
+```bash
+# Preferred: Use environment variables (requires .env file or exported variables)
+java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar com.rtd.pipeline.BusCommHTTPReceiver
+
+# Alternative: Command line with credentials (less secure - avoid in production)
+java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar \
+  com.rtd.pipeline.BusCommHTTPReceiver \
+  http://tisproxy.rtd-denver.com siri 90000 username password
+
+# Bus data processing pipeline
+java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar com.rtd.pipeline.RTDBusCommSimplePipeline
+```
+
+**Rail Communication Pipeline (Secure)**
+```bash
+# Preferred: Use environment variables (requires .env file or exported variables)
+java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar com.rtd.pipeline.RailCommHTTPReceiver
+
+# Alternative: Command line with credentials (less secure - avoid in production)
+java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar \
+  com.rtd.pipeline.RailCommHTTPReceiver \
+  http://tisproxy.rtd-denver.com railcomm 90000 username password
+
+# Rail communication data processing pipeline
+java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar com.rtd.pipeline.RTDRailCommPipeline
+```
 
 **Local Development (Flink Mini Cluster)**
 ```bash

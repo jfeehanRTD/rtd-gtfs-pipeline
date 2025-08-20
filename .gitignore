@@ -18,3 +18,22 @@ Thumbs.db
 
 # Runtime
 *.pid
+
+# Security - Environment files containing secrets
+.env
+.env.local
+.env.production
+.env.staging
+
+# Credentials and sensitive configuration
+config/credentials.json
+config/secrets.yml
+credentials.properties
+secrets.properties
+
+# Private keys and certificates
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
