@@ -7,16 +7,15 @@
 set -e
 
 # Configuration
-JAVA_MAIN_CLASS="com.rtd.pipeline.RTDStaticDataPipeline"
-KAFKA_MAIN_CLASS="com.rtd.pipeline.RTDApiApplication"  # Use Spring Boot API server
-BUS_RECEIVER_CLASS="com.rtd.pipeline.BusCommHTTPReceiver"
-RAIL_RECEIVER_CLASS="com.rtd.pipeline.RailCommHTTPReceiver"
+RTD_PIPELINE_CLASS="com.rtd.pipeline.RTDStaticDataPipeline"
+SPRING_BOOT_API_CLASS="com.rtd.pipeline.RTDApiApplication"  # Use Spring Boot API server
 REACT_APP_DIR="rtd-maps-app"
-JAVA_LOG_FILE="rtd-api-server.log"
+RTD_PIPELINE_LOG_FILE="rtd-pipeline.log"
+SPRING_BOOT_LOG_FILE="rtd-api-server.log"
 REACT_LOG_FILE="react-app.log"
-BUS_RECEIVER_LOG_FILE="bus-receiver.log"
-RAIL_RECEIVER_LOG_FILE="rail-receiver.log"
 DOCKER_SETUP_SCRIPT="./scripts/docker-setup"
+
+# Note: Removed test data receivers - now using only real RTD GTFS-RT data
 
 # Colors for output
 RED='\033[0;31m'
@@ -58,13 +57,13 @@ get_pids() {
 start_java() {
     print_status "Starting RTD Spring Boot API Server..."
     
-    if check_process "$JAVA_MAIN_CLASS"; then
+    if check_process "$RTD_PIPELINE_CLASS"; then
         print_warning "API server is already running"
         return 0
     fi
     
     # Start in background with logging
-    nohup mvn exec:java -Dexec.mainClass="$JAVA_MAIN_CLASS" -q > "$JAVA_LOG_FILE" 2>&1 &
+    nohup mvn exec:java -Dexec.mainClass="$RTD_PIPELINE_CLASS" -q > "$RTD_PIPELINE_LOG_FILE" 2>&1 &
     local java_pid=$!
     
     # Wait a moment to check if it started successfully
@@ -118,7 +117,7 @@ start_react() {
 stop_java() {
     print_status "Stopping RTD Spring Boot API Server..."
     
-    local pids=$(get_pids "$JAVA_MAIN_CLASS")
+    local pids=$(get_pids "$RTD_PIPELINE_CLASS")
     if [ -z "$pids" ]; then
         print_warning "No API server processes found"
         return 0
@@ -185,137 +184,23 @@ stop_react() {
     print_success "React app stopped"
 }
 
-# Function to start Bus SIRI HTTP Receiver
-start_bus_receiver() {
-    print_status "Starting Bus SIRI HTTP Receiver..."
-    
-    if check_process "$BUS_RECEIVER_CLASS"; then
-        print_warning "Bus SIRI HTTP Receiver is already running"
-        return 0
-    fi
-    
-    # Start in background with logging
-    nohup mvn exec:java -Dexec.mainClass="$BUS_RECEIVER_CLASS" -Dexec.cleanupDaemonThreads=false -q > "$BUS_RECEIVER_LOG_FILE" 2>&1 &
-    local bus_pid=$!
-    
-    # Wait a moment to check if it started successfully
-    sleep 5
-    
-    if kill -0 $bus_pid 2>/dev/null; then
-        print_success "Bus SIRI HTTP Receiver started (PID: $bus_pid)"
-        print_status "  ↳ Endpoint: http://localhost:8082/bus-siri"
-        print_status "  ↳ Latest Data: http://localhost:8082/bus-siri/latest"
-        print_status "  ↳ Health: http://localhost:8082/health"
-        print_status "  ↳ Logs: tail -f $BUS_RECEIVER_LOG_FILE"
-    else
-        print_error "Failed to start Bus SIRI HTTP Receiver"
-        return 1
-    fi
-}
-
-# Function to start Rail Communication HTTP Receiver
-start_rail_receiver() {
-    print_status "Starting Rail Communication HTTP Receiver..."
-    
-    if check_process "$RAIL_RECEIVER_CLASS"; then
-        print_warning "Rail Communication HTTP Receiver is already running"
-        return 0
-    fi
-    
-    # Start in background with logging
-    nohup mvn exec:java -Dexec.mainClass="$RAIL_RECEIVER_CLASS" -Dexec.cleanupDaemonThreads=false -q > "$RAIL_RECEIVER_LOG_FILE" 2>&1 &
-    local rail_pid=$!
-    
-    # Wait a moment to check if it started successfully
-    sleep 5
-    
-    if kill -0 $rail_pid 2>/dev/null; then
-        print_success "Rail Communication HTTP Receiver started (PID: $rail_pid)"
-        print_status "  ↳ Endpoint: http://localhost:8081/rail-comm"
-        print_status "  ↳ Latest Data: http://localhost:8081/rail-comm/latest"
-        print_status "  ↳ Health: http://localhost:8081/health"
-        print_status "  ↳ Logs: tail -f $RAIL_RECEIVER_LOG_FILE"
-    else
-        print_error "Failed to start Rail Communication HTTP Receiver"
-        return 1
-    fi
-}
-
-# Function to stop Bus SIRI HTTP Receiver
-stop_bus_receiver() {
-    print_status "Stopping Bus SIRI HTTP Receiver..."
-    
-    local pids=$(get_pids "$BUS_RECEIVER_CLASS")
-    if [ -z "$pids" ]; then
-        print_warning "No Bus SIRI HTTP Receiver processes found"
-        return 0
-    fi
-    
-    for pid in $pids; do
-        print_status "Killing Bus receiver process $pid"
-        kill -TERM $pid 2>/dev/null || true
-        
-        # Wait up to 10 seconds for graceful shutdown
-        local count=0
-        while kill -0 $pid 2>/dev/null && [ $count -lt 10 ]; do
-            sleep 1
-            count=$((count + 1))
-        done
-        
-        # Force kill if still running
-        if kill -0 $pid 2>/dev/null; then
-            print_warning "Force killing Bus receiver process $pid"
-            kill -KILL $pid 2>/dev/null || true
-        fi
-    done
-    
-    print_success "Bus SIRI HTTP Receiver stopped"
-}
-
-# Function to stop Rail Communication HTTP Receiver
-stop_rail_receiver() {
-    print_status "Stopping Rail Communication HTTP Receiver..."
-    
-    local pids=$(get_pids "$RAIL_RECEIVER_CLASS")
-    if [ -z "$pids" ]; then
-        print_warning "No Rail Communication HTTP Receiver processes found"
-        return 0
-    fi
-    
-    for pid in $pids; do
-        print_status "Killing Rail receiver process $pid"
-        kill -TERM $pid 2>/dev/null || true
-        
-        # Wait up to 10 seconds for graceful shutdown
-        local count=0
-        while kill -0 $pid 2>/dev/null && [ $count -lt 10 ]; do
-            sleep 1
-            count=$((count + 1))
-        done
-        
-        # Force kill if still running
-        if kill -0 $pid 2>/dev/null; then
-            print_warning "Force killing Rail receiver process $pid"
-            kill -KILL $pid 2>/dev/null || true
-        fi
-    done
-    
-    print_success "Rail Communication HTTP Receiver stopped"
-}
+# Note: Removed Bus SIRI and Rail Communication HTTP Receivers
+# Now using only real RTD GTFS-RT data from RTDStaticDataPipeline
 
 # Function to show status of all processes
 status() {
     print_status "RTD Pipeline Status"
     echo
     
-    # Check Spring Boot API server
-    if check_process "$JAVA_MAIN_CLASS"; then
-        local java_pids=$(get_pids "$JAVA_MAIN_CLASS")
-        print_success "Spring Boot API Server: RUNNING (PIDs: $java_pids)"
+    # Check RTD Live Data Pipeline
+    if check_process "$RTD_PIPELINE_CLASS"; then
+        local rtd_pids=$(get_pids "$RTD_PIPELINE_CLASS")
+        print_success "RTD Live Data Pipeline: RUNNING (PIDs: $rtd_pids)"
         print_status "  ↳ Health: http://localhost:8080/api/health"
-        print_status "  ↳ Occupancy: http://localhost:8080/api/occupancy/status"
+        print_status "  ↳ Vehicle Data: http://localhost:8080/api/vehicles"
+        print_status "  ↳ Schedule Data: http://localhost:8080/api/schedule"
     else
-        print_warning "Spring Boot API Server: STOPPED"
+        print_warning "RTD Live Data Pipeline: STOPPED"
     fi
     
     # Check React app
@@ -330,34 +215,12 @@ status() {
         print_warning "React Web App: STOPPED"
     fi
     
-    # Check Bus SIRI HTTP Receiver
-    if check_process "$BUS_RECEIVER_CLASS"; then
-        local bus_pids=$(get_pids "$BUS_RECEIVER_CLASS")
-        print_success "Bus SIRI HTTP Receiver: RUNNING (PIDs: $bus_pids)"
-        print_status "  ↳ Endpoint: http://localhost:8082/bus-siri"
-        print_status "  ↳ Latest Data: http://localhost:8082/bus-siri/latest"
-        print_status "  ↳ Health: http://localhost:8082/health"
-    else
-        print_warning "Bus SIRI HTTP Receiver: STOPPED"
-    fi
-    
-    # Check Rail Communication HTTP Receiver
-    if check_process "$RAIL_RECEIVER_CLASS"; then
-        local rail_pids=$(get_pids "$RAIL_RECEIVER_CLASS")
-        print_success "Rail Communication HTTP Receiver: RUNNING (PIDs: $rail_pids)"
-        print_status "  ↳ Endpoint: http://localhost:8081/rail-comm"
-        print_status "  ↳ Latest Data: http://localhost:8081/rail-comm/latest"
-        print_status "  ↳ Health: http://localhost:8081/health"
-    else
-        print_warning "Rail Communication HTTP Receiver: STOPPED"
-    fi
-    
     echo
     
     # Check port usage
     print_status "Port Status:"
     if lsof -ti:8080 > /dev/null 2>&1; then
-        print_status "  ↳ Port 8080: IN USE (Java API)"
+        print_status "  ↳ Port 8080: IN USE (RTD Pipeline API)"
     else
         print_status "  ↳ Port 8080: AVAILABLE"
     fi
@@ -366,18 +229,6 @@ status() {
         print_status "  ↳ Port 3000: IN USE (React App)"
     else
         print_status "  ↳ Port 3000: AVAILABLE"
-    fi
-    
-    if lsof -ti:8082 > /dev/null 2>&1; then
-        print_status "  ↳ Port 8082: IN USE (Bus SIRI Receiver)"
-    else
-        print_status "  ↳ Port 8082: AVAILABLE"
-    fi
-    
-    if lsof -ti:8081 > /dev/null 2>&1; then
-        print_status "  ↳ Port 8081: IN USE (Rail Comm Receiver)"
-    else
-        print_status "  ↳ Port 8081: AVAILABLE"
     fi
 }
 
@@ -562,10 +413,9 @@ cleanup() {
     print_status "Cleaning up RTD Pipeline files..."
     
     # Remove log files
-    [ -f "$JAVA_LOG_FILE" ] && rm -f "$JAVA_LOG_FILE" && print_success "Removed $JAVA_LOG_FILE"
+    [ -f "$RTD_PIPELINE_LOG_FILE" ] && rm -f "$RTD_PIPELINE_LOG_FILE" && print_success "Removed $RTD_PIPELINE_LOG_FILE"
     [ -f "$REACT_LOG_FILE" ] && rm -f "$REACT_LOG_FILE" && print_success "Removed $REACT_LOG_FILE"
-    [ -f "$BUS_RECEIVER_LOG_FILE" ] && rm -f "$BUS_RECEIVER_LOG_FILE" && print_success "Removed $BUS_RECEIVER_LOG_FILE"
-    [ -f "$RAIL_RECEIVER_LOG_FILE" ] && rm -f "$RAIL_RECEIVER_LOG_FILE" && print_success "Removed $RAIL_RECEIVER_LOG_FILE"
+    # Note: Bus and Rail receiver log files removed - now using only RTD Pipeline
     
     # Remove nohup.out if it exists
     [ -f "nohup.out" ] && rm -f "nohup.out" && print_success "Removed nohup.out"
@@ -593,11 +443,11 @@ logs() {
     
     case "$service" in
         "java")
-            if [ -f "$JAVA_LOG_FILE" ]; then
-                print_status "Showing Java pipeline logs (Ctrl+C to exit):"
-                tail -f "$JAVA_LOG_FILE"
+            if [ -f "$RTD_PIPELINE_LOG_FILE" ]; then
+                print_status "Showing RTD pipeline logs (Ctrl+C to exit):"
+                tail -f "$RTD_PIPELINE_LOG_FILE"
             else
-                print_error "Java log file not found: $JAVA_LOG_FILE"
+                print_error "RTD pipeline log file not found: $RTD_PIPELINE_LOG_FILE"
             fi
             ;;
         "react")
@@ -608,24 +458,8 @@ logs() {
                 print_error "React log file not found: $REACT_LOG_FILE"
             fi
             ;;
-        "bus")
-            if [ -f "$BUS_RECEIVER_LOG_FILE" ]; then
-                print_status "Showing Bus SIRI HTTP Receiver logs (Ctrl+C to exit):"
-                tail -f "$BUS_RECEIVER_LOG_FILE"
-            else
-                print_error "Bus receiver log file not found: $BUS_RECEIVER_LOG_FILE"
-            fi
-            ;;
-        "rail")
-            if [ -f "$RAIL_RECEIVER_LOG_FILE" ]; then
-                print_status "Showing Rail Communication HTTP Receiver logs (Ctrl+C to exit):"
-                tail -f "$RAIL_RECEIVER_LOG_FILE"
-            else
-                print_error "Rail receiver log file not found: $RAIL_RECEIVER_LOG_FILE"
-            fi
-            ;;
         *)
-            print_error "Please specify 'java', 'react', 'bus', or 'rail' for logs"
+            print_error "Please specify 'java' or 'react' for logs"
             ;;
     esac
 }
@@ -645,40 +479,16 @@ restart() {
             sleep 2
             start_react
             ;;
-        "bus")
-            stop_bus_receiver
-            sleep 2
-            start_bus_receiver
-            ;;
-        "rail")
-            stop_rail_receiver
-            sleep 2
-            start_rail_receiver
-            ;;
-        "receivers")
-            stop_bus_receiver
-            stop_rail_receiver
-            sleep 3
-            start_bus_receiver
-            sleep 3
-            start_rail_receiver
-            ;;
         "all")
             stop_java
             stop_react
-            stop_bus_receiver
-            stop_rail_receiver
             sleep 3
             start_java
             sleep 3
             start_react
-            sleep 3
-            start_bus_receiver
-            sleep 3
-            start_rail_receiver
             ;;
         *)
-            print_error "Please specify 'java', 'react', 'bus', 'rail', 'receivers', or 'all' for restart"
+            print_error "Please specify 'java', 'react', or 'all' for restart"
             ;;
     esac
 }
@@ -694,28 +504,13 @@ main() {
                 "react")
                     start_react
                     ;;
-                "bus")
-                    start_bus_receiver
-                    ;;
-                "rail")
-                    start_rail_receiver
-                    ;;
-                "receivers")
-                    start_bus_receiver
-                    sleep 3
-                    start_rail_receiver
-                    ;;
                 "all")
                     start_java
                     sleep 3
                     start_react
-                    sleep 3
-                    start_bus_receiver
-                    sleep 3
-                    start_rail_receiver
                     ;;
                 *)
-                    print_error "Usage: $0 start [java|react|bus|rail|receivers|all]"
+                    print_error "Usage: $0 start [java|react|all]"
                     exit 1
                     ;;
             esac
@@ -728,24 +523,12 @@ main() {
                 "react")
                     stop_react
                     ;;
-                "bus")
-                    stop_bus_receiver
-                    ;;
-                "rail")
-                    stop_rail_receiver
-                    ;;
-                "receivers")
-                    stop_bus_receiver
-                    stop_rail_receiver
-                    ;;
                 "all")
                     stop_java
                     stop_react
-                    stop_bus_receiver
-                    stop_rail_receiver
                     ;;
                 *)
-                    print_error "Usage: $0 stop [java|react|bus|rail|receivers|all]"
+                    print_error "Usage: $0 stop [java|react|all]"
                     exit 1
                     ;;
             esac
@@ -821,6 +604,16 @@ main() {
                         print_warning "Direct Kafka Bridge is already running"
                     fi
                     ;;
+                "bridge-stop")
+                    print_status "Stopping RTD Direct Kafka Bridge..."
+                    local bridge_pids=$(get_pids "DirectKafkaBridge")
+                    if [[ -n "$bridge_pids" ]]; then
+                        echo "$bridge_pids" | xargs kill -TERM
+                        print_success "Direct Kafka Bridge stopped"
+                    else
+                        print_warning "Direct Kafka Bridge is not running"
+                    fi
+                    ;;
                 "test")
                     print_status "Testing RTD Rail Communication Pipeline..."
                     ./scripts/test-rail-comm.sh send
@@ -849,6 +642,10 @@ main() {
                     print_status "Benchmarking rail comm endpoints..."
                     ./scripts/proxy-subscribe-bridge.sh benchmark
                     ;;
+                "test-bridge")
+                    print_status "Testing Direct Kafka Bridge..."
+                    ./scripts/test-direct-kafka-bridge.sh
+                    ;;
                 "unsubscribe")
                     print_status "Unsubscribing from rail comm proxy feed..."
                     ./scripts/proxy-subscribe.sh unsubscribe
@@ -864,11 +661,13 @@ main() {
                     print_status "  run              - Start the rail comm pipeline"
                     print_status "  receiver         - Start HTTP receiver for proxy data (original)"
                     print_status "  bridge           - Start Direct Kafka Bridge (optimized)"
+                    print_status "  bridge-stop      - Stop Direct Kafka Bridge"
                     echo
                     print_status "Testing & Monitoring:"
                     print_status "  test             - Send test JSON payloads"
                     print_status "  monitor          - Monitor rail comm topic"
                     print_status "  test-endpoints   - Test connectivity to all endpoints"
+                    print_status "  test-bridge      - Test Direct Kafka Bridge functionality"
                     print_status "  benchmark        - Benchmark performance of all endpoints"
                     echo
                     print_status "Proxy Subscription:"
@@ -998,13 +797,13 @@ main() {
             echo "Usage: $0 COMMAND [OPTIONS]"
             echo
             echo "Commands:"
-            echo "  start [java|react|bus|rail|receivers|all]    Start services locally (default: all)"
-            echo "  stop [java|react|bus|rail|receivers|all]     Stop services (default: all)"
-            echo "  restart [java|react|bus|rail|receivers|all]  Restart services (default: all)"
+            echo "  start [java|react|all]    Start services locally (default: all)"
+            echo "  stop [java|react|all]     Stop services (default: all)"
+            echo "  restart [java|react|all]  Restart services (default: all)"
             echo "  docker [start|stop|status] Run with Docker/Kafka (recommended)"
             echo "  podman [start|stop|status] Run with Podman/Kafka (Docker alternative)"
             echo "  status                    Show status of all services"
-            echo "  logs [java|react|bus|rail] Show real-time logs"
+            echo "  logs [java|react] Show real-time logs"
             echo "  rail-comm [run|test|monitor] Rail communication pipeline commands"
             echo "  bus-comm [run|receiver|monitor] Bus communication pipeline (SIRI)"
             echo "  gtfs-table [interactive|processor|api] GTFS static data table system"
@@ -1019,15 +818,13 @@ main() {
             echo "  $0 docker restart         # Restart container services"
             echo
             echo "Local Mode Examples:"
-            echo "  $0 start                  # Start all services (Java, React, Bus & Rail receivers)"
-            echo "  $0 start java             # Start only Java pipeline"
-            echo "  $0 start receivers        # Start only Bus & Rail HTTP receivers"
-            echo "  $0 start bus              # Start only Bus SIRI HTTP receiver"
-            echo "  $0 stop rail              # Stop only Rail Communication HTTP receiver"
+            echo "  $0 start                  # Start all services (RTD Pipeline & React)"
+            echo "  $0 start java             # Start only RTD pipeline"
+            echo "  $0 start react            # Start only React app"
             echo "  $0 restart all            # Restart all services"
             echo "  $0 status                 # Check status"
-            echo "  $0 logs bus               # Follow Bus receiver logs"
-            echo "  $0 logs rail              # Follow Rail receiver logs"
+            echo "  $0 logs java              # Follow RTD pipeline logs"
+            echo "  $0 logs react             # Follow React app logs"
             echo "  $0 cleanup                # Clean up files"
             echo
             echo "Rail Communication Pipeline:"

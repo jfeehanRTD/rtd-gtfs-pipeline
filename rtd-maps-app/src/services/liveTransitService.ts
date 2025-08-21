@@ -6,6 +6,7 @@ import axios from 'axios';
 export interface SIRIVehicleData {
   timestamp_ms: number;
   vehicle_id: string;
+  vehicle_label: string;
   route_id: string;
   direction: string;
   latitude: number;
@@ -61,12 +62,12 @@ export class LiveTransitService {
   private updateInterval: ReturnType<typeof setInterval> | null = null;
   private updateIntervalMs = 5000; // 5 second updates for live data
   
-  // HTTP endpoints that serve data from the Flink pipelines
-  private readonly SIRI_ENDPOINT = 'http://localhost:8082/bus-siri/latest'; // Bus SIRI data
-  private readonly RAIL_ENDPOINT = 'http://localhost:8081/rail-comm/latest'; // Rail Communication data
+  // HTTP endpoints that serve live RTD data
+  private readonly RTD_VEHICLES_ENDPOINT = 'http://localhost:8080/api/vehicles'; // Real RTD GTFS-RT vehicle data
+  private readonly RTD_HEALTH_ENDPOINT = 'http://localhost:8080/api/health'; // Health check
   
-  // Fallback to reading from Kafka topics directly if HTTP endpoints not available
-  private readonly KAFKA_PROXY_BASE = 'http://localhost:8090/api'; // Kafka consumer proxy
+  // Note: Using real RTD GTFS-RT data instead of test data
+  // This connects to the RTDStaticDataPipeline which fetches from https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/VehiclePosition.pb
 
   public static getInstance(): LiveTransitService {
     if (!LiveTransitService.instance) {
@@ -80,42 +81,31 @@ export class LiveTransitService {
   }
 
   private async initializeService(): Promise<void> {
-    console.log('🚍🚊 Initializing Live Transit Service - SIRI Bus + Rail Communication...');
+    console.log('🚍🚊 Initializing Live Transit Service - RTD GTFS-RT Live Data...');
+    console.log('📡 Connecting to real RTD vehicle positions from rtd-denver.com');
     
     await this.testConnections();
     this.startDataPolling();
   }
 
   private async testConnections(): Promise<void> {
-    let siriConnected = false;
-    let railConnected = false;
+    let rtdConnected = false;
 
     try {
-      // Test SIRI Bus endpoint
-      const siriResponse = await axios.get(`${this.SIRI_ENDPOINT}`, { timeout: 3000 });
-      if (siriResponse.status === 200) {
-        console.log('✅ Connected to SIRI Bus data endpoint');
-        siriConnected = true;
+      // Test RTD live data endpoint
+      const rtdResponse = await axios.get(this.RTD_HEALTH_ENDPOINT, { timeout: 3000 });
+      if (rtdResponse.status === 200) {
+        console.log('✅ Connected to RTD live data pipeline');
+        rtdConnected = true;
       }
     } catch (error) {
-      console.warn('⚠️ SIRI Bus endpoint not available, will try Kafka proxy...');
+      console.warn('⚠️ RTD live data pipeline not available');
     }
 
-    try {
-      // Test Rail Communication endpoint
-      const railResponse = await axios.get(`${this.RAIL_ENDPOINT}`, { timeout: 3000 });
-      if (railResponse.status === 200) {
-        console.log('✅ Connected to Rail Communication data endpoint');
-        railConnected = true;
-      }
-    } catch (error) {
-      console.warn('⚠️ Rail Communication endpoint not available, will try Kafka proxy...');
-    }
-
-    this.connectionState.isConnected = siriConnected || railConnected;
+    this.connectionState.isConnected = rtdConnected;
     
     if (!this.connectionState.isConnected) {
-      this.connectionState.error = 'Neither SIRI nor Rail Communication endpoints available';
+      this.connectionState.error = 'RTD live data pipeline not available';
     } else {
       this.connectionState.error = null;
     }
@@ -134,12 +124,7 @@ export class LiveTransitService {
   }
 
   private async fetchLiveData(): Promise<void> {
-    const promises = [
-      this.fetchSIRIData(),
-      this.fetchRailData()
-    ];
-
-    await Promise.allSettled(promises);
+    await this.fetchRTDVehicleData();
     
     // Update connection state
     this.connectionState.lastUpdate = new Date();
@@ -150,95 +135,118 @@ export class LiveTransitService {
     this.notifyListeners();
   }
 
-  private async fetchSIRIData(): Promise<void> {
+  private async fetchRTDVehicleData(): Promise<void> {
     try {
-      // Try primary endpoint first
-      let response;
-      try {
-        response = await axios.get(this.SIRI_ENDPOINT, { timeout: 3000 });
-      } catch (error) {
-        // Fallback to Kafka proxy
-        response = await axios.get(`${this.KAFKA_PROXY_BASE}/siri/latest`, { timeout: 3000 });
-      }
+      console.log('📡 Fetching live RTD vehicle data...');
+      const response = await axios.get(this.RTD_VEHICLES_ENDPOINT, { timeout: 10000 });
 
-      if (response.data) {
-        // Handle both single object and array responses
-        const busData = Array.isArray(response.data) ? response.data : [response.data];
+      if (response.data && response.data.vehicles) {
+        const vehicles = response.data.vehicles;
         
-        busData.forEach((bus: any) => {
-          if (bus && bus.vehicle_id) {
-            const siriVehicle: SIRIVehicleData = {
-              timestamp_ms: bus.timestamp_ms || Date.now(),
-              vehicle_id: bus.vehicle_id,
-              route_id: bus.route_id || 'UNKNOWN',
-              direction: bus.direction || 'UNKNOWN',
-              latitude: parseFloat(bus.latitude) || 0,
-              longitude: parseFloat(bus.longitude) || 0,
-              speed_mph: parseFloat(bus.speed_mph) || 0,
-              status: bus.status || 'UNKNOWN',
-              next_stop: bus.next_stop || '',
-              delay_seconds: parseInt(bus.delay_seconds) || 0,
-              occupancy: bus.occupancy || 'UNKNOWN',
-              block_id: bus.block_id || '',
-              trip_id: bus.trip_id || '',
-              last_updated: new Date(),
-              is_real_time: (Date.now() - (bus.timestamp_ms || 0)) < 300000 // Real-time if < 5 minutes
-            };
-
-            this.busVehicles.set(bus.vehicle_id, siriVehicle);
+        // Clear old data
+        this.busVehicles.clear();
+        this.trainVehicles.clear();
+        
+        vehicles.forEach((vehicle: any) => {
+          if (vehicle && vehicle.vehicle_id && vehicle.latitude && vehicle.longitude) {
+            // Determine if this is a bus or train based on route_id patterns
+            const routeId = vehicle.route_id || 'UNKNOWN';
+            const isLightRail = this.isLightRailRoute(routeId);
+            
+            if (isLightRail) {
+              // Treat as train/light rail
+              const railVehicle: RailCommData = {
+                timestamp_ms: vehicle.timestamp_ms || Date.now(),
+                train_id: vehicle.vehicle_id,
+                line_id: routeId,
+                direction: this.getDirectionFromBearing(vehicle.bearing) || 'UNKNOWN',
+                latitude: parseFloat(vehicle.latitude) || 0,
+                longitude: parseFloat(vehicle.longitude) || 0,
+                speed_mph: parseFloat(vehicle.speed) || 0,
+                status: this.mapVehicleStatus(vehicle.current_status) || 'UNKNOWN',
+                next_station: '',
+                delay_seconds: 0,
+                operator_message: '',
+                last_updated: new Date(),
+                is_real_time: true
+              };
+              this.trainVehicles.set(vehicle.vehicle_id, railVehicle);
+            } else {
+              // Treat as bus
+              const busVehicle: SIRIVehicleData = {
+                timestamp_ms: vehicle.timestamp_ms || Date.now(),
+                vehicle_id: vehicle.vehicle_id,
+                vehicle_label: vehicle.vehicle_label || vehicle.vehicle_id,
+                route_id: routeId,
+                direction: this.getDirectionFromBearing(vehicle.bearing) || 'UNKNOWN',
+                latitude: parseFloat(vehicle.latitude) || 0,
+                longitude: parseFloat(vehicle.longitude) || 0,
+                speed_mph: parseFloat(vehicle.speed) || 0,
+                status: this.mapVehicleStatus(vehicle.current_status) || 'IN_TRANSIT',
+                next_stop: '',
+                delay_seconds: 0,
+                occupancy: this.mapOccupancyStatus(vehicle.occupancy_status) || 'UNKNOWN',
+                block_id: '',
+                trip_id: vehicle.trip_id || '',
+                last_updated: new Date(),
+                is_real_time: true
+              };
+              this.busVehicles.set(vehicle.vehicle_id, busVehicle);
+            }
           }
         });
 
-        console.log(`🚌 Fetched ${busData.length} SIRI bus vehicles`);
+        console.log(`🚌 Processed ${this.busVehicles.size} buses and 🚊 ${this.trainVehicles.size} light rail vehicles from RTD live data`);
       }
       
     } catch (error) {
-      console.error('❌ Failed to fetch SIRI data:', error);
+      console.error('❌ Failed to fetch RTD vehicle data:', error);
+      this.connectionState.error = 'Failed to fetch RTD vehicle data';
     }
   }
 
-  private async fetchRailData(): Promise<void> {
-    try {
-      // Try primary endpoint first
-      let response;
-      try {
-        response = await axios.get(this.RAIL_ENDPOINT, { timeout: 3000 });
-      } catch (error) {
-        // Fallback to Kafka proxy
-        response = await axios.get(`${this.KAFKA_PROXY_BASE}/rail/latest`, { timeout: 3000 });
-      }
+  private isLightRailRoute(routeId: string): boolean {
+    // RTD Light Rail lines: A, B, C, D, E, F, G, H, N, R, W
+    const lightRailLines = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'N', 'R', 'W'];
+    return lightRailLines.includes(routeId.toUpperCase());
+  }
 
-      if (response.data) {
-        // Handle both single object and array responses
-        const railData = Array.isArray(response.data) ? response.data : [response.data];
-        
-        railData.forEach((train: any) => {
-          if (train && train.train_id) {
-            const railVehicle: RailCommData = {
-              timestamp_ms: train.timestamp_ms || Date.now(),
-              train_id: train.train_id,
-              line_id: train.line_id || 'UNKNOWN',
-              direction: train.direction || 'UNKNOWN',
-              latitude: parseFloat(train.latitude) || 0,
-              longitude: parseFloat(train.longitude) || 0,
-              speed_mph: parseFloat(train.speed_mph) || 0,
-              status: train.status || 'UNKNOWN',
-              next_station: train.next_station || '',
-              delay_seconds: parseInt(train.delay_seconds) || 0,
-              operator_message: train.operator_message || '',
-              last_updated: new Date(),
-              is_real_time: (Date.now() - (train.timestamp_ms || 0)) < 300000 // Real-time if < 5 minutes
-            };
+  private getDirectionFromBearing(bearing: number): string {
+    if (bearing == null) return 'UNKNOWN';
+    
+    // Convert bearing to cardinal directions
+    if (bearing >= 315 || bearing < 45) return 'NORTHBOUND';
+    if (bearing >= 45 && bearing < 135) return 'EASTBOUND';
+    if (bearing >= 135 && bearing < 225) return 'SOUTHBOUND';
+    if (bearing >= 225 && bearing < 315) return 'WESTBOUND';
+    
+    return 'UNKNOWN';
+  }
 
-            this.trainVehicles.set(train.train_id, railVehicle);
-          }
-        });
+  private mapVehicleStatus(status: string): string {
+    if (!status) return 'IN_TRANSIT';
+    
+    // Map GTFS-RT vehicle status to display status
+    switch (status.toUpperCase()) {
+      case 'INCOMING_AT': return 'APPROACHING';
+      case 'STOPPED_AT': return 'AT_STOP';
+      case 'IN_TRANSIT_TO': return 'IN_TRANSIT';
+      default: return 'IN_TRANSIT';
+    }
+  }
 
-        console.log(`🚊 Fetched ${railData.length} rail communication vehicles`);
-      }
-      
-    } catch (error) {
-      console.error('❌ Failed to fetch Rail Communication data:', error);
+  private mapOccupancyStatus(occupancy: string): string {
+    if (!occupancy) return 'UNKNOWN';
+    
+    // Map GTFS-RT occupancy status to display status
+    switch (occupancy.toUpperCase()) {
+      case 'EMPTY': return 'EMPTY';
+      case 'MANY_SEATS_AVAILABLE': return 'MANY_SEATS_AVAILABLE';
+      case 'FEW_SEATS_AVAILABLE': return 'FEW_SEATS_AVAILABLE';
+      case 'STANDING_ROOM_ONLY': return 'STANDING_ROOM_ONLY';
+      case 'CRUSHED_STANDING_ROOM_ONLY': return 'CRUSHED_STANDING_ROOM_ONLY';
+      case 'FULL': return 'FULL';
+      default: return 'UNKNOWN';
     }
   }
 

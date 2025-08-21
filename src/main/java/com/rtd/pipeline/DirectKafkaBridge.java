@@ -45,6 +45,7 @@ public class DirectKafkaBridge {
     private final KafkaProducer<String, String> kafkaProducer;
     private final HttpServer httpServer;
     private final ExecutorService executorService;
+    private final long startTime = System.currentTimeMillis();
     
     public DirectKafkaBridge() throws IOException {
         // Initialize optimized Kafka producer
@@ -116,6 +117,12 @@ public class DirectKafkaBridge {
             String method = exchange.getRequestMethod();
             String path = exchange.getRequestURI().getPath();
             
+            // Handle CORS preflight requests
+            if ("OPTIONS".equals(method)) {
+                handleCorsPreflight(exchange);
+                return;
+            }
+            
             // Extract topic from URL path: /kafka/{topic}
             String topic = DEFAULT_TOPIC;
             if (path.startsWith(BRIDGE_PATH + "/")) {
@@ -132,6 +139,13 @@ public class DirectKafkaBridge {
             } else {
                 sendErrorResponse(exchange, 405, "Method not allowed");
             }
+        }
+        
+        private void handleCorsPreflight(HttpExchange exchange) throws IOException {
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+            exchange.sendResponseHeaders(200, -1);
         }
         
         private void handlePostRequest(HttpExchange exchange, String topic) throws IOException {
@@ -193,6 +207,12 @@ public class DirectKafkaBridge {
         public void handle(HttpExchange exchange) throws IOException {
             String method = exchange.getRequestMethod();
             
+            // Handle CORS preflight requests
+            if ("OPTIONS".equals(method)) {
+                handleCorsPreflight(exchange);
+                return;
+            }
+            
             if ("POST".equals(method)) {
                 handleRailCommPost(exchange);
             } else if ("GET".equals(method)) {
@@ -200,6 +220,13 @@ public class DirectKafkaBridge {
             } else {
                 sendErrorResponse(exchange, 405, "Method not allowed");
             }
+        }
+        
+        private void handleCorsPreflight(HttpExchange exchange) throws IOException {
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+            exchange.sendResponseHeaders(200, -1);
         }
         
         private void handleRailCommPost(HttpExchange exchange) throws IOException {
@@ -297,8 +324,6 @@ public class DirectKafkaBridge {
             sendJsonResponse(exchange, 200, response);
         }
     }
-    
-    private final long startTime = System.currentTimeMillis();
     
     /**
      * Async Kafka publishing for better performance

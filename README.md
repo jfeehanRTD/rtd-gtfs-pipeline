@@ -89,6 +89,43 @@ This version includes major improvements for live RTD data integration:
 - ✅ **Flink 2.1.0 Compatibility**: Resolved DataStream API serialization issues with Simple Table API pipeline
 - ✅ **End-to-End Bus Integration**: Complete SIRI HTTP receiver → Kafka → Simple Pipeline workflow
 
+## Achievement Tracking
+
+This project includes an automated achievement tracking system to maintain a comprehensive history of major accomplishments.
+
+### Using the Achievement Appender
+
+```bash
+# Interactive mode (recommended)
+./scripts/append-achievement.sh --interactive
+
+# Command line mode
+./scripts/append-achievement.sh \
+  --title "Feature Implementation" \
+  --description "Implemented new GTFS-RT validation" \
+  --accomplishments "Validation Logic,Test Suite,Documentation" \
+  --technical "Added protobuf validation with 99% accuracy" \
+  --commands "./scripts/test.sh,./scripts/deploy.sh" \
+  --files "src/Validation.java:Core validation logic,docs/guide.md:User documentation"
+```
+
+### Achievement Categories
+- **New Feature Implementation**: Complete new functionality
+- **Performance Improvements**: Significant performance gains
+- **Test Suite Creation**: Comprehensive testing implementation
+- **Documentation Milestones**: Major documentation updates
+- **Deployment Success**: Successful production deployments
+- **Bug Fixes**: Critical bug fixes with significant impact
+- **Architecture Improvements**: Major architectural changes
+- **Integration Success**: Successful integration with external systems
+
+### Viewing Achievements
+All achievements are tracked in `cursor_context.md` with detailed information including:
+- Technical details and performance metrics
+- Usage commands and examples
+- Files created or modified
+- Timestamps and chronological order
+
 ## 🚀 Quick Start
 
 ### One-Command Setup (Fastest)

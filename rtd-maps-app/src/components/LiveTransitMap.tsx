@@ -29,6 +29,51 @@ L.Icon.Default.mergeOptions({
 // Custom icons for vehicles
 const createBusIcon = (routeId: string, occupancy: string) => {
   const color = getOccupancyColor(occupancy);
+  const isFF = routeId.startsWith('FF');
+  
+  // FF buses get special BRT styling
+  if (isFF) {
+    return new L.DivIcon({
+      html: `
+        <div style="
+          background: linear-gradient(45deg, ${color}, #0066CC);
+          border: 2px solid #FFD700;
+          border-radius: 6px;
+          width: 28px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 9px;
+          font-weight: bold;
+          color: white;
+          box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+          position: relative;
+        ">
+          ${routeId}
+          <div style="
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: #FFD700;
+            border-radius: 50%;
+            width: 8px;
+            height: 8px;
+            font-size: 6px;
+            color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">⚡</div>
+        </div>
+      `,
+      className: 'bus-marker ff-bus',
+      iconSize: [28, 20],
+      iconAnchor: [14, 10]
+    });
+  }
+  
+  // Regular buses
   return new L.DivIcon({
     html: `
       <div style="
@@ -314,7 +359,7 @@ const LiveTransitMap: React.FC = () => {
                   <Bus className="w-5 h-5 text-blue-600" />
                   <div>
                     <h3 className="font-semibold">Route {bus.route_id}</h3>
-                    <p className="text-sm text-gray-600">Bus {bus.vehicle_id}</p>
+                    <p className="text-sm text-gray-600">Bus {bus.vehicle_label || bus.vehicle_id}</p>
                   </div>
                 </div>
                 

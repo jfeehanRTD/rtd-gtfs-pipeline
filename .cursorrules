@@ -1,0 +1,109 @@
+# Cursor Rules for RTD GTFS Pipeline Project
+
+## Project Context
+This is a comprehensive Kafka and Flink-based transit data processing system for RTD (Regional Transportation District) in Denver, Colorado. The project handles real-time transit data including GTFS-RT feeds, rail communication, and bus SIRI data.
+
+## Code Quality Standards
+- Use comprehensive test suites for all new features
+- Implement proper error handling and logging
+- Follow Java best practices and naming conventions
+- Document all major components and APIs
+- Include unit tests, integration tests, and performance tests
+
+## Testing Strategy
+- Unit tests for individual components
+- Integration tests for data pipelines
+- End-to-end tests for complete workflows
+- Performance tests for critical paths
+- GTFS-RT validation for real-time data feeds
+
+## Documentation Requirements
+- Update README.md for major changes
+- Create detailed documentation in docs/ directory
+- Include usage examples and troubleshooting guides
+- Document performance benchmarks and test results
+
+## Achievement Tracking Rule
+**IMPORTANT**: After completing any major achievement, automatically append it to `cursor_context.md` with the following format:
+
+```markdown
+### YYYY-MM-DD: [Achievement Name] ✅
+**Achievement**: [Brief description of what was accomplished]
+
+**Key Accomplishments**:
+- ✅ **[Component/Feature]**: [Description]
+- ✅ **[Component/Feature]**: [Description]
+- ✅ **[Component/Feature]**: [Description]
+
+**Technical Details**:
+- [Specific technical improvements]
+- [Performance metrics if applicable]
+- [Test results if applicable]
+
+**Usage Commands** (if applicable):
+```bash
+# Example commands
+./scripts/example-command.sh
+```
+
+**Files Created/Modified**:
+- `path/to/file` - [Description]
+- `path/to/file` - [Description]
+
+---
+
+```
+
+## Major Achievement Criteria
+Consider the following as major achievements that should be tracked:
+1. **New Feature Implementation**: Complete new functionality
+2. **Performance Improvements**: Significant performance gains
+3. **Test Suite Creation**: Comprehensive testing implementation
+4. **Documentation Milestones**: Major documentation updates
+5. **Deployment Success**: Successful production deployments
+6. **Bug Fixes**: Critical bug fixes with significant impact
+7. **Architecture Improvements**: Major architectural changes
+8. **Integration Success**: Successful integration with external systems
+
+## File Organization
+- Keep `cursor_context.md` at the root level
+- Update it immediately after major achievements
+- Include timestamps, technical details, and usage information
+- Maintain chronological order with newest achievements at the top
+
+## Development Workflow
+1. Implement feature/improvement
+2. Create comprehensive tests
+3. Update documentation
+4. Test thoroughly
+5. **Automatically append to cursor_context.md**
+6. Commit changes with descriptive messages
+
+## Project-Specific Guidelines
+- Always test GTFS-RT endpoints when working with real-time data
+- Validate protobuf formats for GTFS-RT feeds
+- Monitor performance metrics for Kafka and Flink pipelines
+- Ensure proper error handling for network operations
+- Maintain backward compatibility when possible
+
+## Performance Standards
+- GTFS-RT endpoint response times: < 10 seconds
+- Kafka message processing: < 100ms latency
+- Flink job processing: < 1 second end-to-end
+- File downloads: < 30 seconds for typical feeds
+
+## Security Considerations
+- Validate all input data
+- Use secure connections for external endpoints
+- Implement proper authentication where required
+- Log security-relevant events
+- Follow least privilege principles
+
+## Monitoring Requirements
+- Implement health checks for all services
+- Monitor data quality metrics
+- Track performance benchmarks
+- Alert on critical failures
+- Maintain audit logs for data processing
+
+Remember: Always update `cursor_context.md` after major achievements to maintain project history and context for future development.
