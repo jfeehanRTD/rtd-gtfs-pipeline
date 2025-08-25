@@ -33,10 +33,10 @@ class GTFSRTEndpointComparisonTest {
     private static final String CURRENT_TRIP_URL = "https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/TripUpdate.pb";
     private static final String CURRENT_ALERT_URL = "https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/Alerts.pb";
     
-    // New open-data URLs with /rtd/ path
-    private static final String NEW_VEHICLE_URL = "https://open-data.rtd-denver.com/files/prod/gtfs-rt/rtd/VehiclePosition.pb";
-    private static final String NEW_TRIP_URL = "https://open-data.rtd-denver.com/files/prod/gtfs-rt/rtd/TripUpdate.pb";
-    private static final String NEW_ALERT_URL = "https://open-data.rtd-denver.com/files/prod/gtfs-rt/rtd/Alerts.pb";
+    // New open-data URLs with /rtd/ path (without /prod/)
+    private static final String NEW_VEHICLE_URL = "https://open-data.rtd-denver.com/files/gtfs-rt/rtd/VehiclePosition.pb";
+    private static final String NEW_TRIP_URL = "https://open-data.rtd-denver.com/files/gtfs-rt/rtd/TripUpdate.pb";
+    private static final String NEW_ALERT_URL = "https://open-data.rtd-denver.com/files/gtfs-rt/rtd/Alerts.pb";
 
     private static final int TIMEOUT_SECONDS = 30;
 
