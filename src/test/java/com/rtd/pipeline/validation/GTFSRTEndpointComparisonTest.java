@@ -2,6 +2,7 @@ package com.rtd.pipeline.validation;
 
 import com.google.transit.realtime.GtfsRealtime.*;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -709,7 +710,15 @@ class GTFSRTEndpointComparisonTest {
     private EndpointMetrics testEndpoint(String url) {
         long startTime = System.currentTimeMillis();
         
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+        RequestConfig requestConfig = RequestConfig.custom()
+            .setConnectTimeout(10000)  // 10 seconds connection timeout
+            .setSocketTimeout(10000)   // 10 seconds socket timeout
+            .setConnectionRequestTimeout(10000)  // 10 seconds request timeout
+            .build();
+            
+        try (CloseableHttpClient httpClient = HttpClients.custom()
+                .setDefaultRequestConfig(requestConfig)
+                .build()) {
             HttpGet request = new HttpGet(url);
             request.setHeader("User-Agent", "RTD-GTFS-Pipeline-Test/1.0");
             
@@ -744,7 +753,15 @@ class GTFSRTEndpointComparisonTest {
     }
 
     private FeedMessage fetchGTFSRTFeed(String url) {
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+        RequestConfig requestConfig = RequestConfig.custom()
+            .setConnectTimeout(10000)  // 10 seconds connection timeout
+            .setSocketTimeout(10000)   // 10 seconds socket timeout
+            .setConnectionRequestTimeout(10000)  // 10 seconds request timeout
+            .build();
+            
+        try (CloseableHttpClient httpClient = HttpClients.custom()
+                .setDefaultRequestConfig(requestConfig)
+                .build()) {
             HttpGet request = new HttpGet(url);
             request.setHeader("User-Agent", "RTD-GTFS-Pipeline-Test/1.0");
             

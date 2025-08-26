@@ -2,6 +2,7 @@ package com.rtd.pipeline.validation;
 
 import com.google.transit.realtime.GtfsRealtime.*;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -372,6 +373,14 @@ class TISProducerGTFSRTTest {
             FeedMessage tisFeed = fetchGTFSRTFeed(TIS_VEHICLE_POSITION_URL);
             FeedMessage rtdFeed = fetchGTFSRTFeed(RTD_VEHICLE_POSITION_URL);
             
+            // Skip test if feeds are not available
+            if (tisFeed == null || rtdFeed == null) {
+                LOG.warn("Skipping test - Feeds not available (TIS: {}, RTD: {})", 
+                    tisFeed != null, rtdFeed != null);
+                Assumptions.assumeTrue(false, "TIS or RTD feeds not available");
+                return;
+            }
+            
             assertThat(tisFeed).isNotNull();
             assertThat(rtdFeed).isNotNull();
             
@@ -400,6 +409,14 @@ class TISProducerGTFSRTTest {
             
             FeedMessage tisFeed = fetchGTFSRTFeed(TIS_TRIP_UPDATE_URL);
             FeedMessage rtdFeed = fetchGTFSRTFeed(RTD_TRIP_UPDATE_URL);
+            
+            // Skip test if feeds are not available
+            if (tisFeed == null || rtdFeed == null) {
+                LOG.warn("Skipping test - Feeds not available (TIS: {}, RTD: {})", 
+                    tisFeed != null, rtdFeed != null);
+                Assumptions.assumeTrue(false, "TIS or RTD feeds not available");
+                return;
+            }
             
             assertThat(tisFeed).isNotNull();
             assertThat(rtdFeed).isNotNull();
@@ -464,7 +481,15 @@ class TISProducerGTFSRTTest {
      * Helper method to fetch GTFS-RT feed from URL
      */
     private FeedMessage fetchGTFSRTFeed(String url) {
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+        RequestConfig requestConfig = RequestConfig.custom()
+            .setConnectTimeout(10000)  // 10 seconds connection timeout
+            .setSocketTimeout(10000)   // 10 seconds socket timeout
+            .setConnectionRequestTimeout(10000)  // 10 seconds request timeout
+            .build();
+            
+        try (CloseableHttpClient httpClient = HttpClients.custom()
+                .setDefaultRequestConfig(requestConfig)
+                .build()) {
             HttpGet request = new HttpGet(url);
             request.setHeader("User-Agent", "RTD-GTFS-RT-Test/1.0");
             request.setHeader("Accept", "application/x-protobuf");

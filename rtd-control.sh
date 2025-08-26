@@ -8,6 +8,7 @@ set -e
 
 # Configuration
 RTD_PIPELINE_CLASS="com.rtd.pipeline.RTDStaticDataPipeline"
+KAFKA_MAIN_CLASS="com.rtd.pipeline.DirectKafkaBridge"
 SPRING_BOOT_API_CLASS="com.rtd.pipeline.RTDApiApplication"  # Use Spring Boot API server
 REACT_APP_DIR="rtd-maps-app"
 RTD_PIPELINE_LOG_FILE="rtd-pipeline.log"
