@@ -8,7 +8,7 @@ set -e
 
 # Configuration
 RTD_PIPELINE_CLASS="com.rtd.pipeline.RTDStaticDataPipeline"
-KAFKA_MAIN_CLASS="com.rtd.pipeline.DirectKafkaBridge"
+KAFKA_MAIN_CLASS="${KAFKA_MAIN_CLASS:-com.rtd.pipeline.DirectKafkaBridge}"
 SPRING_BOOT_API_CLASS="com.rtd.pipeline.RTDApiApplication"  # Use Spring Boot API server
 REACT_APP_DIR="rtd-maps-app"
 RTD_PIPELINE_LOG_FILE="rtd-pipeline.log"
@@ -73,7 +73,7 @@ start_java() {
     if kill -0 $java_pid 2>/dev/null; then
         print_success "Spring Boot API server started (PID: $java_pid)"
         print_status "API: http://localhost:8080/api/health"
-        print_status "Logs: tail -f $JAVA_LOG_FILE"
+        print_status "Logs: tail -f $RTD_PIPELINE_LOG_FILE"
     else
         print_error "Failed to start Spring Boot API server"
         return 1
@@ -320,7 +320,7 @@ start_docker() {
         
         # Start the Kafka-enabled pipeline
         print_status "Starting RTD Kafka Pipeline..."
-        nohup mvn exec:java -Dexec.mainClass="$KAFKA_MAIN_CLASS" -q > "$JAVA_LOG_FILE" 2>&1 &
+        nohup mvn exec:java -Dexec.mainClass="$KAFKA_MAIN_CLASS" -q > "$RTD_PIPELINE_LOG_FILE" 2>&1 &
         local pipeline_pid=$!
         
         sleep 5
@@ -330,10 +330,10 @@ start_docker() {
             print_status "RTD API is available at http://localhost:8080"
             print_status "Kafka is available at localhost:9092"
             print_status "Kafka UI is available at http://localhost:8090"
-            print_status "Pipeline logs: tail -f $JAVA_LOG_FILE"
+            print_status "Pipeline logs: tail -f $RTD_PIPELINE_LOG_FILE"
         else
             print_error "Failed to start Kafka pipeline"
-            print_status "Check logs: tail -f $JAVA_LOG_FILE"
+            print_status "Check logs: tail -f $RTD_PIPELINE_LOG_FILE"
             return 1
         fi
     else
