@@ -177,10 +177,6 @@ public class OccupancyAnalysisController {
             
             logger.warn("Mock data removed - connect to real occupancy analysis service");
             List<Map<String, Object>> metrics = new ArrayList<>();
-                routeMetric.put("accuracyPercentage", routeAccuracies[i]);
-                routeMetric.put("lastUpdated", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                metrics.add(routeMetric);
-            }
             
             return ResponseEntity.ok(metrics);
             

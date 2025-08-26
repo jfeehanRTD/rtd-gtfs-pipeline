@@ -17,6 +17,7 @@ import {
   Navigation
 } from 'lucide-react';
 import { LiveTransitService, SIRIVehicleData, RailCommData } from '../services/liveTransitService';
+import MobileStatusBar from './MobileStatusBar';
 
 // Fix Leaflet default marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -240,19 +241,19 @@ const LiveTransitMap: React.FC = () => {
   const visibleTrains = showTrains ? trains.filter(train => train.latitude && train.longitude) : [];
 
   return (
-    <div className="relative w-full h-full">
-      {/* Status Bar */}
-      <div className="absolute top-4 left-4 right-4 z-[1000] flex justify-between items-center">
-        <div className="bg-white rounded-lg shadow-md p-3 flex items-center space-x-3">
+    <div className="relative w-full h-full overflow-hidden">
+      {/* Enhanced Status Bar - Desktop Only */}
+      <div className="hidden sm:flex absolute top-4 left-4 right-4 z-[1000] justify-between items-center">
+        <div className="bg-white rounded-lg shadow-lg p-3 flex items-center space-x-3 min-w-0 flex-1">
           <div className="flex items-center space-x-2">
             {connectionState.isConnected ? (
               <>
-                <Wifi className="w-5 h-5 text-green-500" />
+                <Wifi className="w-5 h-5 text-green-500" aria-label="Connected" />
                 <span className="text-sm font-medium text-green-600">Live</span>
               </>
             ) : (
               <>
-                <WifiOff className="w-5 h-5 text-red-500" />
+                <WifiOff className="w-5 h-5 text-red-500" aria-label="Disconnected" />
                 <span className="text-sm font-medium text-red-600">Offline</span>
               </>
             )}
@@ -261,72 +262,130 @@ const LiveTransitMap: React.FC = () => {
           <div className="h-4 border-l border-gray-300"></div>
           
           <div className="flex items-center space-x-4 text-sm text-gray-600">
-            <div className="flex items-center space-x-1">
-              <Bus className="w-4 h-4" />
+            <div className="flex items-center space-x-1" title={`${connectionState.busCount} buses active`}>
+              <Bus className="w-4 h-4" aria-label="Buses" />
               <span>{connectionState.busCount}</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <Train className="w-4 h-4" />
+            <div className="flex items-center space-x-1" title={`${connectionState.trainCount} trains active`}>
+              <Train className="w-4 h-4" aria-label="Trains" />
               <span>{connectionState.trainCount}</span>
             </div>
           </div>
 
           {connectionState.lastUpdate && (
             <>
-              <div className="h-4 border-l border-gray-300"></div>
-              <div className="flex items-center space-x-1 text-sm text-gray-500">
-                <Clock className="w-4 h-4" />
+              <div className="hidden sm:block h-4 border-l border-gray-300"></div>
+              <div className="hidden sm:flex items-center space-x-1 text-sm text-gray-500">
+                <Clock className="w-4 h-4" aria-label="Last updated" />
                 <span>{connectionState.lastUpdate.toLocaleTimeString()}</span>
               </div>
             </>
           )}
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-2">
+        <div className="bg-white rounded-lg shadow-lg p-2">
           <button
             onClick={handleRefresh}
-            className="p-2 hover:bg-gray-100 rounded transition-colors"
-            title="Refresh data"
+            className="p-2 hover:bg-gray-100 rounded transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            title="Refresh live transit data"
+            aria-label="Refresh live transit data"
           >
             <RefreshCw className="w-5 h-5 text-gray-600" />
           </button>
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="absolute top-20 left-4 z-[1000]">
-        <div className="bg-white rounded-lg shadow-md p-3 space-y-2">
-          <h3 className="font-semibold text-sm text-gray-700 mb-2">Show Vehicles</h3>
+      {/* Mobile Status Bar */}
+      <MobileStatusBar 
+        connectionState={connectionState}
+        onRefresh={handleRefresh}
+      />
+
+      {/* Enhanced Vehicle Controls */}
+      <div className="hidden sm:block absolute top-24 left-4 z-[1000]">
+        <div className="bg-white rounded-lg shadow-lg p-3 space-y-3 min-w-[200px]">
+          <div className="flex items-center space-x-2">
+            <Navigation className="w-4 h-4 text-gray-600" aria-label="Vehicle controls" />
+            <h3 className="font-semibold text-sm text-gray-700">Vehicle Filters</h3>
+          </div>
           
-          <label className="flex items-center space-x-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showBuses}
-              onChange={(e) => setShowBuses(e.target.checked)}
-              className="rounded"
-            />
-            <Bus className="w-4 h-4 text-blue-600" />
-            <span className="text-sm">Buses ({buses.length})</span>
-          </label>
+          <div className="space-y-2">
+            <label className="flex items-center space-x-2 cursor-pointer group hover:bg-gray-50 p-1 rounded transition-colors">
+              <input
+                type="checkbox"
+                checked={showBuses}
+                onChange={(e) => setShowBuses(e.target.checked)}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
+                aria-label={`Toggle bus visibility (${buses.length} available)`}
+              />
+              <Bus className="w-4 h-4 text-blue-600" aria-hidden="true" />
+              <div className="flex-1">
+                <span className="text-sm font-medium">Buses</span>
+                <span className="text-xs text-gray-500 ml-1">({buses.length})</span>
+              </div>
+            </label>
+            
+            <label className="flex items-center space-x-2 cursor-pointer group hover:bg-gray-50 p-1 rounded transition-colors">
+              <input
+                type="checkbox"
+                checked={showTrains}
+                onChange={(e) => setShowTrains(e.target.checked)}
+                className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 focus:ring-2"
+                aria-label={`Toggle train visibility (${trains.length} available)`}
+              />
+              <Train className="w-4 h-4 text-purple-600" aria-hidden="true" />
+              <div className="flex-1">
+                <span className="text-sm font-medium">Trains</span>
+                <span className="text-xs text-gray-500 ml-1">({trains.length})</span>
+              </div>
+            </label>
+          </div>
           
-          <label className="flex items-center space-x-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showTrains}
-              onChange={(e) => setShowTrains(e.target.checked)}
-              className="rounded"
-            />
-            <Train className="w-4 h-4 text-purple-600" />
-            <span className="text-sm">Trains ({trains.length})</span>
-          </label>
+          {/* Vehicle Statistics */}
+          <div className="pt-2 border-t border-gray-200">
+            <div className="flex items-center justify-between text-xs text-gray-600">
+              <span>Visible:</span>
+              <span>{visibleBuses.length + visibleTrains.length} vehicles</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Vehicle Controls */}
+      <div className="sm:hidden absolute top-4 right-4 z-[1000]">
+        <div className="bg-white rounded-lg shadow-lg p-2">
+          <div className="flex flex-col space-y-1">
+            <label className="flex items-center space-x-2 text-xs">
+              <input
+                type="checkbox"
+                checked={showBuses}
+                onChange={(e) => setShowBuses(e.target.checked)}
+                className="w-3 h-3 rounded border-gray-300 text-blue-600"
+                aria-label={`Show buses (${buses.length})`}
+              />
+              <Bus className="w-3 h-3 text-blue-600" />
+              <span>{buses.length}</span>
+            </label>
+            <label className="flex items-center space-x-2 text-xs">
+              <input
+                type="checkbox"
+                checked={showTrains}
+                onChange={(e) => setShowTrains(e.target.checked)}
+                className="w-3 h-3 rounded border-gray-300 text-purple-600"
+                aria-label={`Show trains (${trains.length})`}
+              />
+              <Train className="w-3 h-3 text-purple-600" />
+              <span>{trains.length}</span>
+            </label>
+          </div>
         </div>
       </div>
 
       {/* Error Message */}
       {connectionState.error && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000]">
-          <div className="bg-red-100 border border-red-300 rounded-lg p-3 flex items-center space-x-2">
-            <AlertCircle className="w-5 h-5 text-red-500" />
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] max-w-sm mx-auto">
+          <div className="bg-red-100 border border-red-300 rounded-lg p-3 flex items-center space-x-2 shadow-lg">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" aria-label="Error" />
             <span className="text-sm text-red-700">{connectionState.error}</span>
           </div>
         </div>
@@ -337,11 +396,15 @@ const LiveTransitMap: React.FC = () => {
         center={[39.7392, -104.9903]} // Denver center
         zoom={11}
         className="h-full w-full"
-        zoomControl={false}
+        zoomControl={true}
+        attributionControl={true}
+        preferCanvas={true}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          maxZoom={18}
+          minZoom={9}
         />
         
         <MapController buses={visibleBuses} trains={visibleTrains} />

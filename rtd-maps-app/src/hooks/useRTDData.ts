@@ -103,11 +103,17 @@ export const useRTDData = (initialFilters?: Partial<MapFilters>): UseRTDDataResu
   // Filter vehicles based on current filters
   useEffect(() => {
     const filtered = vehicles.filter(vehicle => {
+      // Determine vehicle type - if no route_info, assume it's a bus (route_type 3) for most RTD routes
+      const routeType = vehicle.route_info?.route_type ?? (
+        // Light rail lines are typically single letters A-Z
+        /^[A-Z]$/.test(vehicle.route_id || '') ? 0 : 3
+      );
+      
       // Vehicle type filter
-      if (!filters.showBuses && vehicle.route_info?.route_type === 3) {
+      if (!filters.showBuses && routeType === 3) {
         return false;
       }
-      if (!filters.showTrains && vehicle.route_info?.route_type !== 3) {
+      if (!filters.showTrains && routeType !== 3) {
         return false;
       }
 

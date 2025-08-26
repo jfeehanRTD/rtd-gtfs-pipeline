@@ -62,12 +62,14 @@ export class LiveTransitService {
   private updateInterval: ReturnType<typeof setInterval> | null = null;
   private updateIntervalMs = 5000; // 5 second updates for live data
   
-  // HTTP endpoints that serve live RTD data
-  private readonly RTD_VEHICLES_ENDPOINT = 'http://localhost:8080/api/vehicles'; // Real RTD GTFS-RT vehicle data
-  private readonly RTD_HEALTH_ENDPOINT = 'http://localhost:8080/api/health'; // Health check
+  // HTTP endpoints for live bus SIRI and rail communication data
+  private readonly BUS_SIRI_ENDPOINT = 'http://localhost:8082/bus-siri'; // Bus SIRI live data
+  private readonly BUS_SIRI_STATUS = 'http://localhost:8082/status'; // Bus SIRI status
+  private readonly RAIL_COMM_ENDPOINT = 'http://localhost:8081/rail-comm'; // Rail communication live data  
+  private readonly RAIL_COMM_STATUS = 'http://localhost:8081/status'; // Rail communication status
   
-  // Note: Using real RTD GTFS-RT data instead of test data
-  // This connects to the RTDStaticDataPipeline which fetches from https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/VehiclePosition.pb
+  // Note: Using live bus SIRI and rail communication feeds
+  // This is separate from the static GTFS-RT data used by the static map
 
   public static getInstance(): LiveTransitService {
     if (!LiveTransitService.instance) {
@@ -89,23 +91,39 @@ export class LiveTransitService {
   }
 
   private async testConnections(): Promise<void> {
-    let rtdConnected = false;
+    let busConnected = false;
+    let railConnected = false;
 
     try {
-      // Test RTD live data endpoint
-      const rtdResponse = await axios.get(this.RTD_HEALTH_ENDPOINT, { timeout: 3000 });
-      if (rtdResponse.status === 200) {
-        console.log('✅ Connected to RTD live data pipeline');
-        rtdConnected = true;
+      // Test Bus SIRI endpoint
+      const busResponse = await axios.get(this.BUS_SIRI_STATUS, { timeout: 3000 });
+      if (busResponse.status === 200) {
+        console.log('✅ Connected to Bus SIRI live data receiver');
+        busConnected = true;
       }
     } catch (error) {
-      console.warn('⚠️ RTD live data pipeline not available');
+      console.warn('⚠️ Bus SIRI receiver not available');
     }
 
-    this.connectionState.isConnected = rtdConnected;
+    try {
+      // Test Rail Communication endpoint
+      const railResponse = await axios.get(this.RAIL_COMM_STATUS, { timeout: 3000 });
+      if (railResponse.status === 200) {
+        console.log('✅ Connected to Rail Communication live data receiver');
+        railConnected = true;
+      }
+    } catch (error) {
+      console.warn('⚠️ Rail Communication receiver not available');
+    }
+
+    this.connectionState.isConnected = busConnected || railConnected;
     
-    if (!this.connectionState.isConnected) {
-      this.connectionState.error = 'RTD live data pipeline not available';
+    if (!busConnected && !railConnected) {
+      this.connectionState.error = 'Bus SIRI and Rail Communication receivers not available';
+    } else if (!busConnected) {
+      this.connectionState.error = 'Bus SIRI receiver not available';
+    } else if (!railConnected) {
+      this.connectionState.error = 'Rail Communication receiver not available';
     } else {
       this.connectionState.error = null;
     }
@@ -124,7 +142,10 @@ export class LiveTransitService {
   }
 
   private async fetchLiveData(): Promise<void> {
-    await this.fetchRTDVehicleData();
+    await Promise.allSettled([
+      this.fetchBusSIRIData(),
+      this.fetchRailCommData()
+    ]);
     
     // Update connection state
     this.connectionState.lastUpdate = new Date();
@@ -135,73 +156,59 @@ export class LiveTransitService {
     this.notifyListeners();
   }
 
-  private async fetchRTDVehicleData(): Promise<void> {
+  private async fetchBusSIRIData(): Promise<void> {
     try {
-      console.log('📡 Fetching live RTD vehicle data...');
-      const response = await axios.get(this.RTD_VEHICLES_ENDPOINT, { timeout: 10000 });
+      console.log('📡 Checking Bus SIRI live feed status...');
+      const response = await axios.get(this.BUS_SIRI_STATUS, { timeout: 5000 });
 
-      if (response.data && response.data.vehicles) {
-        const vehicles = response.data.vehicles;
+      if (response.data) {
+        console.log('🚌 Bus SIRI receiver status:', response.data);
         
-        // Clear old data
+        // Note: The SIRI receivers are HTTP endpoints that receive POST data from RTD's TIS proxy
+        // They don't serve GET data for retrieval. The live data flows through Kafka topics.
+        // For a fully functional live tab, you would need to:
+        // 1. Subscribe to RTD's SIRI feed using ./rtd-control.sh bus-comm subscribe
+        // 2. Implement Kafka consumer to read from rtd.bus.siri topic
+        // 3. Or add data retrieval endpoints to the HTTP receivers
+        
+        // For now, clear any existing data to show that this is a different data source
         this.busVehicles.clear();
-        this.trainVehicles.clear();
         
-        vehicles.forEach((vehicle: any) => {
-          if (vehicle && vehicle.vehicle_id && vehicle.latitude && vehicle.longitude) {
-            // Determine if this is a bus or train based on route_id patterns
-            const routeId = vehicle.route_id || 'UNKNOWN';
-            const isLightRail = this.isLightRailRoute(routeId);
-            
-            if (isLightRail) {
-              // Treat as train/light rail
-              const railVehicle: RailCommData = {
-                timestamp_ms: vehicle.timestamp_ms || Date.now(),
-                train_id: vehicle.vehicle_id,
-                line_id: routeId,
-                direction: this.getDirectionFromBearing(vehicle.bearing) || 'UNKNOWN',
-                latitude: parseFloat(vehicle.latitude) || 0,
-                longitude: parseFloat(vehicle.longitude) || 0,
-                speed_mph: parseFloat(vehicle.speed) || 0,
-                status: this.mapVehicleStatus(vehicle.current_status) || 'UNKNOWN',
-                next_station: '',
-                delay_seconds: 0,
-                operator_message: '',
-                last_updated: new Date(),
-                is_real_time: true
-              };
-              this.trainVehicles.set(vehicle.vehicle_id, railVehicle);
-            } else {
-              // Treat as bus
-              const busVehicle: SIRIVehicleData = {
-                timestamp_ms: vehicle.timestamp_ms || Date.now(),
-                vehicle_id: vehicle.vehicle_id,
-                vehicle_label: vehicle.vehicle_label || vehicle.vehicle_id,
-                route_id: routeId,
-                direction: this.getDirectionFromBearing(vehicle.bearing) || 'UNKNOWN',
-                latitude: parseFloat(vehicle.latitude) || 0,
-                longitude: parseFloat(vehicle.longitude) || 0,
-                speed_mph: parseFloat(vehicle.speed) || 0,
-                status: this.mapVehicleStatus(vehicle.current_status) || 'IN_TRANSIT',
-                next_stop: '',
-                delay_seconds: 0,
-                occupancy: this.mapOccupancyStatus(vehicle.occupancy_status) || 'UNKNOWN',
-                block_id: '',
-                trip_id: vehicle.trip_id || '',
-                last_updated: new Date(),
-                is_real_time: true
-              };
-              this.busVehicles.set(vehicle.vehicle_id, busVehicle);
-            }
-          }
-        });
-
-        console.log(`🚌 Processed ${this.busVehicles.size} buses and 🚊 ${this.trainVehicles.size} light rail vehicles from RTD live data`);
+        if (response.data.subscription_active) {
+          console.log('✅ Bus SIRI subscription is active - live data flowing to Kafka');
+        } else {
+          console.log('⚠️ Bus SIRI subscription not active - use: ./rtd-control.sh bus-comm subscribe');
+        }
       }
       
     } catch (error) {
-      console.error('❌ Failed to fetch RTD vehicle data:', error);
-      this.connectionState.error = 'Failed to fetch RTD vehicle data';
+      console.warn('⚠️ Failed to fetch Bus SIRI status:', error);
+    }
+  }
+
+  private async fetchRailCommData(): Promise<void> {
+    try {
+      console.log('📡 Checking Rail Communication live feed status...');
+      const response = await axios.get(this.RAIL_COMM_STATUS, { timeout: 5000 });
+
+      if (response.data) {
+        console.log('🚊 Rail Communication receiver status:', response.data);
+        
+        // Note: Similar to bus SIRI, the rail comm receiver is an HTTP endpoint for receiving POST data
+        // Live rail communication data flows through the rtd.rail.comm Kafka topic
+        
+        // For now, clear any existing data to show that this is a different data source
+        this.trainVehicles.clear();
+        
+        if (response.data.subscription_active) {
+          console.log('✅ Rail Communication subscription is active - live data flowing to Kafka');
+        } else {
+          console.log('⚠️ Rail Communication subscription not active - use: ./rtd-control.sh rail-comm subscribe');
+        }
+      }
+      
+    } catch (error) {
+      console.warn('⚠️ Failed to fetch Rail Communication status:', error);
     }
   }
 

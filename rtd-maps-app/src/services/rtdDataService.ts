@@ -194,9 +194,19 @@ export class RTDDataService {
     const now = new Date();
     
     vehicles.forEach(vehicle => {
+      // Dynamically determine route info from the vehicle data itself
+      const routeInfo = vehicle.route_id ? {
+        route_id: vehicle.route_id,
+        route_short_name: vehicle.route_id,
+        route_long_name: `Route ${vehicle.route_id}`,
+        // Infer route type from route ID pattern - single letters are typically light rail (0), numbers are buses (3)
+        route_type: /^[A-Z]$/.test(vehicle.route_id) ? 0 : 3,
+        route_color: /^[A-Z]$/.test(vehicle.route_id) ? '#0066CC' : '#666666'
+      } : undefined;
+
       const enhanced: EnhancedVehicleData = {
         ...vehicle,
-        route_info: this.routes.get(vehicle.route_id || ''),
+        route_info: routeInfo,
         delay_seconds: this.tripUpdates.get(vehicle.trip_id || '')?.delay_seconds,
         last_updated: now,
         is_real_time: (now.getTime() - vehicle.timestamp_ms) < 300000 // Real-time if < 5 minutes old
@@ -209,30 +219,9 @@ export class RTDDataService {
   }
 
   private async loadRouteInformation(): Promise<void> {
-    // Static route information
-    const rtdRoutes: RouteInfo[] = [
-      { route_id: 'A', route_short_name: 'A', route_long_name: 'Union Station to Denver Airport', route_type: 0, route_color: '#0066CC' },
-      { route_id: 'B', route_short_name: 'B', route_long_name: 'Union Station to Westminster', route_type: 0, route_color: '#00AA44' },
-      { route_id: 'C', route_short_name: 'C', route_long_name: 'Union Station to Littleton', route_type: 0, route_color: '#FF6600' },
-      { route_id: 'D', route_short_name: 'D', route_long_name: 'Union Station to Ridgegate', route_type: 0, route_color: '#FFD700' },
-      { route_id: 'E', route_short_name: 'E', route_long_name: 'Union Station to Lincoln', route_type: 0, route_color: '#800080' },
-      { route_id: 'F', route_short_name: 'F', route_long_name: '18th & California to Union Station', route_type: 0, route_color: '#FF69B4' },
-      { route_id: 'G', route_short_name: 'G', route_long_name: 'Union Station to Wheat Ridge', route_type: 0, route_color: '#008080' },
-      { route_id: 'H', route_short_name: 'H', route_long_name: 'Union Station to Nine Mile', route_type: 0, route_color: '#DC143C' },
-      { route_id: 'N', route_short_name: 'N', route_long_name: 'Union Station to Eastlake', route_type: 0, route_color: '#32CD32' },
-      { route_id: 'R', route_short_name: 'R', route_long_name: 'Union Station Shuttle', route_type: 0, route_color: '#FF4500' },
-      { route_id: 'W', route_short_name: 'W', route_long_name: 'Union Station to Jefferson County', route_type: 0, route_color: '#4B0082' },
-      // Common bus routes
-      { route_id: '15', route_short_name: '15', route_long_name: 'East Colfax', route_type: 3, route_color: '#666666' },
-      { route_id: '16', route_short_name: '16', route_long_name: '16th Street Mall', route_type: 3, route_color: '#666666' },
-      { route_id: '20', route_short_name: '20', route_long_name: 'East 20th Avenue', route_type: 3, route_color: '#666666' },
-      { route_id: '44', route_short_name: '44', route_long_name: 'West 44th Avenue', route_type: 3, route_color: '#666666' },
-      { route_id: '83', route_short_name: '83', route_long_name: '83rd Avenue', route_type: 3, route_color: '#666666' }
-    ];
-
-    rtdRoutes.forEach(route => {
-      this.routes.set(route.route_id, route);
-    });
+    // No hardcoded route data - use only live GTFS-RT feed data
+    // Route information will be dynamically determined from vehicle data
+    console.log('📋 Route information will be determined from live GTFS-RT data');
   }
 
   private notifyListeners(): void {

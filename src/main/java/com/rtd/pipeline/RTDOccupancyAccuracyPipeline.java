@@ -63,6 +63,7 @@ public class RTDOccupancyAccuracyPipeline {
             logger.error("Mock data streams removed - please implement real data source connections");
             throw new IllegalStateException("Production pipeline requires real data sources - mock data has been removed");
             
+            /*
             // Configure watermarks for event time processing
             DataStream<GTFSRTVehiclePosition> gtfsrtWithWatermarks = gtfsrtStream
                 .assignTimestampsAndWatermarks(
@@ -127,6 +128,7 @@ public class RTDOccupancyAccuracyPipeline {
             // Execute the pipeline
             logger.info("Executing RTD Occupancy Accuracy Analysis Pipeline");
             env.execute("RTD Occupancy Accuracy Analysis Pipeline");
+            */
             
         } catch (Exception e) {
             logger.error("Error in RTD Occupancy Accuracy Analysis Pipeline", e);
