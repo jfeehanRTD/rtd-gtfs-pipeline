@@ -12,35 +12,33 @@ fi
 
 # Function to get local host IP
 get_local_host() {
-    # Dynamically determine IP address if LOCAL_IP not set
-    if [[ -n "$LOCAL_IP" ]]; then
-        local ip="$LOCAL_IP"
-    else
-        # VPN-aware IP detection
-        local ip=""
-        
-        # Priority 1: Check for VPN interfaces (utun*)
-        if command -v ifconfig &> /dev/null; then
-            for vpn_interface in $(ifconfig -l | tr ' ' '\n' | grep 'utun'); do
-                candidate_ip=$(ifconfig "$vpn_interface" 2>/dev/null | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -1)
-                if [[ -n "$candidate_ip" ]]; then
-                    ip="$candidate_ip"
-                    echo "🔐 Using VPN IP from $vpn_interface: $ip" >&2
-                    break
-                fi
-            done
-        fi
-        
-        # Priority 2: Try route-based detection if no VPN IP found
-        if [[ -z "$ip" ]]; then
-            ip=$(route get default 2>/dev/null | grep interface | awk '{print $2}' | xargs ifconfig 2>/dev/null | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}' | head -1)
-        fi
-        
-        # Priority 3: Fallback to first non-localhost IP
-        if [[ -z "$ip" ]]; then
-            ip=$(ifconfig 2>/dev/null | grep 'inet ' | grep -v '127.0.0.1' | head -1 | awk '{print $2}')
-        fi
+    # Always dynamically determine IP address (ignore LOCAL_IP env var)
+    local ip=""
+    
+    # Priority 1: Check for VPN interfaces (utun*)
+    if command -v ifconfig &> /dev/null; then
+        for vpn_interface in $(ifconfig -l | tr ' ' '\n' | grep 'utun'); do
+            candidate_ip=$(ifconfig "$vpn_interface" 2>/dev/null | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -1)
+            if [[ -n "$candidate_ip" ]]; then
+                ip="$candidate_ip"
+                echo "🔐 Using VPN IP from $vpn_interface: $ip" >&2
+                break
+            fi
+        done
     fi
+    
+    # Priority 2: Try route-based detection if no VPN IP found
+    if [[ -z "$ip" ]]; then
+        ip=$(route get default 2>/dev/null | grep interface | awk '{print $2}' | xargs ifconfig 2>/dev/null | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}' | head -1)
+        echo "🌐 Using route-based IP: $ip" >&2
+    fi
+    
+    # Priority 3: Fallback to first non-localhost IP
+    if [[ -z "$ip" ]]; then
+        ip=$(ifconfig 2>/dev/null | grep 'inet ' | grep -v '127.0.0.1' | head -1 | awk '{print $2}')
+        echo "📡 Using fallback IP: $ip" >&2
+    fi
+    
     echo "http://${ip}:${RAIL_COMM_PORT:-881}"
 }
 

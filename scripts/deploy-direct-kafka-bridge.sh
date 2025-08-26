@@ -81,7 +81,7 @@ wait_for_service() {
 start_kafka() {
     print_status "Starting Kafka cluster..."
     
-    if check_service "Kafka" "./scripts/kafka-topics --list >/dev/null 2>&1"; then
+    if check_service "Kafka" "./scripts/kafka-topics.sh --list >/dev/null 2>&1"; then
         print_info "Kafka is already running"
         return 0
     fi
@@ -90,7 +90,7 @@ start_kafka() {
     ./rtd-control.sh docker start
     
     # Wait for Kafka to be ready
-    wait_for_service "Kafka" "./scripts/kafka-topics --list >/dev/null 2>&1"
+    wait_for_service "Kafka" "./scripts/kafka-topics.sh --list >/dev/null 2>&1"
 }
 
 # Function to create Kafka topics
@@ -98,9 +98,9 @@ create_topics() {
     print_status "Creating Kafka topics..."
     
     # Create rail comm topic if it doesn't exist
-    if ! ./scripts/kafka-topics --list | grep -q "rtd.rail.comm"; then
+    if ! ./scripts/kafka-topics.sh --list | grep -q "rtd.rail.comm"; then
         print_info "Creating rtd.rail.comm topic..."
-        ./scripts/kafka-topics --create --topic rtd.rail.comm --partitions 2 --replication-factor 1
+        ./scripts/kafka-topics.sh --create --topic rtd.rail.comm --partitions 2 --replication-factor 1
         print_success "Created rtd.rail.comm topic"
     else
         print_info "rtd.rail.comm topic already exists"
@@ -108,7 +108,7 @@ create_topics() {
     
     # List all topics
     print_info "Available Kafka topics:"
-    ./scripts/kafka-topics --list
+    ./scripts/kafka-topics.sh --list
 }
 
 # Function to start Direct Kafka Bridge
@@ -150,9 +150,9 @@ show_status() {
     echo
     
     # Check Kafka
-    if check_service "Kafka" "./scripts/kafka-topics --list >/dev/null 2>&1"; then
+    if check_service "Kafka" "./scripts/kafka-topics.sh --list >/dev/null 2>&1"; then
         print_success "Kafka: Running"
-        print_info "  Topics: $(./scripts/kafka-topics --list | wc -l) topics available"
+        print_info "  Topics: $(./scripts/kafka-topics.sh --list | wc -l) topics available"
     else
         print_error "Kafka: Not running"
     fi

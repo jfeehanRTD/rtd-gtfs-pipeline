@@ -126,7 +126,7 @@ send_payload() {
 check_kafka() {
     print_status "Checking Kafka connectivity..."
     
-    if ./scripts/kafka-topics --list > /dev/null 2>&1; then
+    if ./scripts/kafka-topics.sh --list > /dev/null 2>&1; then
         print_success "Kafka is running and accessible"
         return 0
     else
@@ -143,14 +143,14 @@ check_kafka() {
 check_topic() {
     print_status "Checking if topic '$KAFKA_TOPIC' exists..."
     
-    if ./scripts/kafka-topics --list | grep -q "^$KAFKA_TOPIC$"; then
+    if ./scripts/kafka-topics.sh --list | grep -q "^$KAFKA_TOPIC$"; then
         print_success "Topic '$KAFKA_TOPIC' exists"
         return 0
     else
         print_warning "Topic '$KAFKA_TOPIC' does not exist"
         print_status "Creating topic '$KAFKA_TOPIC'..."
         
-        if ./scripts/kafka-topics --create --topic "$KAFKA_TOPIC" --partitions 2 --replication-factor 1; then
+        if ./scripts/kafka-topics.sh --create --topic "$KAFKA_TOPIC" --partitions 2 --replication-factor 1; then
             print_success "Topic '$KAFKA_TOPIC' created successfully"
             return 0
         else
@@ -166,7 +166,7 @@ start_monitoring() {
     print_status "Press Ctrl+C to stop monitoring"
     echo
     
-    ./scripts/kafka-console-consumer --topic "$KAFKA_TOPIC" --bootstrap-server "$KAFKA_SERVERS" --from-beginning
+    ./scripts/kafka-console-consumer.sh --topic "$KAFKA_TOPIC" --bootstrap-server "$KAFKA_SERVERS" --from-beginning
 }
 
 # Function to show the current contents of the topic
@@ -175,7 +175,7 @@ show_topic_contents() {
     echo
     
     # Use timeout to prevent hanging if no messages
-    timeout 5s ./scripts/kafka-console-consumer --topic "$KAFKA_TOPIC" --bootstrap-server "$KAFKA_SERVERS" --from-beginning --max-messages 10 2>/dev/null || {
+    timeout 5s ./scripts/kafka-console-consumer.sh --topic "$KAFKA_TOPIC" --bootstrap-server "$KAFKA_SERVERS" --from-beginning --max-messages 10 2>/dev/null || {
         print_warning "No messages found in topic or timeout reached"
     }
 }

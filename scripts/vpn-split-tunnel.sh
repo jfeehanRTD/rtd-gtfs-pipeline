@@ -30,12 +30,11 @@ print_error() {
 
 # Configuration - Update these for your work network
 WORK_NETWORKS=(
-    "10.0.0.0/8"        # RTD internal network
-    "172.16.0.0/12"     # Private network range
-    "192.168.0.0/16"    # Private network range
+    "10.1.3.0/24"       # RTD work IPs that are already routed
+    "10.4.51.37/32"     # Specific RTD proxy server
 )
 
-# Domains to exclude from VPN (keep on regular internet)
+# Domains/IPs to exclude from VPN (keep on regular internet)
 EXCLUDE_DOMAINS=(
     "api.anthropic.com"
     "claude.ai"
@@ -43,13 +42,33 @@ EXCLUDE_DOMAINS=(
     "*.anthropic.com"
 )
 
+# IP addresses to route directly (bypass VPN)
+BYPASS_IPS=(
+    "8.8.8.8"           # Google DNS
+    "1.1.1.1"           # Cloudflare DNS
+    "208.67.222.222"    # OpenDNS
+    "208.67.220.220"    # OpenDNS
+)
+
+# Additional domains that need to bypass VPN
+ADDITIONAL_DOMAINS=(
+    "openai.com"
+    "chatgpt.com" 
+    "githubusercontent.com"
+    "github.com"
+)
+
 # Get VPN interface name
 get_vpn_interface() {
-    # Common VPN interface names
-    for iface in utun0 utun1 utun2 ppp0 tun0; do
+    # Find utun interface with an IP address (active VPN)
+    for iface in utun0 utun1 utun2 utun3 utun4 utun5 ppp0 tun0; do
         if ifconfig $iface >/dev/null 2>&1; then
-            echo $iface
-            return 0
+            # Check if this interface has an IP address
+            vpn_ip=$(ifconfig $iface 2>/dev/null | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -1)
+            if [[ -n "$vpn_ip" ]]; then
+                echo $iface
+                return 0
+            fi
         fi
     done
     return 1
@@ -76,26 +95,50 @@ setup_split_tunnel() {
     
     print_success "Found VPN interface: $VPN_INTERFACE"
     
-    # Get original default route
-    ORIGINAL_GATEWAY=$(route -n get default | grep gateway | awk '{print $2}')
-    print_status "Original gateway: $ORIGINAL_GATEWAY"
+    # Get VPN IP and physical gateway
+    VPN_IP=$(ifconfig $VPN_INTERFACE | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -1)
+    print_status "VPN IP: $VPN_IP"
     
-    # Remove VPN default route (keeps internet traffic direct)
-    print_status "Removing VPN default route..."
-    sudo route delete default -interface $VPN_INTERFACE 2>/dev/null || true
+    # Find physical gateway (non-VPN) 
+    PHYSICAL_GATEWAY=$(netstat -rn | grep '^default' | grep -v $VPN_INTERFACE | awk '{print $2}' | head -1)
+    if [ -z "$PHYSICAL_GATEWAY" ]; then
+        PHYSICAL_GATEWAY="192.168.0.1"  # Common fallback
+    fi
     
-    # Add specific routes for work networks through VPN
-    print_status "Adding work network routes through VPN..."
-    for network in "${WORK_NETWORKS[@]}"; do
-        print_status "  → Routing $network through $VPN_INTERFACE"
-        sudo route add -net $network -interface $VPN_INTERFACE 2>/dev/null || true
+    print_status "Physical gateway: $PHYSICAL_GATEWAY"
+    
+    # **SIMPLE APPROACH: Only add specific host routes, don't touch default routes**
+    print_status "Adding bypass routes for Claude services (leaving default routes intact)..."
+    
+    # Get IP addresses for Claude and other services that need to bypass VPN
+    ALL_DOMAINS=("${EXCLUDE_DOMAINS[@]}" "${ADDITIONAL_DOMAINS[@]}")
+    ALL_IPS=""
+    
+    for domain in "${ALL_DOMAINS[@]}"; do
+        if [[ "$domain" != *"*"* ]]; then  # Skip wildcard domains
+            domain_ips=$(nslookup "$domain" 2>/dev/null | grep "Address:" | grep -v "#53" | awk '{print $2}')
+            ALL_IPS="$ALL_IPS $domain_ips"
+        fi
     done
     
-    # Restore direct internet route if needed
-    if [ -n "$ORIGINAL_GATEWAY" ]; then
-        print_status "Ensuring direct internet access..."
-        sudo route add default $ORIGINAL_GATEWAY 2>/dev/null || true
-    fi
+    # Add specific bypass routes (but don't use -ifscope which may cause issues)
+    for ip in $ALL_IPS; do
+        if [[ -n "$ip" && "$ip" != "127.0.0.1" ]]; then
+            print_status "  → Adding direct route for $ip"
+            sudo route delete -host $ip 2>/dev/null || true
+            sudo route add -host $ip $PHYSICAL_GATEWAY 2>/dev/null || true
+        fi
+    done
+    
+    # Add bypass routes for common IPs
+    for ip in "${BYPASS_IPS[@]}"; do
+        print_status "  → Adding direct route for $ip"
+        sudo route delete -host $ip 2>/dev/null || true
+        sudo route add -host $ip $PHYSICAL_GATEWAY 2>/dev/null || true
+    done
+    
+    # Don't modify work network routes - let VPN handle them naturally
+    print_status "Work network routes will use existing VPN configuration"
     
     print_success "Split tunneling configured!"
     show_status

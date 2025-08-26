@@ -102,7 +102,7 @@ test_kafka() {
         fi
     else
         # Try using the built-in script
-        if ./scripts/kafka-topics --list >/dev/null 2>&1; then
+        if ./scripts/kafka-topics.sh --list >/dev/null 2>&1; then
             print_success "Kafka is accessible (via built-in script)"
             return 0
         else
@@ -127,7 +127,7 @@ monitor_topic() {
             --from-beginning \
             --max-messages 5 &
     else
-        timeout $duration ./scripts/kafka-console-consumer \
+        timeout $duration ./scripts/kafka-console-consumer.sh \
             --topic "$topic" \
             --from-beginning \
             --max-messages 5 &

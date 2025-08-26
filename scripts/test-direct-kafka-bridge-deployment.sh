@@ -125,7 +125,7 @@ test_kafka_connectivity() {
     increment_test
     print_step "Testing Kafka connectivity..."
     
-    if ./scripts/kafka-topics --list >/dev/null 2>&1; then
+    if ./scripts/kafka-topics.sh --list >/dev/null 2>&1; then
         test_passed "Kafka is accessible"
         return 0
     else
@@ -141,11 +141,11 @@ test_kafka_topic_creation() {
     
     local test_topic="test.direct.kafka.bridge.$(date +%s)"
     
-    if ./scripts/kafka-topics --create --topic "$test_topic" --partitions 1 --replication-factor 1 >/dev/null 2>&1; then
+    if ./scripts/kafka-topics.sh --create --topic "$test_topic" --partitions 1 --replication-factor 1 >/dev/null 2>&1; then
         test_passed "Kafka topic creation works"
         
         # Clean up test topic
-        ./scripts/kafka-topics --delete --topic "$test_topic" >/dev/null 2>&1 || true
+        ./scripts/kafka-topics.sh --delete --topic "$test_topic" >/dev/null 2>&1 || true
         return 0
     else
         test_failed "Kafka topic creation failed"
@@ -162,14 +162,14 @@ test_kafka_message_publishing() {
     local test_message='{"test": true, "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
     
     # Create test topic
-    ./scripts/kafka-topics --create --topic "$test_topic" --partitions 1 --replication-factor 1 >/dev/null 2>&1
+    ./scripts/kafka-topics.sh --create --topic "$test_topic" --partitions 1 --replication-factor 1 >/dev/null 2>&1
     
     # Publish test message
     if echo "$test_message" | ./scripts/kafka-console-producer --topic "$test_topic" >/dev/null 2>&1; then
         test_passed "Kafka message publishing works"
         
         # Clean up test topic
-        ./scripts/kafka-topics --delete --topic "$test_topic" >/dev/null 2>&1 || true
+        ./scripts/kafka-topics.sh --delete --topic "$test_topic" >/dev/null 2>&1 || true
         return 0
     else
         test_failed "Kafka message publishing failed"

@@ -227,7 +227,7 @@ setup_complete_environment() {
     cd "$PROJECT_DIR"
     
     if [ -f "target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar" ]; then
-        ./scripts/kafka-topics --create-rtd-topics
+        ./scripts/kafka-topics.sh --create-rtd-topics
         if [ $? -eq 0 ]; then
             print_status "RTD topics created successfully!"
         else
@@ -235,7 +235,7 @@ setup_complete_environment() {
         fi
     else
         print_warning "Project not built. Run 'mvn package' first to create topics automatically"
-        print_warning "You can create topics manually later with: ./scripts/kafka-topics --create-rtd-topics"
+        print_warning "You can create topics manually later with: ./scripts/kafka-topics.sh --create-rtd-topics"
     fi
     
     echo
@@ -268,10 +268,10 @@ show_service_info() {
     echo
     echo "Next steps:"
     echo "  1. Build project:           mvn clean package"
-    echo "  2. Create topics:           ./scripts/kafka-topics --create-rtd-topics"
-    echo "  3. List topics:             ./scripts/kafka-topics --list"
+    echo "  2. Create topics:           ./scripts/kafka-topics.sh --create-rtd-topics"
+    echo "  3. List topics:             ./scripts/kafka-topics.sh --list"
     echo "  4. Run RTD pipeline:        mvn exec:java -Dexec.mainClass=\"com.rtd.pipeline.RTDGTFSPipeline\""
-    echo "  5. Query data:              ./scripts/rtd-query health"
+    echo "  5. Query data:              ./scripts/rtd-query.sh health"
 }
 
 open_ui() {

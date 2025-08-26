@@ -623,8 +623,12 @@ main() {
                     ./scripts/test-rail-comm.sh monitor
                     ;;
                 "subscribe")
-                    print_status "Subscribing to rail comm proxy feed (original)..."
-                    ./scripts/proxy-subscribe.sh send
+                    print_status "Subscribing to rail comm proxy feed..."
+                    if [ -f "./railcomm-subscribe.sh" ]; then
+                        ./railcomm-subscribe.sh "$3" "$4" "$5"
+                    else
+                        print_error "Rail communication subscription script not found"
+                    fi
                     ;;
                 "subscribe-bridge")
                     print_status "Subscribing to rail comm proxy feed (Direct Kafka Bridge)..."
