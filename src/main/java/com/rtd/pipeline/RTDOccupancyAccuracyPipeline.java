@@ -55,10 +55,13 @@ public class RTDOccupancyAccuracyPipeline {
             GTFSRTVPProcessor vpProcessor = new GTFSRTVPProcessor();
             APCDataProcessor apcProcessor = new APCDataProcessor(occupancyAnalyzer, capacityService);
             
-            // Create mock data sources for demonstration
-            // In production, these would be real GTFS-RT and APC data sources
-            DataStream<GTFSRTVehiclePosition> gtfsrtStream = createMockGTFSRTStream(env);
-            DataStream<APCData> apcStream = createMockAPCStream(env);
+            // TODO: Connect to real GTFS-RT and APC data sources
+            // Replace with actual Kafka source or HTTP source connectors
+            // DataStream<GTFSRTVehiclePosition> gtfsrtStream = createGTFSRTSource(env);
+            // DataStream<APCData> apcStream = createAPCSource(env);
+            
+            logger.error("Mock data streams removed - please implement real data source connections");
+            throw new IllegalStateException("Production pipeline requires real data sources - mock data has been removed");
             
             // Configure watermarks for event time processing
             DataStream<GTFSRTVehiclePosition> gtfsrtWithWatermarks = gtfsrtStream
@@ -175,55 +178,40 @@ public class RTDOccupancyAccuracyPipeline {
     }
     
     /**
-     * Creates a mock GTFS-RT vehicle position stream for demonstration.
-     * In production, this would connect to actual GTFS-RT feed.
+     * Creates a real GTFS-RT vehicle position stream from RTD feeds.
+     * TODO: Implement connection to actual GTFS-RT feed.
      */
-    private static DataStream<GTFSRTVehiclePosition> createMockGTFSRTStream(StreamExecutionEnvironment env) {
-        // This is a placeholder - in production, use actual GTFS-RT source
-        return env.fromElements(
-            createSampleGTFSRTRecord("V001", "TRIP001", "15", "STOP001", OccupancyStatus.MANY_SEATS_AVAILABLE, 0.45),
-            createSampleGTFSRTRecord("V002", "TRIP002", "121", "STOP002", OccupancyStatus.FEW_SEATS_AVAILABLE, 0.68),
-            createSampleGTFSRTRecord("V051", "TRIP003", "0", "STOP003", OccupancyStatus.STANDING_ROOM_ONLY, 0.82),
-            createSampleGTFSRTRecord("V081", "TRIP004", "105", "STOP004", OccupancyStatus.CRUSHED_STANDING_ROOM_ONLY, 0.91),
-            createSampleGTFSRTRecord("V025", "TRIP005", "FF1", "STOP005", OccupancyStatus.EMPTY, 0.12)
-        );
+    private static DataStream<GTFSRTVehiclePosition> createGTFSRTSource(StreamExecutionEnvironment env) {
+        // TODO: Replace with actual Kafka or HTTP source
+        // Example:
+        // Properties properties = new Properties();
+        // properties.setProperty("bootstrap.servers", "localhost:9092");
+        // properties.setProperty("group.id", "rtd-occupancy-analysis");
+        // FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>("rtd.vehicle.positions", 
+        //     new SimpleStringSchema(), properties);
+        // return env.addSource(consumer).map(new GTFSRTDeserializer());
+        
+        throw new UnsupportedOperationException("Real GTFS-RT source not implemented yet");
     }
     
     /**
-     * Creates a mock APC data stream for demonstration.
-     * In production, this would connect to actual APC data source.
+     * Creates a real APC data stream from RTD APC system.
+     * TODO: Implement connection to actual APC data source.
      */
-    private static DataStream<APCData> createMockAPCStream(StreamExecutionEnvironment env) {
-        // This is a placeholder - in production, use actual APC data source
-        return env.fromElements(
-            createSampleAPCRecord("BUS001", "TRIP001", "STOP001", 16), // Should match GTFS-RT MANY_SEATS_AVAILABLE
-            createSampleAPCRecord("BUS002", "TRIP002", "STOP002", 20), // Different from GTFS-RT (should be MANY_SEATS_AVAILABLE)
-            createSampleAPCRecord("BUS051", "TRIP003", "STOP003", 55), // Should match GTFS-RT STANDING_ROOM_ONLY
-            createSampleAPCRecord("BUS081", "TRIP004", "STOP004", 75), // Should match GTFS-RT CRUSHED_STANDING_ROOM_ONLY
-            createSampleAPCRecord("BUS025", "TRIP005", "STOP005", 3)   // Should match GTFS-RT EMPTY
-        );
+    private static DataStream<APCData> createAPCSource(StreamExecutionEnvironment env) {
+        // TODO: Replace with actual data source (database, file, or Kafka stream)
+        // Example:
+        // Properties properties = new Properties();
+        // properties.setProperty("bootstrap.servers", "localhost:9092");
+        // properties.setProperty("group.id", "rtd-occupancy-analysis");
+        // FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>("rtd.apc.data", 
+        //     new SimpleStringSchema(), properties);
+        // return env.addSource(consumer).map(new APCDataDeserializer());
+        
+        throw new UnsupportedOperationException("Real APC source not implemented yet");
     }
     
-    private static GTFSRTVehiclePosition createSampleGTFSRTRecord(String vehicleId, String tripId, 
-                                                                 String routeId, String stopId, 
-                                                                 OccupancyStatus status, double percentage) {
-        GTFSRTVehiclePosition vp = new GTFSRTVehiclePosition(vehicleId, tripId, routeId, stopId);
-        vp.setCurrentStatus("IN_TRANSIT_TO");
-        vp.setOccupancyStatus(status);
-        vp.setOccupancyPercentage(percentage);
-        vp.setVehicleTimestamp(java.time.LocalDateTime.of(2023, 8, 15, 10, 30));
-        vp.setServiceDate(java.time.LocalDateTime.of(2023, 8, 15, 10, 30));
-        vp.setLatitude(39.7392);
-        vp.setLongitude(-104.9903);
-        return vp;
-    }
-    
-    private static APCData createSampleAPCRecord(String vehicleCode, String tripCode, String stopCode, int passengerLoad) {
-        APCData apc = new APCData(vehicleCode, tripCode, stopCode, 
-                                 java.time.LocalDateTime.of(2023, 8, 15, 10, 30), passengerLoad);
-        apc.setTimestamp(java.time.LocalDateTime.of(2023, 8, 15, 10, 30));
-        return apc;
-    }
+    // Sample record creation methods removed - no longer needed for production pipeline
     
     /**
      * Returns set of valid route IDs for filtering.
@@ -231,7 +219,7 @@ public class RTDOccupancyAccuracyPipeline {
      */
     private static Set<String> getValidRoutes() {
         Set<String> validRoutes = new HashSet<>();
-        // Add sample routes from the Arcadis study
+        // Add actual RTD routes that have APC data available
         validRoutes.add("0");
         validRoutes.add("15");
         validRoutes.add("121");

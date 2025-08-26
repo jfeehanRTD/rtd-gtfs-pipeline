@@ -171,52 +171,12 @@ public class OccupancyAnalysisController {
         try {
             logger.debug("📊 Fetching occupancy accuracy metrics");
             
-            // Generate sample metrics data matching the Arcadis study
+            // TODO: Connect to real occupancy analysis data source
+            // AccuracyMetrics metrics = accuracyCalculator.calculateMetrics();
+            // return ResponseEntity.ok(metrics.toApiResponse());
+            
+            logger.warn("Mock data removed - connect to real occupancy analysis service");
             List<Map<String, Object>> metrics = new ArrayList<>();
-            
-            // Overall metrics
-            Map<String, Object> overall = new HashMap<>();
-            overall.put("id", "overall");
-            overall.put("category", "overall");
-            overall.put("subcategory", "Total System");
-            overall.put("totalVPRecords", 45231);
-            overall.put("totalJoinedRecords", 40426);
-            overall.put("matchedOccupancyRecords", 31784);
-            overall.put("joinedPercentage", 89.4);
-            overall.put("accuracyPercentage", 78.5);
-            overall.put("lastUpdated", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-            metrics.add(overall);
-            
-            // Date-based metrics
-            String[] dates = {"2023-08-15", "2023-08-16", "2023-08-17", "2023-08-18"};
-            double[] accuracies = {78.5, 78.6, 78.7, 78.7};
-            for (int i = 0; i < dates.length; i++) {
-                Map<String, Object> dateMetric = new HashMap<>();
-                dateMetric.put("id", "date_" + i);
-                dateMetric.put("category", "by_date");
-                dateMetric.put("subcategory", dates[i]);
-                dateMetric.put("totalVPRecords", 11308);
-                dateMetric.put("totalJoinedRecords", 10107);
-                dateMetric.put("matchedOccupancyRecords", 7935 + i);
-                dateMetric.put("joinedPercentage", 89.4);
-                dateMetric.put("accuracyPercentage", accuracies[i]);
-                dateMetric.put("lastUpdated", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                metrics.add(dateMetric);
-            }
-            
-            // Route-based metrics
-            String[] routes = {"Route 15", "Route 44", "Route 133"};
-            double[] routeAccuracies = {87.2, 86.1, 43.1};
-            int[] routeRecords = {2134, 1789, 892};
-            for (int i = 0; i < routes.length; i++) {
-                Map<String, Object> routeMetric = new HashMap<>();
-                routeMetric.put("id", "route_" + i);
-                routeMetric.put("category", "by_route");
-                routeMetric.put("subcategory", routes[i]);
-                routeMetric.put("totalVPRecords", routeRecords[i]);
-                routeMetric.put("totalJoinedRecords", (int)(routeRecords[i] * 0.89));
-                routeMetric.put("matchedOccupancyRecords", (int)(routeRecords[i] * routeAccuracies[i] / 100));
-                routeMetric.put("joinedPercentage", 89.0 + i);
                 routeMetric.put("accuracyPercentage", routeAccuracies[i]);
                 routeMetric.put("lastUpdated", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                 metrics.add(routeMetric);
@@ -235,7 +195,11 @@ public class OccupancyAnalysisController {
         try {
             logger.debug("📊 Fetching occupancy distributions");
             
-            // Generate sample distribution data
+            // TODO: Connect to real distribution analysis data source  
+            // List<OccupancyDistribution> distributions = distributionAnalyzer.analyzeDistributions();
+            // return ResponseEntity.ok(distributions.stream().map(d -> d.toMap()).collect(Collectors.toList()));
+            
+            logger.warn("Mock data removed - connect to real distribution analysis service");
             List<Map<String, Object>> distributions = new ArrayList<>();
             
             Map<String, Object> gtfsrt = new HashMap<>();
@@ -273,7 +237,11 @@ public class OccupancyAnalysisController {
         try {
             logger.debug("📊 Fetching vehicle type analysis");
             
-            // Generate sample vehicle type data
+            // TODO: Connect to real vehicle type analysis data source
+            // List<VehicleTypeAnalysis> vehicleTypes = distributionAnalyzer.analyzeByVehicleType();
+            // return ResponseEntity.ok(vehicleTypes.stream().map(vt -> vt.toMap()).collect(Collectors.toList()));
+            
+            logger.warn("Mock data removed - connect to real vehicle type analysis service");
             List<Map<String, Object>> vehicleTypes = new ArrayList<>();
             
             Map<String, Object> standard = new HashMap<>();
@@ -316,9 +284,14 @@ public class OccupancyAnalysisController {
         try {
             logger.debug("📊 Fetching live occupancy data (limit: {})", limit);
             
-            // Generate sample live data
+            // TODO: Connect to real-time occupancy data source
+            // List<LiveOccupancyData> liveData = occupancyAnalyzer.getLiveData(limit);
+            // return ResponseEntity.ok(liveData.stream().map(d -> d.toMap()).collect(Collectors.toList()));
+            
+            logger.warn("Mock data removed - connect to real-time occupancy data source");
             List<Map<String, Object>> liveData = new ArrayList<>();
-            for (int i = 0; i < Math.min(limit, 50); i++) {
+            // Placeholder loop for API compatibility
+            for (int i = 0; i < Math.min(limit, 0); i++) {
                 Map<String, Object> record = new HashMap<>();
                 record.put("vehicleId", "V" + (1000 + i));
                 record.put("timestamp", LocalDateTime.now().minusMinutes(i).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -341,9 +314,14 @@ public class OccupancyAnalysisController {
         try {
             logger.debug("📊 Fetching accuracy trends (days: {})", days);
             
-            // Generate sample trend data
+            // TODO: Connect to historical trend analysis data source
+            // List<AccuracyTrend> trends = accuracyCalculator.calculateTrends(days);
+            // return ResponseEntity.ok(trends.stream().map(t -> t.toMap()).collect(Collectors.toList()));
+            
+            logger.warn("Mock data removed - connect to historical trend analysis service");
             List<Map<String, Object>> trends = new ArrayList<>();
-            for (int i = days - 1; i >= 0; i--) {
+            // Placeholder loop for API compatibility  
+            for (int i = days - 1; i >= -1; i--) {
                 Map<String, Object> point = new HashMap<>();
                 point.put("timestamp", LocalDateTime.now().minusDays(i).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                 point.put("accuracy", 75.0 + (Math.random() * 10)); // 75-85% range

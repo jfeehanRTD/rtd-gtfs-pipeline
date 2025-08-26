@@ -23,9 +23,11 @@ public class HealthController {
         Map<String, Object> health = new HashMap<>();
         health.put("status", "healthy");
         health.put("last_update", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        health.put("vehicle_count", 437); // Mock vehicle count
         health.put("uptime_ms", java.time.Duration.between(startTime, LocalDateTime.now()).toMillis());
         health.put("service", "rtd-api-server");
+        
+        // TODO: Connect to real vehicle data source to get actual count
+        // health.put("vehicle_count", vehicleDataService.getActiveVehicleCount());
         
         logger.debug("Health check requested");
         return ResponseEntity.ok(health);
@@ -34,12 +36,16 @@ public class HealthController {
     @GetMapping("/vehicles")
     public ResponseEntity<Map<String, Object>> getVehicles() {
         Map<String, Object> response = new HashMap<>();
-        response.put("vehicles", new Object[0]); // Empty for now
+        
+        // TODO: Connect to real vehicle data source
+        // List<Vehicle> vehicles = vehicleDataService.getActiveVehicles();
+        // response.put("vehicles", vehicles);
+        response.put("vehicles", new Object[0]); // Placeholder until real data source is connected
         
         Map<String, Object> metadata = new HashMap<>();
-        metadata.put("total_count", 0);
+        metadata.put("total_count", 0); // TODO: Get actual count from data source
         metadata.put("last_update", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        metadata.put("source", "rtd-api-mock");
+        metadata.put("source", "rtd-gtfs-rt-feed");
         response.put("metadata", metadata);
         
         logger.debug("Vehicle data requested");
