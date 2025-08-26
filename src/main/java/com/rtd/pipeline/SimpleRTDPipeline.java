@@ -62,9 +62,9 @@ public class SimpleRTDPipeline {
             System.err.println("Pipeline execution failed: " + e.getMessage());
             e.printStackTrace();
             
-            // Test direct RTD connection as fallback
-            System.out.println("\n=== Fallback: Direct RTD Data Test ===");
-            com.rtd.pipeline.DirectRTDTest.main(args);
+            // Log error and exit
+            System.out.println("\n=== Pipeline Execution Failed ===");
+            System.out.println("Please check the logs above for detailed error information.");
         }
     }
 }

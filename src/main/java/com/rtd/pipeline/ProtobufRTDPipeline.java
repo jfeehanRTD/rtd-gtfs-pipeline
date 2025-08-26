@@ -73,9 +73,9 @@ public class ProtobufRTDPipeline {
             System.err.println("Protobuf pipeline execution failed: " + e.getMessage());
             e.printStackTrace();
             
-            // Fallback to direct data test
-            System.out.println("\n=== Fallback: Direct RTD Data Test ===");
-            com.rtd.pipeline.DirectRTDTest.main(args);
+            // Log error and exit
+            System.out.println("\n=== Protobuf Pipeline Execution Failed ===");
+            System.out.println("Please check the logs above for detailed error information.");
         }
     }
     
