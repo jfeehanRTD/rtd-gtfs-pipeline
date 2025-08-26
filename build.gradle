@@ -5,6 +5,8 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.6'
 }
 
+import java.time.Duration
+
 group = 'com.rtd'
 version = '1.0-SNAPSHOT'
 description = 'RTD GTFS-RT Data Pipeline'
@@ -173,9 +175,24 @@ tasks.withType(JavaExec) {
 test {
     useJUnitPlatform()
     jvmArgs += ['--enable-preview']
+    
+    // Fix test execution issues
+    maxHeapSize = '2g'
+    forkEvery = 1  // Fork a new JVM for each test class
+    maxParallelForks = 1  // Run tests sequentially to avoid resource conflicts
+    
+    // Increase test timeout
+    timeout = Duration.ofMinutes(10)
+    
+    // Better test logging
     testLogging {
-        events "passed", "skipped", "failed"
+        events "passed", "skipped", "failed", "standard_out", "standard_error"
+        exceptionFormat = 'full'
+        showStandardStreams = false
     }
+    
+    // Exclude problematic tests if they exist
+    systemProperty 'junit.jupiter.execution.parallel.enabled', 'false'
 }
 
 // Wrapper configuration

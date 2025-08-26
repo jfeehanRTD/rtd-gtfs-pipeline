@@ -1,0 +1,35 @@
+{
+  "msg_time": "2025-08-13 21:00:00",
+  "trains": [
+    {
+      "last_movement_time": "2025-08-13 21:00:00",
+      "service_date": "2025-08-13",
+      "run": "72",
+      "destination_name": "JEFF",
+      "destination_id": "61",
+      "trip": "12",
+      "direction": "South",
+      "train": "72",
+      "train_consist": [
+        {
+          "car": "234",
+          "order": "1"
+        },
+        {
+          "car": "225",
+          "order": "2"
+        }
+      ],
+      "source": "TRACK_CIRCUIT",
+      "position": "431BZT Track",
+      "latitude": "39.73475397540",
+      "longitude": "-105.03954629500",
+      "scheduled_time_to_next": "55",
+      "scheduled_stop_time": "2025-08-13 20:58:00",
+      "schedule_adherence": "-120",
+      "prev_stop": "KNOX",
+      "current_stop": "PERRY",
+      "next_stop": "SHERI"
+    }
+  ]
+}
