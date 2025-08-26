@@ -3,6 +3,7 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import MapView from './components/MapView';
 import AdminDashboard from './components/AdminDashboard';
+import ModernAdminDashboard from './components/ModernAdminDashboard';
 import LiveTransitMap from './components/LiveTransitMap';
 import { 
   MapPin,
@@ -74,16 +75,24 @@ const Navigation = () => {
 function App() {
   return (
     <Router>
-      <div className="h-screen bg-gray-100 font-sans">
-        <Navigation />
-        <div className="pt-16 h-full">
-          <Routes>
-            <Route path="/" element={<MapView />} />
-            <Route path="/live" element={<LiveTransitMap />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-          </Routes>
-        </div>
-      </div>
+      <Routes>
+        {/* Modern admin dashboard takes full screen */}
+        <Route path="/admin" element={<ModernAdminDashboard />} />
+        
+        {/* Other routes use the main layout with navigation */}
+        <Route path="/*" element={
+          <div className="h-screen bg-gray-100 font-sans">
+            <Navigation />
+            <div className="pt-16 h-full">
+              <Routes>
+                <Route path="/" element={<MapView />} />
+                <Route path="/live" element={<LiveTransitMap />} />
+                <Route path="/admin/legacy" element={<AdminDashboard />} />
+              </Routes>
+            </div>
+          </div>
+        } />
+      </Routes>
     </Router>
   );
 }
