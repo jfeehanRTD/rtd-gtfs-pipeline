@@ -10,9 +10,25 @@ if [[ -f .env ]]; then
     set +a  # stop automatic export
 fi
 
+# Function to get local host IP
+get_local_host() {
+    # Dynamically determine IP address if LOCAL_IP not set
+    if [[ -n "$LOCAL_IP" ]]; then
+        local ip="$LOCAL_IP"
+    else
+        # Try to get the primary network interface IP
+        local ip=$(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | head -1 | awk '{print $2}')
+        # Fallback to route-based detection if ifconfig fails
+        if [[ -z "$ip" ]]; then
+            ip=$(route get default | grep interface | awk '{print $2}' | xargs ifconfig | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}' | head -1)
+        fi
+    fi
+    echo "http://${ip}:${BUS_SIRI_PORT:-880}"
+}
+
 # Default values (can be overridden by environment variables)
 DEFAULT_TIS_HOST="${TIS_PROXY_HOST:-http://tisproxy.rtd-denver.com}"
-DEFAULT_LOCAL_HOST="http://${LOCAL_IP:-172.16.23.5}:${BUS_SIRI_PORT:-880}"
+DEFAULT_LOCAL_HOST="$(get_local_host)"
 DEFAULT_SERVICE="${TIS_PROXY_SERVICE:-siri}"
 DEFAULT_TTL="${TIS_PROXY_TTL:-90000}"
 DEFAULT_RECEIVER_PORT="8082"
@@ -33,6 +49,10 @@ echo "  Subscription Host: $SUBSCRIPTION_HOST"
 echo "  Service: $SERVICE"
 echo "  TTL: $TTL ms"
 echo "  Local Receiver Port: $RECEIVER_PORT"
+echo "  Current Hostname: $(hostname)"
+# Get the IP that will be used
+USED_IP=$(get_local_host | sed 's/http:\/\///; s/:.*$//')
+echo "  Connection: Using IP address $USED_IP"
 echo ""
 
 # Create subscription JSON payload
