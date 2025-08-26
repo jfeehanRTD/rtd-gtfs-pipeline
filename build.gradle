@@ -1,0 +1,185 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.springframework.boot' version '3.4.1'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.rtd'
+version = '1.0-SNAPSHOT'
+description = 'RTD GTFS-RT Data Pipeline'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_24
+    targetCompatibility = JavaVersion.VERSION_24
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(24)
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://repository.apache.org/content/repositories/snapshots' }
+    maven { url = 'https://packages.confluent.io/maven/' }
+}
+
+ext {
+    flinkVersion = '2.1.0'
+    kafkaVersion = '4.0.0'
+    slf4jVersion = '2.0.16'
+    junitVersion = '5.11.0'
+    jacksonVersion = '2.18.1'
+    log4jVersion = '2.24.3'
+    springBootVersion = '3.4.1'
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+dependencies {
+    // Apache Flink Core Dependencies
+    implementation "org.apache.flink:flink-core:${flinkVersion}"
+    implementation "org.apache.flink:flink-streaming-java:${flinkVersion}"
+    implementation "org.apache.flink:flink-table-api-java-bridge:${flinkVersion}"
+    implementation "org.apache.flink:flink-table-planner_2.12:${flinkVersion}"
+    implementation "org.apache.flink:flink-table-runtime:${flinkVersion}"
+    implementation "org.apache.flink:flink-table-api-java:${flinkVersion}"
+    implementation "org.apache.flink:flink-connector-files:${flinkVersion}"
+    implementation "org.apache.flink:flink-json:${flinkVersion}"
+    implementation "org.apache.flink:flink-connector-kafka:4.0.0-2.0"
+    implementation "org.apache.flink:flink-connector-datagen:${flinkVersion}"
+    implementation "org.apache.flink:flink-runtime:${flinkVersion}"
+    implementation "org.apache.flink:flink-clients:${flinkVersion}"
+    
+    // JSON Path for Table API
+    implementation 'com.jayway.jsonpath:json-path:2.8.0'
+    
+    // Kafka
+    implementation "org.apache.kafka:kafka_2.13:${kafkaVersion}"
+    implementation "org.apache.kafka:kafka-clients:${kafkaVersion}"
+    
+    // GTFS-RT Protobuf
+    implementation 'com.google.transit:gtfs-realtime-bindings:0.0.4'
+    
+    // HTTP Client
+    implementation 'org.apache.httpcomponents:httpclient:4.5.14'
+    
+    // Flink File System Connectors
+    implementation "org.apache.flink:flink-parquet:${flinkVersion}"
+    implementation "org.apache.flink:flink-csv:${flinkVersion}"
+    
+    // Scala Dependencies for Table API
+    implementation 'org.scala-lang:scala-library:2.12.18'
+    testImplementation 'org.scala-lang:scala-compiler:2.12.18'
+    
+    // JSON Processing
+    implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonVersion}"
+    
+    // Logging
+    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+    implementation "org.apache.logging.log4j:log4j-slf4j2-impl:${log4jVersion}"
+    implementation "org.apache.logging.log4j:log4j-api:${log4jVersion}"
+    implementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
+    
+    // Spring Boot (excluding default logging)
+    implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}") {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+    implementation("org.springframework.boot:spring-boot-starter:${springBootVersion}") {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+    
+    // HTTP Server
+    implementation 'com.sun.net.httpserver:http:20070405'
+    implementation 'org.apache.commons:commons-csv:1.12.0'
+    implementation 'org.apache.commons:commons-lang3:3.17.0'
+    
+    // Test Dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "org.apache.flink:flink-test-utils:${flinkVersion}"
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+    testImplementation 'org.assertj:assertj-core:3.26.3'
+    testImplementation 'org.testcontainers:junit-jupiter:1.20.3'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+}
+
+application {
+    mainClass = 'com.rtd.pipeline.RTDStaticDataPipeline'
+}
+
+// Task to run specific main classes
+task runRTDPipeline(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.RTDStaticDataPipeline'
+}
+
+task runBusReceiver(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.BusCommHTTPReceiver'
+}
+
+task runRailReceiver(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.RailCommHTTPReceiver'
+}
+
+task runSpringBootAPI(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.RTDApiApplication'
+}
+
+// Configure the JAR task
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'com.rtd.pipeline.RTDStaticDataPipeline',
+            'Class-Path': configurations.runtimeClasspath.files.collect { it.name }.join(' ')
+        )
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Fat JAR task
+task fatJar(type: Jar) {
+    archiveBaseName = 'rtd-gtfs-pipeline-all'
+    zip64 = true  // Enable ZIP64 for large archives
+    from sourceSets.main.output
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes(
+            'Main-Class': 'com.rtd.pipeline.RTDStaticDataPipeline'
+        )
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.release = 24
+    options.compilerArgs += ['--enable-preview']
+}
+
+tasks.withType(JavaExec) {
+    jvmArgs += ['--enable-preview']
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs += ['--enable-preview']
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+// Wrapper configuration
+wrapper {
+    gradleVersion = '8.14'
+    distributionType = Wrapper.DistributionType.ALL
+}
