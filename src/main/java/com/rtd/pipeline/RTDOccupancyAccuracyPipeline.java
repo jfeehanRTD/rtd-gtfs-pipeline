@@ -48,8 +48,8 @@ public class RTDOccupancyAccuracyPipeline {
             ReportGenerator reportGenerator = new ReportGenerator();
             DistributionAnalyzer distributionAnalyzer = new DistributionAnalyzer();
             
-            // Load vehicle capacity data (this would typically come from a database or file)
-            loadSampleVehicleCapacityData(capacityService);
+            // Load vehicle capacity data from configuration or database
+            loadVehicleCapacityData(capacityService);
             
             // Create data processors
             GTFSRTVPProcessor vpProcessor = new GTFSRTVPProcessor();
@@ -137,46 +137,36 @@ public class RTDOccupancyAccuracyPipeline {
     }
     
     /**
-     * Loads sample vehicle capacity data for demonstration.
-     * In production, this would load from bus_info database table.
+     * Loads vehicle capacity data from database or configuration file.
+     * This method should be implemented to connect to the RTD bus_info database table
+     * or load from a configuration file containing actual vehicle specifications.
      */
-    private static void loadSampleVehicleCapacityData(VehicleCapacityService capacityService) {
-        logger.info("Loading sample vehicle capacity data");
+    private static void loadVehicleCapacityData(VehicleCapacityService capacityService) {
+        logger.info("Loading vehicle capacity data from configuration");
         
-        // Standard 40ft buses (36 seats, 8 standing)
-        for (int i = 1; i <= 50; i++) {
-            VehicleInfo standardBus = new VehicleInfo(
-                "V" + String.format("%03d", i),
-                "BUS" + String.format("%03d", i),
-                VehicleType.STANDARD_40FT,
-                36, 8
+        // TODO: Implement database connection to load actual RTD vehicle capacity data
+        // Example implementation:
+        // Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+        // PreparedStatement stmt = conn.prepareStatement(
+        //     "SELECT vehicle_id, vehicle_number, vehicle_type, seat_capacity, standing_capacity FROM bus_info");
+        // ResultSet rs = stmt.executeQuery();
+        // while (rs.next()) {
+        //     VehicleInfo vehicle = new VehicleInfo(
+        //         rs.getString("vehicle_id"),
+        //         rs.getString("vehicle_number"), 
+        //         VehicleType.valueOf(rs.getString("vehicle_type")),
+        //         rs.getInt("seat_capacity"),
+        //         rs.getInt("standing_capacity")
+        //     );
+        //     capacityService.registerVehicle(vehicle);
+        // }
+        
+        // For now, throw an exception requiring proper implementation
+        throw new IllegalStateException(
+            "Vehicle capacity data loading not implemented. " +
+            "Please implement database connection or configuration file loading " +
+            "to load actual RTD vehicle specifications."
             );
-            capacityService.registerVehicle(standardBus);
-        }
-        
-        // Coach buses (37 seats, 36 standing)
-        for (int i = 51; i <= 80; i++) {
-            VehicleInfo coachBus = new VehicleInfo(
-                "V" + String.format("%03d", i),
-                "BUS" + String.format("%03d", i),
-                VehicleType.COACH,
-                37, 36
-            );
-            capacityService.registerVehicle(coachBus);
-        }
-        
-        // Articulated buses (57 seats, 23 standing)
-        for (int i = 81; i <= 100; i++) {
-            VehicleInfo articulatedBus = new VehicleInfo(
-                "V" + String.format("%03d", i),
-                "BUS" + String.format("%03d", i),
-                VehicleType.ARTICULATED,
-                57, 23
-            );
-            capacityService.registerVehicle(articulatedBus);
-        }
-        
-        logger.info("Loaded capacity data for {} vehicles", capacityService.getRegisteredVehicleCount());
     }
     
     /**
