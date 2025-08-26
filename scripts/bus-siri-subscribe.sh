@@ -16,11 +16,29 @@ get_local_host() {
     if [[ -n "$LOCAL_IP" ]]; then
         local ip="$LOCAL_IP"
     else
-        # Try to get the primary network interface IP
-        local ip=$(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | head -1 | awk '{print $2}')
-        # Fallback to route-based detection if ifconfig fails
+        # VPN-aware IP detection
+        local ip=""
+        
+        # Priority 1: Check for VPN interfaces (utun*)
+        if command -v ifconfig &> /dev/null; then
+            for vpn_interface in $(ifconfig -l | tr ' ' '\n' | grep 'utun'); do
+                candidate_ip=$(ifconfig "$vpn_interface" 2>/dev/null | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | head -1)
+                if [[ -n "$candidate_ip" ]]; then
+                    ip="$candidate_ip"
+                    echo "🔐 Using VPN IP from $vpn_interface: $ip" >&2
+                    break
+                fi
+            done
+        fi
+        
+        # Priority 2: Try route-based detection if no VPN IP found
         if [[ -z "$ip" ]]; then
-            ip=$(route get default | grep interface | awk '{print $2}' | xargs ifconfig | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}' | head -1)
+            ip=$(route get default 2>/dev/null | grep interface | awk '{print $2}' | xargs ifconfig 2>/dev/null | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}' | head -1)
+        fi
+        
+        # Priority 3: Fallback to first non-localhost IP
+        if [[ -z "$ip" ]]; then
+            ip=$(ifconfig 2>/dev/null | grep 'inet ' | grep -v '127.0.0.1' | head -1 | awk '{print $2}')
         fi
     fi
     echo "http://${ip}:${BUS_SIRI_PORT:-880}"
