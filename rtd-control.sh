@@ -745,6 +745,248 @@ main() {
                     ;;
             esac
             ;;
+        "lrgps")
+            case "${2:-run}" in
+                "run")
+                    print_status "Starting RTD LRGPS Pipeline..."
+                    if ! check_process "LRGPSPipeline"; then
+                        mvn exec:java -Dexec.mainClass="com.rtd.pipeline.LRGPSPipeline"
+                    else
+                        print_warning "LRGPS pipeline is already running"
+                    fi
+                    ;;
+                "receiver")
+                    print_status "Starting RTD LRGPS HTTP Receiver..."
+                    if ! check_process "LRGPSHTTPReceiver"; then
+                        mvn exec:java -Dexec.mainClass="com.rtd.pipeline.LRGPSHTTPReceiver"
+                    else
+                        print_warning "LRGPS HTTP receiver is already running"
+                    fi
+                    ;;
+                "subscribe")
+                    print_status "Subscribing to LRGPS feed..."
+                    if [ -f "./scripts/lrgps-subscribe.sh" ]; then
+                        ./scripts/lrgps-subscribe.sh "$3" "$4" "$5"
+                    else
+                        print_error "LRGPS subscription script not found"
+                    fi
+                    ;;
+                "test")
+                    print_status "Testing LRGPS Communication..."
+                    if [ -f "./scripts/lrgps-subscribe.sh" ]; then
+                        ./scripts/lrgps-subscribe.sh
+                    else
+                        print_error "LRGPS test script not found"
+                    fi
+                    ;;
+                "monitor")
+                    print_status "Monitoring LRGPS topic..."
+                    ./scripts/kafka-console-consumer.sh --topic rtd.lrgps
+                    ;;
+                "status")
+                    print_status "Checking LRGPS status..."
+                    curl -s "http://localhost:8083/status" | jq . 2>/dev/null || curl -s "http://localhost:8083/status"
+                    ;;
+                "unsubscribe")
+                    print_status "Unsubscribing from LRGPS feed..."
+                    # Send unsubscribe request to TIS proxy
+                    AUTH_HEADER=""
+                    if [[ -n "$TIS_PROXY_USERNAME" && -n "$TIS_PROXY_PASSWORD" ]]; then
+                        AUTH_HEADER="-u $TIS_PROXY_USERNAME:$TIS_PROXY_PASSWORD"
+                    fi
+                    TIS_HOST="${TIS_PROXY_HOST:-http://tisproxy.rtd-denver.com}"
+                    curl -s -X DELETE $AUTH_HEADER "$TIS_HOST/unsubscribe/lrgps" || print_warning "Failed to unsubscribe from TIS proxy"
+                    print_success "LRGPS unsubscribe request sent"
+                    ;;
+                *)
+                    print_error "Usage: $0 lrgps [COMMAND]"
+                    echo
+                    print_status "Core Services:"
+                    print_status "  run              - Start the LRGPS pipeline"
+                    print_status "  receiver         - Start HTTP receiver for LRGPS data"
+                    echo
+                    print_status "LRGPS Subscription:"
+                    print_status "  subscribe [host] [service] [ttl] - Subscribe to LRGPS feed"
+                    print_status "  test             - Test LRGPS subscription with defaults"
+                    print_status "  unsubscribe      - Unsubscribe from LRGPS feed"
+                    echo
+                    print_status "Monitoring:"
+                    print_status "  monitor          - Monitor LRGPS topic"
+                    print_status "  status           - Check receiver status"
+                    exit 1
+                    ;;
+            esac
+            ;;
+        "gtfs-rt")
+            case "${2:-pipeline}" in
+                "pipeline")
+                    print_status "Starting RTD GTFS-RT Generation Pipeline..."
+                    if ! check_process "WorkingGTFSRTPipeline"; then
+                        MAVEN_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.misc=ALL-UNNAMED" \
+                        mvn exec:java -Dexec.mainClass="com.rtd.pipeline.WorkingGTFSRTPipeline"
+                    else
+                        print_warning "GTFS-RT pipeline is already running"
+                    fi
+                    ;;
+                "publisher")
+                    print_status "Starting RTD GTFS-RT Publisher (HTTP Server)..."
+                    if ! check_process "GTFSRTPublisher"; then
+                        nohup mvn exec:java -Dexec.mainClass="com.rtd.pipeline.gtfsrt.GTFSRTPublisher" -q > "gtfs-rt-publisher.log" 2>&1 &
+                        local pub_pid=$!
+                        sleep 3
+                        if kill -0 $pub_pid 2>/dev/null; then
+                            print_success "GTFS-RT Publisher started (PID: $pub_pid)"
+                            print_status "Vehicle Positions: http://localhost:8084/files/gtfs-rt/VehiclePosition.pb"
+                            print_status "Trip Updates: http://localhost:8084/files/gtfs-rt/TripUpdate.pb"
+                            print_status "Alerts: http://localhost:8084/files/gtfs-rt/Alerts.pb"
+                            print_status "Status: http://localhost:8084/gtfs-rt/status"
+                        else
+                            print_error "Failed to start GTFS-RT Publisher"
+                        fi
+                    else
+                        print_warning "GTFS-RT Publisher is already running"
+                    fi
+                    ;;
+                "stop-publisher")
+                    print_status "Stopping RTD GTFS-RT Publisher..."
+                    local pids=$(get_pids "GTFSRTPublisher")
+                    if [[ -n "$pids" ]]; then
+                        echo "$pids" | xargs kill -TERM
+                        sleep 2
+                        # Check if still running and force kill if needed
+                        local remaining_pids=$(get_pids "GTFSRTPublisher")
+                        if [[ -n "$remaining_pids" ]]; then
+                            echo "$remaining_pids" | xargs kill -KILL
+                        fi
+                        print_success "GTFS-RT Publisher stopped"
+                    else
+                        print_warning "GTFS-RT Publisher is not running"
+                    fi
+                    ;;
+                "all")
+                    print_status "Starting GTFS-RT Pipeline and Publisher..."
+                    # Start publisher first
+                    "$0" gtfs-rt publisher
+                    sleep 3
+                    # Start pipeline
+                    "$0" gtfs-rt pipeline
+                    ;;
+                "stop-all")
+                    print_status "Stopping all GTFS-RT services..."
+                    "$0" gtfs-rt stop-publisher
+                    local pipeline_pids=$(get_pids "WorkingGTFSRTPipeline")
+                    if [[ -n "$pipeline_pids" ]]; then
+                        echo "$pipeline_pids" | xargs kill -TERM
+                        sleep 2
+                        local remaining_pids=$(get_pids "WorkingGTFSRTPipeline")
+                        if [[ -n "$remaining_pids" ]]; then
+                            echo "$remaining_pids" | xargs kill -KILL
+                        fi
+                        print_success "GTFS-RT Pipeline stopped"
+                    fi
+                    ;;
+                "status")
+                    print_status "GTFS-RT Services Status:"
+                    echo
+                    
+                    # Check GTFS-RT Pipeline
+                    if check_process "WorkingGTFSRTPipeline"; then
+                        local pipeline_pids=$(get_pids "WorkingGTFSRTPipeline")
+                        print_success "GTFS-RT Pipeline: RUNNING (PIDs: $pipeline_pids)"
+                    else
+                        print_warning "GTFS-RT Pipeline: STOPPED"
+                    fi
+                    
+                    # Check GTFS-RT Publisher
+                    if check_process "GTFSRTPublisher"; then
+                        local pub_pids=$(get_pids "GTFSRTPublisher")
+                        print_success "GTFS-RT Publisher: RUNNING (PIDs: $pub_pids)"
+                        print_status "  ↳ Vehicle Positions: http://localhost:8084/files/gtfs-rt/VehiclePosition.pb"
+                        print_status "  ↳ Trip Updates: http://localhost:8084/files/gtfs-rt/TripUpdate.pb"
+                        print_status "  ↳ Status: http://localhost:8084/gtfs-rt/status"
+                    else
+                        print_warning "GTFS-RT Publisher: STOPPED"
+                    fi
+                    
+                    # Check for generated files
+                    if [ -d "data/gtfs-rt" ]; then
+                        echo
+                        print_status "Generated GTFS-RT Files:"
+                        for file in "data/gtfs-rt/VehiclePosition.pb" "data/gtfs-rt/TripUpdate.pb" "data/gtfs-rt/Alerts.pb"; do
+                            if [ -f "$file" ]; then
+                                local size=$(ls -lh "$file" | awk '{print $5}')
+                                local modified=$(ls -l "$file" | awk '{print $6, $7, $8}')
+                                print_status "  ↳ $(basename $file): ${size} (modified: ${modified})"
+                            else
+                                print_status "  ↳ $(basename $file): NOT FOUND"
+                            fi
+                        done
+                    fi
+                    ;;
+                "test")
+                    print_status "Testing GTFS-RT endpoints..."
+                    local base_url="http://localhost:8084"
+                    
+                    # Test status endpoint
+                    print_status "Testing status endpoint..."
+                    curl -s "$base_url/gtfs-rt/status" | jq . 2>/dev/null || curl -s "$base_url/gtfs-rt/status"
+                    
+                    echo
+                    print_status "Testing protobuf endpoints..."
+                    
+                    # Test protobuf endpoints
+                    for endpoint in "VehiclePosition.pb" "TripUpdate.pb" "Alerts.pb"; do
+                        local url="$base_url/files/gtfs-rt/$endpoint"
+                        local status=$(curl -s -o /dev/null -w "%{http_code}" "$url")
+                        if [ "$status" = "200" ]; then
+                            local size=$(curl -s -I "$url" | grep -i content-length | awk '{print $2}' | tr -d '\r')
+                            print_success "$endpoint: OK (${size:-unknown} bytes)"
+                        else
+                            print_warning "$endpoint: HTTP $status"
+                        fi
+                    done
+                    ;;
+                "compare")
+                    print_status "Comparing generated feeds with official RTD feeds..."
+                    if [ -f "./scripts/compare-gtfs-rt-feeds.sh" ]; then
+                        ./scripts/compare-gtfs-rt-feeds.sh
+                    else
+                        print_error "Feed comparison script not found"
+                        print_status "Expected: ./scripts/compare-gtfs-rt-feeds.sh"
+                    fi
+                    ;;
+                "compare-quick")
+                    print_status "Running quick feed comparison (test only)..."
+                    if [ -f "./scripts/compare-gtfs-rt-feeds.sh" ]; then
+                        ./scripts/compare-gtfs-rt-feeds.sh --test-only
+                    else
+                        print_error "Feed comparison script not found"
+                    fi
+                    ;;
+                *)
+                    print_error "Usage: $0 gtfs-rt [COMMAND]"
+                    echo
+                    print_status "Available Commands:"
+                    print_status "  pipeline         - Start GTFS-RT generation pipeline (consumes from Kafka)"
+                    print_status "  publisher        - Start GTFS-RT HTTP publisher server (port 8084)"
+                    print_status "  all              - Start both pipeline and publisher"
+                    print_status "  stop-publisher   - Stop GTFS-RT HTTP publisher"
+                    print_status "  stop-all         - Stop all GTFS-RT services"
+                    print_status "  status           - Show status of GTFS-RT services and files"
+                    print_status "  test             - Test GTFS-RT endpoints and connectivity"
+                    print_status "  compare          - Compare generated feeds with official RTD feeds"
+                    print_status "  compare-quick    - Quick comparison (Java test only)"
+                    echo
+                    print_status "Endpoints (when publisher is running):"
+                    print_status "  Vehicle Positions: http://localhost:8084/files/gtfs-rt/VehiclePosition.pb"
+                    print_status "  Trip Updates: http://localhost:8084/files/gtfs-rt/TripUpdate.pb"
+                    print_status "  Alerts: http://localhost:8084/files/gtfs-rt/Alerts.pb"
+                    print_status "  Status: http://localhost:8084/gtfs-rt/status"
+                    print_status "  Health: http://localhost:8084/gtfs-rt/health"
+                    exit 1
+                    ;;
+            esac
+            ;;
         "gtfs-table")
             case "${2:-interactive}" in
                 "interactive")
@@ -811,6 +1053,8 @@ main() {
             echo "  logs [java|react] Show real-time logs"
             echo "  rail-comm [run|test|monitor] Rail communication pipeline commands"
             echo "  bus-comm [run|receiver|monitor] Bus communication pipeline (SIRI)"
+            echo "  lrgps [run|receiver|monitor] LRGPS pipeline commands"
+            echo "  gtfs-rt [pipeline|publisher|all] GTFS-RT generation and publishing"
             echo "  gtfs-table [interactive|processor|api] GTFS static data table system"
             echo "  cleanup                   Clean up log files and temp directories"
             echo "  help                      Show this help message"
@@ -847,6 +1091,23 @@ main() {
             echo "  $0 bus-comm test          # Test SIRI subscription"
             echo "  $0 bus-comm monitor       # Monitor bus SIRI topic"
             echo "  $0 bus-comm status        # Check receiver status"
+            echo ""
+            echo "LRGPS Pipeline:"
+            echo "  $0 lrgps run              # Start LRGPS pipeline"
+            echo "  $0 lrgps receiver         # Start LRGPS HTTP receiver"
+            echo "  $0 lrgps subscribe        # Subscribe to LRGPS feed"
+            echo "  $0 lrgps test             # Test LRGPS subscription"
+            echo "  $0 lrgps unsubscribe      # Unsubscribe from LRGPS feed"
+            echo "  $0 lrgps monitor          # Monitor LRGPS topic"
+            echo "  $0 lrgps status           # Check receiver status"
+            echo ""
+            echo "GTFS-RT Generation Pipeline:"
+            echo "  $0 gtfs-rt pipeline       # Start GTFS-RT generation pipeline (Kafka consumer)"
+            echo "  $0 gtfs-rt publisher      # Start GTFS-RT HTTP publisher server"
+            echo "  $0 gtfs-rt all            # Start both pipeline and publisher"
+            echo "  $0 gtfs-rt stop-all       # Stop all GTFS-RT services"
+            echo "  $0 gtfs-rt status         # Check GTFS-RT services status"
+            echo "  $0 gtfs-rt test           # Test GTFS-RT endpoints"
             echo ""
             echo "GTFS Static Data Table System:"
             echo "  $0 gtfs-table interactive # Interactive SQL query system"

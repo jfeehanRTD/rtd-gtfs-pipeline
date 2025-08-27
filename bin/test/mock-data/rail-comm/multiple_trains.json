@@ -1,0 +1,95 @@
+{
+  "msg_time": "2025-08-13 21:00:00",
+  "trains": [
+    {
+      "last_movement_time": "2025-08-13 21:00:00",
+      "service_date": "2025-08-13",
+      "run": "35",
+      "destination_name": "RIDGEGATE",
+      "destination_id": "47",
+      "trip": "10",
+      "direction": "South",
+      "train": "35",
+      "train_consist": [
+        {
+          "car": "129",
+          "order": "1"
+        },
+        {
+          "car": "148",
+          "order": "2"
+        }
+      ],
+      "source": "TRACK_CIRCUIT",
+      "position": "1127T Track",
+      "latitude": "39.64683382380",
+      "longitude": "-104.91532832000",
+      "scheduled_time_to_next": "120",
+      "scheduled_stop_time": "2025-08-13 21:02:00",
+      "schedule_adherence": "0",
+      "prev_stop": "SOUTH",
+      "current_stop": "BELL",
+      "next_stop": "DAY"
+    },
+    {
+      "last_movement_time": "2025-08-13 21:00:00",
+      "service_date": "2025-08-13",
+      "run": "78",
+      "destination_name": "JEFF",
+      "destination_id": "61",
+      "trip": "10",
+      "direction": "South",
+      "train": "78",
+      "train_consist": [
+        {
+          "car": "299",
+          "order": "1"
+        },
+        {
+          "car": "212",
+          "order": "2"
+        }
+      ],
+      "source": "TRACK_CIRCUIT",
+      "position": "635BZT Track",
+      "latitude": "39.73668589750",
+      "longitude": "-105.08062852200",
+      "scheduled_time_to_next": "210",
+      "scheduled_stop_time": "2025-08-13 21:01:45",
+      "schedule_adherence": "45",
+      "prev_stop": "LAMAR",
+      "current_stop": "WADS",
+      "next_stop": "GARR"
+    },
+    {
+      "last_movement_time": "2025-08-13 21:00:00",
+      "service_date": "2025-08-13",
+      "run": "23",
+      "destination_name": "PEORIA",
+      "destination_id": "71",
+      "trip": "11",
+      "direction": "North",
+      "train": "23",
+      "train_consist": [
+        {
+          "car": "337",
+          "order": "1"
+        },
+        {
+          "car": "335",
+          "order": "2"
+        }
+      ],
+      "source": "TRACK_CIRCUIT",
+      "position": "1351ZT Track",
+      "latitude": "39.63926002040",
+      "longitude": "-104.88543408200",
+      "scheduled_time_to_next": "273",
+      "scheduled_stop_time": "2025-08-13 21:03:00",
+      "schedule_adherence": "63",
+      "prev_stop": "BELL",
+      "current_stop": "DAY",
+      "next_stop": "NINE"
+    }
+  ]
+}

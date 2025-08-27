@@ -1,0 +1,77 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - img [ref=e8]
+        - heading "RTD Live Transit Map" [level=1] [ref=e11]
+      - navigation [ref=e12]:
+        - link "Static Map" [ref=e13] [cursor=pointer]:
+          - /url: /
+        - link "Live Transit" [ref=e14] [cursor=pointer]:
+          - /url: /live
+          - img [ref=e15] [cursor=pointer]
+          - generic [ref=e21] [cursor=pointer]: Live Transit
+        - link "Admin" [ref=e22] [cursor=pointer]:
+          - /url: /admin
+          - img [ref=e23] [cursor=pointer]
+          - generic [ref=e26] [cursor=pointer]: Admin
+    - generic [ref=e27]: Live SIRI & Rail Feed Map
+  - generic [ref=e29]:
+    - generic [ref=e30]:
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - img "Connected" [ref=e33]
+          - generic [ref=e38]: Live
+        - generic [ref=e40]:
+          - generic "0 buses active" [ref=e41]:
+            - img "Buses" [ref=e42]
+            - generic [ref=e50]: "0"
+          - generic "0 trains active" [ref=e51]:
+            - img "Trains" [ref=e52]
+            - generic [ref=e60]: "0"
+        - generic [ref=e62]:
+          - img "Last updated" [ref=e63]
+          - generic [ref=e66]: 7:30:47 AM
+      - button "Refresh live transit data" [ref=e68] [cursor=pointer]:
+        - img [ref=e69] [cursor=pointer]
+    - generic [ref=e75]:
+      - generic [ref=e76]:
+        - img "Vehicle controls" [ref=e77]
+        - heading "Vehicle Filters" [level=3] [ref=e79]
+      - generic [ref=e80]:
+        - generic [ref=e81] [cursor=pointer]:
+          - checkbox "Toggle bus visibility (0 available)" [checked] [ref=e82]
+          - img [ref=e83] [cursor=pointer]
+          - generic [ref=e91] [cursor=pointer]:
+            - generic [ref=e92] [cursor=pointer]: Buses
+            - generic [ref=e93] [cursor=pointer]: (0)
+        - generic [ref=e94] [cursor=pointer]:
+          - checkbox "Toggle train visibility (0 available)" [checked] [ref=e95]
+          - img [ref=e96] [cursor=pointer]
+          - generic [ref=e104] [cursor=pointer]:
+            - generic [ref=e105] [cursor=pointer]: Trains
+            - generic [ref=e106] [cursor=pointer]: (0)
+      - generic [ref=e108]:
+        - generic [ref=e109]: "Visible:"
+        - generic [ref=e110]: 0 vehicles
+    - generic [ref=e111]:
+      - generic:
+        - generic [ref=e112]:
+          - button "Zoom in" [ref=e113] [cursor=pointer]:
+            - generic [ref=e114] [cursor=pointer]: +
+          - button "Zoom out" [ref=e115] [cursor=pointer]:
+            - generic [ref=e116] [cursor=pointer]: −
+        - generic [ref=e117]:
+          - link "Leaflet" [ref=e118] [cursor=pointer]:
+            - /url: https://leafletjs.com
+            - img [ref=e119] [cursor=pointer]
+            - text: Leaflet
+          - generic [ref=e123]: "|"
+          - text: ©
+          - link "OpenStreetMap" [ref=e124] [cursor=pointer]:
+            - /url: https://www.openstreetmap.org/copyright
+          - text: contributors
+```

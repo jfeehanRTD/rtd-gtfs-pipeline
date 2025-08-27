@@ -1,0 +1,1027 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - img [ref=e8]
+        - heading "RTD Live Transit Map" [level=1] [ref=e11]
+      - navigation [ref=e12]:
+        - link "Static Map" [ref=e13] [cursor=pointer]:
+          - /url: /
+        - link "Live Transit" [ref=e14] [cursor=pointer]:
+          - /url: /live
+          - img [ref=e15] [cursor=pointer]
+          - generic [ref=e21] [cursor=pointer]: Live Transit
+        - link "Admin" [ref=e22] [cursor=pointer]:
+          - /url: /admin
+          - img [ref=e23] [cursor=pointer]
+          - generic [ref=e26] [cursor=pointer]: Admin
+    - generic [ref=e27]: Static Transit Map
+  - generic [ref=e29]:
+    - generic [ref=e31]:
+      - generic [ref=e33]:
+        - img [ref=e34]
+        - generic [ref=e41]: Disconnected
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]: "428"
+          - generic [ref=e45]: / 428 vehicles
+        - generic [ref=e46]:
+          - button "Data Sources" [active] [ref=e47] [cursor=pointer]:
+            - img [ref=e48] [cursor=pointer]
+          - button "Vehicle Selector" [ref=e52] [cursor=pointer]:
+            - img [ref=e53] [cursor=pointer]
+          - button "Vehicle Tracker" [ref=e57] [cursor=pointer]:
+            - img [ref=e58] [cursor=pointer]
+          - button "Update Interval" [ref=e60] [cursor=pointer]:
+            - img [ref=e61] [cursor=pointer]
+          - button "My Transit Profile" [ref=e64] [cursor=pointer]:
+            - img [ref=e65] [cursor=pointer]
+        - button "Refresh" [ref=e68] [cursor=pointer]:
+          - img [ref=e69] [cursor=pointer]
+          - generic [ref=e74] [cursor=pointer]: Refresh
+    - generic [ref=e75]:
+      - generic [ref=e76]:
+        - generic [ref=e77]:
+          - generic:
+            - generic:
+              - button [ref=e78] [cursor=pointer]:
+                - img [ref=e80] [cursor=pointer]
+              - button [ref=e91] [cursor=pointer]:
+                - img [ref=e93] [cursor=pointer]
+              - button [ref=e104] [cursor=pointer]:
+                - img [ref=e106] [cursor=pointer]
+              - button [ref=e117] [cursor=pointer]:
+                - img [ref=e119] [cursor=pointer]
+              - button [ref=e130] [cursor=pointer]:
+                - img [ref=e132] [cursor=pointer]
+              - button [ref=e143] [cursor=pointer]:
+                - img [ref=e145] [cursor=pointer]
+              - button [ref=e156] [cursor=pointer]:
+                - img [ref=e158] [cursor=pointer]
+              - button [ref=e169] [cursor=pointer]:
+                - img [ref=e171] [cursor=pointer]
+              - button [ref=e182] [cursor=pointer]:
+                - img [ref=e184] [cursor=pointer]
+              - button [ref=e195] [cursor=pointer]:
+                - img [ref=e197] [cursor=pointer]
+              - button [ref=e208] [cursor=pointer]:
+                - img [ref=e210] [cursor=pointer]
+              - button [ref=e221] [cursor=pointer]:
+                - img [ref=e223] [cursor=pointer]
+              - button [ref=e234] [cursor=pointer]:
+                - img [ref=e236] [cursor=pointer]
+              - button [ref=e247] [cursor=pointer]:
+                - img [ref=e249] [cursor=pointer]
+              - button [ref=e260] [cursor=pointer]:
+                - img [ref=e262] [cursor=pointer]
+              - button [ref=e271] [cursor=pointer]:
+                - img [ref=e273] [cursor=pointer]
+              - button [ref=e282] [cursor=pointer]:
+                - img [ref=e284] [cursor=pointer]
+              - button [ref=e295] [cursor=pointer]:
+                - img [ref=e297] [cursor=pointer]
+              - button [ref=e308] [cursor=pointer]:
+                - img [ref=e310] [cursor=pointer]
+              - button [ref=e321] [cursor=pointer]:
+                - img [ref=e323] [cursor=pointer]
+              - button [ref=e334] [cursor=pointer]:
+                - img [ref=e336] [cursor=pointer]
+              - button [ref=e347] [cursor=pointer]:
+                - img [ref=e349] [cursor=pointer]
+              - button [ref=e360] [cursor=pointer]:
+                - img [ref=e362] [cursor=pointer]
+              - button [ref=e373] [cursor=pointer]:
+                - img [ref=e375] [cursor=pointer]
+              - button [ref=e386] [cursor=pointer]:
+                - img [ref=e388] [cursor=pointer]
+              - button [ref=e399] [cursor=pointer]:
+                - img [ref=e401] [cursor=pointer]
+              - button [ref=e412] [cursor=pointer]:
+                - img [ref=e414] [cursor=pointer]
+              - button [ref=e425] [cursor=pointer]:
+                - img [ref=e427] [cursor=pointer]
+              - button [ref=e438] [cursor=pointer]:
+                - img [ref=e440] [cursor=pointer]
+              - button [ref=e451] [cursor=pointer]:
+                - img [ref=e453] [cursor=pointer]
+              - button [ref=e464] [cursor=pointer]:
+                - img [ref=e466] [cursor=pointer]
+              - button [ref=e477] [cursor=pointer]:
+                - img [ref=e479] [cursor=pointer]
+              - button [ref=e490] [cursor=pointer]:
+                - img [ref=e492] [cursor=pointer]
+              - button [ref=e503] [cursor=pointer]:
+                - img [ref=e505] [cursor=pointer]
+              - button [ref=e516] [cursor=pointer]:
+                - img [ref=e518] [cursor=pointer]
+              - button [ref=e529] [cursor=pointer]:
+                - img [ref=e531] [cursor=pointer]
+              - button [ref=e542] [cursor=pointer]:
+                - img [ref=e544] [cursor=pointer]
+              - button [ref=e555] [cursor=pointer]:
+                - img [ref=e557] [cursor=pointer]
+              - button [ref=e568] [cursor=pointer]:
+                - img [ref=e570] [cursor=pointer]
+              - button [ref=e581] [cursor=pointer]:
+                - img [ref=e583] [cursor=pointer]
+              - button [ref=e594] [cursor=pointer]:
+                - img [ref=e596] [cursor=pointer]
+              - button [ref=e607] [cursor=pointer]:
+                - img [ref=e609] [cursor=pointer]
+              - button [ref=e620] [cursor=pointer]:
+                - img [ref=e622] [cursor=pointer]
+              - button [ref=e633] [cursor=pointer]:
+                - img [ref=e635] [cursor=pointer]
+              - button [ref=e646] [cursor=pointer]:
+                - img [ref=e648] [cursor=pointer]
+              - button [ref=e659] [cursor=pointer]:
+                - img [ref=e661] [cursor=pointer]
+              - button [ref=e672] [cursor=pointer]:
+                - img [ref=e674] [cursor=pointer]
+              - button [ref=e685] [cursor=pointer]:
+                - img [ref=e687] [cursor=pointer]
+              - button [ref=e698] [cursor=pointer]:
+                - img [ref=e700] [cursor=pointer]
+              - button [ref=e711] [cursor=pointer]:
+                - img [ref=e713] [cursor=pointer]
+              - button [ref=e724] [cursor=pointer]:
+                - img [ref=e726] [cursor=pointer]
+              - button [ref=e737] [cursor=pointer]:
+                - img [ref=e739] [cursor=pointer]
+              - button [ref=e750] [cursor=pointer]:
+                - img [ref=e752] [cursor=pointer]
+              - button [ref=e763] [cursor=pointer]:
+                - img [ref=e765] [cursor=pointer]
+              - button [ref=e776] [cursor=pointer]:
+                - img [ref=e778] [cursor=pointer]
+              - button [ref=e789] [cursor=pointer]:
+                - img [ref=e791] [cursor=pointer]
+              - button [ref=e802] [cursor=pointer]:
+                - img [ref=e804] [cursor=pointer]
+              - button [ref=e813] [cursor=pointer]:
+                - img [ref=e815] [cursor=pointer]
+              - button [ref=e826] [cursor=pointer]:
+                - img [ref=e828] [cursor=pointer]
+              - button [ref=e839] [cursor=pointer]:
+                - img [ref=e841] [cursor=pointer]
+              - button [ref=e850] [cursor=pointer]:
+                - img [ref=e852] [cursor=pointer]
+              - button [ref=e863] [cursor=pointer]:
+                - img [ref=e865] [cursor=pointer]
+              - button [ref=e876] [cursor=pointer]:
+                - img [ref=e878] [cursor=pointer]
+              - button [ref=e889] [cursor=pointer]:
+                - img [ref=e891] [cursor=pointer]
+              - button [ref=e902] [cursor=pointer]:
+                - img [ref=e904] [cursor=pointer]
+              - button [ref=e915] [cursor=pointer]:
+                - img [ref=e917] [cursor=pointer]
+              - button [ref=e928] [cursor=pointer]:
+                - img [ref=e930] [cursor=pointer]
+              - button [ref=e941] [cursor=pointer]:
+                - img [ref=e943] [cursor=pointer]
+              - button [ref=e954] [cursor=pointer]:
+                - img [ref=e956] [cursor=pointer]
+              - button [ref=e967] [cursor=pointer]:
+                - img [ref=e969] [cursor=pointer]
+              - button [ref=e980] [cursor=pointer]:
+                - img [ref=e982] [cursor=pointer]
+              - button [ref=e993] [cursor=pointer]:
+                - img [ref=e995] [cursor=pointer]
+              - button [ref=e1006] [cursor=pointer]:
+                - img [ref=e1008] [cursor=pointer]
+              - button [ref=e1017] [cursor=pointer]:
+                - img [ref=e1019] [cursor=pointer]
+              - button [ref=e1030] [cursor=pointer]:
+                - img [ref=e1032] [cursor=pointer]
+              - button [ref=e1043] [cursor=pointer]:
+                - img [ref=e1045] [cursor=pointer]
+              - button [ref=e1056] [cursor=pointer]:
+                - img [ref=e1058] [cursor=pointer]
+              - button [ref=e1069] [cursor=pointer]:
+                - img [ref=e1071] [cursor=pointer]
+              - button [ref=e1082] [cursor=pointer]:
+                - img [ref=e1084] [cursor=pointer]
+              - button [ref=e1095] [cursor=pointer]:
+                - img [ref=e1097] [cursor=pointer]
+              - button [ref=e1106] [cursor=pointer]:
+                - img [ref=e1108] [cursor=pointer]
+              - button [ref=e1117] [cursor=pointer]:
+                - img [ref=e1119] [cursor=pointer]
+              - button [ref=e1130] [cursor=pointer]:
+                - img [ref=e1132] [cursor=pointer]
+              - button [ref=e1143] [cursor=pointer]:
+                - img [ref=e1145] [cursor=pointer]
+              - button [ref=e1156] [cursor=pointer]:
+                - img [ref=e1158] [cursor=pointer]
+              - button [ref=e1169] [cursor=pointer]:
+                - img [ref=e1171] [cursor=pointer]
+              - button [ref=e1182] [cursor=pointer]:
+                - img [ref=e1184] [cursor=pointer]
+              - button [ref=e1195] [cursor=pointer]:
+                - img [ref=e1197] [cursor=pointer]
+              - button [ref=e1208] [cursor=pointer]:
+                - img [ref=e1210] [cursor=pointer]
+              - button [ref=e1221] [cursor=pointer]:
+                - img [ref=e1223] [cursor=pointer]
+              - button [ref=e1232] [cursor=pointer]:
+                - img [ref=e1234] [cursor=pointer]
+              - button [ref=e1245] [cursor=pointer]:
+                - img [ref=e1247] [cursor=pointer]
+              - button [ref=e1258] [cursor=pointer]:
+                - img [ref=e1260] [cursor=pointer]
+              - button [ref=e1271] [cursor=pointer]:
+                - img [ref=e1273] [cursor=pointer]
+              - button [ref=e1284] [cursor=pointer]:
+                - img [ref=e1286] [cursor=pointer]
+              - button [ref=e1297] [cursor=pointer]:
+                - img [ref=e1299] [cursor=pointer]
+              - button [ref=e1310] [cursor=pointer]:
+                - img [ref=e1312] [cursor=pointer]
+              - button [ref=e1323] [cursor=pointer]:
+                - img [ref=e1325] [cursor=pointer]
+              - button [ref=e1336] [cursor=pointer]:
+                - img [ref=e1338] [cursor=pointer]
+              - button [ref=e1349] [cursor=pointer]:
+                - img [ref=e1351] [cursor=pointer]
+              - button [ref=e1362] [cursor=pointer]:
+                - img [ref=e1364] [cursor=pointer]
+              - button [ref=e1375] [cursor=pointer]:
+                - img [ref=e1377] [cursor=pointer]
+              - button [ref=e1386] [cursor=pointer]:
+                - img [ref=e1388] [cursor=pointer]
+              - button [ref=e1399] [cursor=pointer]:
+                - img [ref=e1401] [cursor=pointer]
+              - button [ref=e1412] [cursor=pointer]:
+                - img [ref=e1414] [cursor=pointer]
+              - button [ref=e1425] [cursor=pointer]:
+                - img [ref=e1427] [cursor=pointer]
+              - button [ref=e1438] [cursor=pointer]:
+                - img [ref=e1440] [cursor=pointer]
+              - button [ref=e1449] [cursor=pointer]:
+                - img [ref=e1451] [cursor=pointer]
+              - button [ref=e1462] [cursor=pointer]:
+                - img [ref=e1464] [cursor=pointer]
+              - button [ref=e1475] [cursor=pointer]:
+                - img [ref=e1477] [cursor=pointer]
+              - button [ref=e1488] [cursor=pointer]:
+                - img [ref=e1490] [cursor=pointer]
+              - button [ref=e1501] [cursor=pointer]:
+                - img [ref=e1503] [cursor=pointer]
+              - button [ref=e1514] [cursor=pointer]:
+                - img [ref=e1516] [cursor=pointer]
+              - button [ref=e1527] [cursor=pointer]:
+                - img [ref=e1529] [cursor=pointer]
+              - button [ref=e1540] [cursor=pointer]:
+                - img [ref=e1542] [cursor=pointer]
+              - button [ref=e1553] [cursor=pointer]:
+                - img [ref=e1555] [cursor=pointer]
+              - button [ref=e1566] [cursor=pointer]:
+                - img [ref=e1568] [cursor=pointer]
+              - button [ref=e1577] [cursor=pointer]:
+                - img [ref=e1579] [cursor=pointer]
+              - button [ref=e1590] [cursor=pointer]:
+                - img [ref=e1592] [cursor=pointer]
+              - button [ref=e1603] [cursor=pointer]:
+                - img [ref=e1605] [cursor=pointer]
+              - button [ref=e1616] [cursor=pointer]:
+                - img [ref=e1618] [cursor=pointer]
+              - button [ref=e1629] [cursor=pointer]:
+                - img [ref=e1631] [cursor=pointer]
+              - button [ref=e1642] [cursor=pointer]:
+                - img [ref=e1644] [cursor=pointer]
+              - button [ref=e1655] [cursor=pointer]:
+                - img [ref=e1657] [cursor=pointer]
+              - button [ref=e1668] [cursor=pointer]:
+                - img [ref=e1670] [cursor=pointer]
+              - button [ref=e1681] [cursor=pointer]:
+                - img [ref=e1683] [cursor=pointer]
+              - button [ref=e1694] [cursor=pointer]:
+                - img [ref=e1696] [cursor=pointer]
+              - button [ref=e1707] [cursor=pointer]:
+                - img [ref=e1709] [cursor=pointer]
+              - button [ref=e1720] [cursor=pointer]:
+                - img [ref=e1722] [cursor=pointer]
+              - button [ref=e1733] [cursor=pointer]:
+                - img [ref=e1735] [cursor=pointer]
+              - button [ref=e1746] [cursor=pointer]:
+                - img [ref=e1748] [cursor=pointer]
+              - button [ref=e1759] [cursor=pointer]:
+                - img [ref=e1761] [cursor=pointer]
+              - button [ref=e1772] [cursor=pointer]:
+                - img [ref=e1774] [cursor=pointer]
+              - button [ref=e1785] [cursor=pointer]:
+                - img [ref=e1787] [cursor=pointer]
+              - button [ref=e1798] [cursor=pointer]:
+                - img [ref=e1800] [cursor=pointer]
+              - button [ref=e1811] [cursor=pointer]:
+                - img [ref=e1813] [cursor=pointer]
+              - button [ref=e1824] [cursor=pointer]:
+                - img [ref=e1826] [cursor=pointer]
+              - button [ref=e1837] [cursor=pointer]:
+                - img [ref=e1839] [cursor=pointer]
+              - button [ref=e1850] [cursor=pointer]:
+                - img [ref=e1852] [cursor=pointer]
+              - button [ref=e1863] [cursor=pointer]:
+                - img [ref=e1865] [cursor=pointer]
+              - button [ref=e1876] [cursor=pointer]:
+                - img [ref=e1878] [cursor=pointer]
+              - button [ref=e1889] [cursor=pointer]:
+                - img [ref=e1891] [cursor=pointer]
+              - button [ref=e1902] [cursor=pointer]:
+                - img [ref=e1904] [cursor=pointer]
+              - button [ref=e1915] [cursor=pointer]:
+                - img [ref=e1917] [cursor=pointer]
+              - button [ref=e1928] [cursor=pointer]:
+                - img [ref=e1930] [cursor=pointer]
+              - button [ref=e1941] [cursor=pointer]:
+                - img [ref=e1943] [cursor=pointer]
+              - button [ref=e1954] [cursor=pointer]:
+                - img [ref=e1956] [cursor=pointer]
+              - button [ref=e1967] [cursor=pointer]:
+                - img [ref=e1969] [cursor=pointer]
+              - button [ref=e1978] [cursor=pointer]:
+                - img [ref=e1980] [cursor=pointer]
+              - button [ref=e1991] [cursor=pointer]:
+                - img [ref=e1993] [cursor=pointer]
+              - button [ref=e2004] [cursor=pointer]:
+                - img [ref=e2006] [cursor=pointer]
+              - button [ref=e2017] [cursor=pointer]:
+                - img [ref=e2019] [cursor=pointer]
+              - button [ref=e2030] [cursor=pointer]:
+                - img [ref=e2032] [cursor=pointer]
+              - button [ref=e2043] [cursor=pointer]:
+                - img [ref=e2045] [cursor=pointer]
+              - button [ref=e2056] [cursor=pointer]:
+                - img [ref=e2058] [cursor=pointer]
+              - button [ref=e2069] [cursor=pointer]:
+                - img [ref=e2071] [cursor=pointer]
+              - button [ref=e2082] [cursor=pointer]:
+                - img [ref=e2084] [cursor=pointer]
+              - button [ref=e2095] [cursor=pointer]:
+                - img [ref=e2097] [cursor=pointer]
+              - button [ref=e2108] [cursor=pointer]:
+                - img [ref=e2110] [cursor=pointer]
+              - button [ref=e2121] [cursor=pointer]:
+                - img [ref=e2123] [cursor=pointer]
+              - button [ref=e2134] [cursor=pointer]:
+                - img [ref=e2136] [cursor=pointer]
+              - button [ref=e2147] [cursor=pointer]:
+                - img [ref=e2149] [cursor=pointer]
+              - button [ref=e2160] [cursor=pointer]:
+                - img [ref=e2162] [cursor=pointer]
+              - button [ref=e2173] [cursor=pointer]:
+                - img [ref=e2175] [cursor=pointer]
+              - button [ref=e2186] [cursor=pointer]:
+                - img [ref=e2188] [cursor=pointer]
+              - button [ref=e2199] [cursor=pointer]:
+                - img [ref=e2201] [cursor=pointer]
+              - button [ref=e2212] [cursor=pointer]:
+                - img [ref=e2214] [cursor=pointer]
+              - button [ref=e2225] [cursor=pointer]:
+                - img [ref=e2227] [cursor=pointer]
+              - button [ref=e2238] [cursor=pointer]:
+                - img [ref=e2240] [cursor=pointer]
+              - button [ref=e2251] [cursor=pointer]:
+                - img [ref=e2253] [cursor=pointer]
+              - button [ref=e2264] [cursor=pointer]:
+                - img [ref=e2266] [cursor=pointer]
+              - button [ref=e2277] [cursor=pointer]:
+                - img [ref=e2279] [cursor=pointer]
+              - button [ref=e2290] [cursor=pointer]:
+                - img [ref=e2292] [cursor=pointer]
+              - button [ref=e2303] [cursor=pointer]:
+                - img [ref=e2305] [cursor=pointer]
+              - button [ref=e2316] [cursor=pointer]:
+                - img [ref=e2318] [cursor=pointer]
+              - button [ref=e2329] [cursor=pointer]:
+                - img [ref=e2331] [cursor=pointer]
+              - button [ref=e2342] [cursor=pointer]:
+                - img [ref=e2344] [cursor=pointer]
+              - button [ref=e2355] [cursor=pointer]:
+                - img [ref=e2357] [cursor=pointer]
+              - button [ref=e2368] [cursor=pointer]:
+                - img [ref=e2370] [cursor=pointer]
+              - button [ref=e2381] [cursor=pointer]:
+                - img [ref=e2383] [cursor=pointer]
+              - button [ref=e2394] [cursor=pointer]:
+                - img [ref=e2396] [cursor=pointer]
+              - button [ref=e2407] [cursor=pointer]:
+                - img [ref=e2409] [cursor=pointer]
+              - button [ref=e2420] [cursor=pointer]:
+                - img [ref=e2422] [cursor=pointer]
+              - button [ref=e2433] [cursor=pointer]:
+                - img [ref=e2435] [cursor=pointer]
+              - button [ref=e2446] [cursor=pointer]:
+                - img [ref=e2448] [cursor=pointer]
+              - button [ref=e2459] [cursor=pointer]:
+                - img [ref=e2461] [cursor=pointer]
+              - button [ref=e2472] [cursor=pointer]:
+                - img [ref=e2474] [cursor=pointer]
+              - button [ref=e2485] [cursor=pointer]:
+                - img [ref=e2487] [cursor=pointer]
+              - button [ref=e2498] [cursor=pointer]:
+                - img [ref=e2500] [cursor=pointer]
+              - button [ref=e2511] [cursor=pointer]:
+                - img [ref=e2513] [cursor=pointer]
+              - button [ref=e2524] [cursor=pointer]:
+                - img [ref=e2526] [cursor=pointer]
+              - button [ref=e2537] [cursor=pointer]:
+                - img [ref=e2539] [cursor=pointer]
+              - button [ref=e2550] [cursor=pointer]:
+                - img [ref=e2552] [cursor=pointer]
+              - button [ref=e2563] [cursor=pointer]:
+                - img [ref=e2565] [cursor=pointer]
+              - button [ref=e2574] [cursor=pointer]:
+                - img [ref=e2576] [cursor=pointer]
+              - button [ref=e2587] [cursor=pointer]:
+                - img [ref=e2589] [cursor=pointer]
+              - button [ref=e2600] [cursor=pointer]:
+                - img [ref=e2602] [cursor=pointer]
+              - button [ref=e2613] [cursor=pointer]:
+                - img [ref=e2615] [cursor=pointer]
+              - button [ref=e2626] [cursor=pointer]:
+                - img [ref=e2628] [cursor=pointer]
+              - button [ref=e2639] [cursor=pointer]:
+                - img [ref=e2641] [cursor=pointer]
+              - button [ref=e2652] [cursor=pointer]:
+                - img [ref=e2654] [cursor=pointer]
+              - button [ref=e2665] [cursor=pointer]:
+                - img [ref=e2667] [cursor=pointer]
+              - button [ref=e2678] [cursor=pointer]:
+                - img [ref=e2680] [cursor=pointer]
+              - button [ref=e2691] [cursor=pointer]:
+                - img [ref=e2693] [cursor=pointer]
+              - button [ref=e2704] [cursor=pointer]:
+                - img [ref=e2706] [cursor=pointer]
+              - button [ref=e2717] [cursor=pointer]:
+                - img [ref=e2719] [cursor=pointer]
+              - button [ref=e2730] [cursor=pointer]:
+                - img [ref=e2732] [cursor=pointer]
+              - button [ref=e2743] [cursor=pointer]:
+                - img [ref=e2745] [cursor=pointer]
+              - button [ref=e2756] [cursor=pointer]:
+                - img [ref=e2758] [cursor=pointer]
+              - button [ref=e2769] [cursor=pointer]:
+                - img [ref=e2771] [cursor=pointer]
+              - button [ref=e2782] [cursor=pointer]:
+                - img [ref=e2784] [cursor=pointer]
+              - button [ref=e2795] [cursor=pointer]:
+                - img [ref=e2797] [cursor=pointer]
+              - button [ref=e2808] [cursor=pointer]:
+                - img [ref=e2810] [cursor=pointer]
+              - button [ref=e2821] [cursor=pointer]:
+                - img [ref=e2823] [cursor=pointer]
+              - button [ref=e2834] [cursor=pointer]:
+                - img [ref=e2836] [cursor=pointer]
+              - button [ref=e2847] [cursor=pointer]:
+                - img [ref=e2849] [cursor=pointer]
+              - button [ref=e2860] [cursor=pointer]:
+                - img [ref=e2862] [cursor=pointer]
+              - button [ref=e2873] [cursor=pointer]:
+                - img [ref=e2875] [cursor=pointer]
+              - button [ref=e2886] [cursor=pointer]:
+                - img [ref=e2888] [cursor=pointer]
+              - button [ref=e2899] [cursor=pointer]:
+                - img [ref=e2901] [cursor=pointer]
+              - button [ref=e2912] [cursor=pointer]:
+                - img [ref=e2914] [cursor=pointer]
+              - button [ref=e2925] [cursor=pointer]:
+                - img [ref=e2927] [cursor=pointer]
+              - button [ref=e2938] [cursor=pointer]:
+                - img [ref=e2940] [cursor=pointer]
+              - button [ref=e2951] [cursor=pointer]:
+                - img [ref=e2953] [cursor=pointer]
+              - button [ref=e2964] [cursor=pointer]:
+                - img [ref=e2966] [cursor=pointer]
+              - button [ref=e2977] [cursor=pointer]:
+                - img [ref=e2979] [cursor=pointer]
+              - button [ref=e2990] [cursor=pointer]:
+                - img [ref=e2992] [cursor=pointer]
+              - button [ref=e3003] [cursor=pointer]:
+                - img [ref=e3005] [cursor=pointer]
+              - button [ref=e3016] [cursor=pointer]:
+                - img [ref=e3018] [cursor=pointer]
+              - button [ref=e3029] [cursor=pointer]:
+                - img [ref=e3031] [cursor=pointer]
+              - button [ref=e3042] [cursor=pointer]:
+                - img [ref=e3044] [cursor=pointer]
+              - button [ref=e3055] [cursor=pointer]:
+                - img [ref=e3057] [cursor=pointer]
+              - button [ref=e3068] [cursor=pointer]:
+                - img [ref=e3070] [cursor=pointer]
+              - button [ref=e3081] [cursor=pointer]:
+                - img [ref=e3083] [cursor=pointer]
+              - button [ref=e3094] [cursor=pointer]:
+                - img [ref=e3096] [cursor=pointer]
+              - button [ref=e3107] [cursor=pointer]:
+                - img [ref=e3109] [cursor=pointer]
+              - button [ref=e3120] [cursor=pointer]:
+                - img [ref=e3122] [cursor=pointer]
+              - button [ref=e3133] [cursor=pointer]:
+                - img [ref=e3135] [cursor=pointer]
+              - button [ref=e3146] [cursor=pointer]:
+                - img [ref=e3148] [cursor=pointer]
+              - button [ref=e3159] [cursor=pointer]:
+                - img [ref=e3161] [cursor=pointer]
+              - button [ref=e3172] [cursor=pointer]:
+                - img [ref=e3174] [cursor=pointer]
+              - button [ref=e3185] [cursor=pointer]:
+                - img [ref=e3187] [cursor=pointer]
+              - button [ref=e3198] [cursor=pointer]:
+                - img [ref=e3200] [cursor=pointer]
+              - button [ref=e3211] [cursor=pointer]:
+                - img [ref=e3213] [cursor=pointer]
+              - button [ref=e3224] [cursor=pointer]:
+                - img [ref=e3226] [cursor=pointer]
+              - button [ref=e3235] [cursor=pointer]:
+                - img [ref=e3237] [cursor=pointer]
+              - button [ref=e3248] [cursor=pointer]:
+                - img [ref=e3250] [cursor=pointer]
+              - button [ref=e3261] [cursor=pointer]:
+                - img [ref=e3263] [cursor=pointer]
+              - button [ref=e3274] [cursor=pointer]:
+                - img [ref=e3276] [cursor=pointer]
+              - button [ref=e3287] [cursor=pointer]:
+                - img [ref=e3289] [cursor=pointer]
+              - button [ref=e3300] [cursor=pointer]:
+                - img [ref=e3302] [cursor=pointer]
+              - button [ref=e3313] [cursor=pointer]:
+                - img [ref=e3315] [cursor=pointer]
+              - button [ref=e3324] [cursor=pointer]:
+                - img [ref=e3326] [cursor=pointer]
+              - button [ref=e3337] [cursor=pointer]:
+                - img [ref=e3339] [cursor=pointer]
+              - button [ref=e3350] [cursor=pointer]:
+                - img [ref=e3352] [cursor=pointer]
+              - button [ref=e3363] [cursor=pointer]:
+                - img [ref=e3365] [cursor=pointer]
+              - button [ref=e3376] [cursor=pointer]:
+                - img [ref=e3378] [cursor=pointer]
+              - button [ref=e3389] [cursor=pointer]:
+                - img [ref=e3391] [cursor=pointer]
+              - button [ref=e3402] [cursor=pointer]:
+                - img [ref=e3404] [cursor=pointer]
+              - button [ref=e3415] [cursor=pointer]:
+                - img [ref=e3417] [cursor=pointer]
+              - button [ref=e3428] [cursor=pointer]:
+                - img [ref=e3430] [cursor=pointer]
+              - button [ref=e3441] [cursor=pointer]:
+                - img [ref=e3443] [cursor=pointer]
+              - button [ref=e3454] [cursor=pointer]:
+                - img [ref=e3456] [cursor=pointer]
+              - button [ref=e3467] [cursor=pointer]:
+                - img [ref=e3469] [cursor=pointer]
+              - button [ref=e3480] [cursor=pointer]:
+                - img [ref=e3482] [cursor=pointer]
+              - button [ref=e3493] [cursor=pointer]:
+                - img [ref=e3495] [cursor=pointer]
+              - button [ref=e3506] [cursor=pointer]:
+                - img [ref=e3508] [cursor=pointer]
+              - button [ref=e3519] [cursor=pointer]:
+                - img [ref=e3521] [cursor=pointer]
+              - button [ref=e3532] [cursor=pointer]:
+                - img [ref=e3534] [cursor=pointer]
+              - button [ref=e3545] [cursor=pointer]:
+                - img [ref=e3547] [cursor=pointer]
+              - button [ref=e3558] [cursor=pointer]:
+                - img [ref=e3560] [cursor=pointer]
+              - button [ref=e3571] [cursor=pointer]:
+                - img [ref=e3573] [cursor=pointer]
+              - button [ref=e3584] [cursor=pointer]:
+                - img [ref=e3586] [cursor=pointer]
+              - button [ref=e3597] [cursor=pointer]:
+                - img [ref=e3599] [cursor=pointer]
+              - button [ref=e3610] [cursor=pointer]:
+                - img [ref=e3612] [cursor=pointer]
+              - button [ref=e3623] [cursor=pointer]:
+                - img [ref=e3625] [cursor=pointer]
+              - button [ref=e3636] [cursor=pointer]:
+                - img [ref=e3638] [cursor=pointer]
+              - button [ref=e3649] [cursor=pointer]:
+                - img [ref=e3651] [cursor=pointer]
+              - button [ref=e3662] [cursor=pointer]:
+                - img [ref=e3664] [cursor=pointer]
+              - button [ref=e3675] [cursor=pointer]:
+                - img [ref=e3677] [cursor=pointer]
+              - button [ref=e3686] [cursor=pointer]:
+                - img [ref=e3688] [cursor=pointer]
+              - button [ref=e3699] [cursor=pointer]:
+                - img [ref=e3701] [cursor=pointer]
+              - button [ref=e3712] [cursor=pointer]:
+                - img [ref=e3714] [cursor=pointer]
+              - button [ref=e3725] [cursor=pointer]:
+                - img [ref=e3727] [cursor=pointer]
+              - button [ref=e3738] [cursor=pointer]:
+                - img [ref=e3740] [cursor=pointer]
+              - button [ref=e3751] [cursor=pointer]:
+                - img [ref=e3753] [cursor=pointer]
+              - button [ref=e3764] [cursor=pointer]:
+                - img [ref=e3766] [cursor=pointer]
+              - button [ref=e3777] [cursor=pointer]:
+                - img [ref=e3779] [cursor=pointer]
+              - button [ref=e3790] [cursor=pointer]:
+                - img [ref=e3792] [cursor=pointer]
+              - button [ref=e3803] [cursor=pointer]:
+                - img [ref=e3805] [cursor=pointer]
+              - button [ref=e3816] [cursor=pointer]:
+                - img [ref=e3818] [cursor=pointer]
+              - button [ref=e3829] [cursor=pointer]:
+                - img [ref=e3831] [cursor=pointer]
+              - button [ref=e3842] [cursor=pointer]:
+                - img [ref=e3844] [cursor=pointer]
+              - button [ref=e3855] [cursor=pointer]:
+                - img [ref=e3857] [cursor=pointer]
+              - button [ref=e3866] [cursor=pointer]:
+                - img [ref=e3868] [cursor=pointer]
+              - button [ref=e3879] [cursor=pointer]:
+                - img [ref=e3881] [cursor=pointer]
+              - button [ref=e3892] [cursor=pointer]:
+                - img [ref=e3894] [cursor=pointer]
+              - button [ref=e3905] [cursor=pointer]:
+                - img [ref=e3907] [cursor=pointer]
+              - button [ref=e3918] [cursor=pointer]:
+                - img [ref=e3920] [cursor=pointer]
+              - button [ref=e3931] [cursor=pointer]:
+                - img [ref=e3933] [cursor=pointer]
+              - button [ref=e3944] [cursor=pointer]:
+                - img [ref=e3946] [cursor=pointer]
+              - button [ref=e3957] [cursor=pointer]:
+                - img [ref=e3959] [cursor=pointer]
+              - button [ref=e3970] [cursor=pointer]:
+                - img [ref=e3972] [cursor=pointer]
+              - button [ref=e3983] [cursor=pointer]:
+                - img [ref=e3985] [cursor=pointer]
+              - button [ref=e3996] [cursor=pointer]:
+                - img [ref=e3998] [cursor=pointer]
+              - button [ref=e4009] [cursor=pointer]:
+                - img [ref=e4011] [cursor=pointer]
+              - button [ref=e4022] [cursor=pointer]:
+                - img [ref=e4024] [cursor=pointer]
+              - button [ref=e4035] [cursor=pointer]:
+                - img [ref=e4037] [cursor=pointer]
+              - button [ref=e4048] [cursor=pointer]:
+                - img [ref=e4050] [cursor=pointer]
+              - button [ref=e4061] [cursor=pointer]:
+                - img [ref=e4063] [cursor=pointer]
+              - button [ref=e4074] [cursor=pointer]:
+                - img [ref=e4076] [cursor=pointer]
+              - button [ref=e4087] [cursor=pointer]:
+                - img [ref=e4089] [cursor=pointer]
+              - button [ref=e4100] [cursor=pointer]:
+                - img [ref=e4102] [cursor=pointer]
+              - button [ref=e4113] [cursor=pointer]:
+                - img [ref=e4115] [cursor=pointer]
+              - button [ref=e4126] [cursor=pointer]:
+                - img [ref=e4128] [cursor=pointer]
+              - button [ref=e4139] [cursor=pointer]:
+                - img [ref=e4141] [cursor=pointer]
+              - button [ref=e4152] [cursor=pointer]:
+                - img [ref=e4154] [cursor=pointer]
+              - button [ref=e4163] [cursor=pointer]:
+                - img [ref=e4165] [cursor=pointer]
+              - button [ref=e4176] [cursor=pointer]:
+                - img [ref=e4178] [cursor=pointer]
+              - button [ref=e4189] [cursor=pointer]:
+                - img [ref=e4191] [cursor=pointer]
+              - button [ref=e4202] [cursor=pointer]:
+                - img [ref=e4204] [cursor=pointer]
+              - button [ref=e4215] [cursor=pointer]:
+                - img [ref=e4217] [cursor=pointer]
+              - button [ref=e4228] [cursor=pointer]:
+                - img [ref=e4230] [cursor=pointer]
+              - button [ref=e4241] [cursor=pointer]:
+                - img [ref=e4243] [cursor=pointer]
+              - button [ref=e4254] [cursor=pointer]:
+                - img [ref=e4256] [cursor=pointer]
+              - button [ref=e4267] [cursor=pointer]:
+                - img [ref=e4269] [cursor=pointer]
+              - button [ref=e4280] [cursor=pointer]:
+                - img [ref=e4282] [cursor=pointer]
+              - button [ref=e4293] [cursor=pointer]:
+                - img [ref=e4295] [cursor=pointer]
+              - button [ref=e4306] [cursor=pointer]:
+                - img [ref=e4308] [cursor=pointer]
+              - button [ref=e4319] [cursor=pointer]:
+                - img [ref=e4321] [cursor=pointer]
+              - button [ref=e4332] [cursor=pointer]:
+                - img [ref=e4334] [cursor=pointer]
+              - button [ref=e4345] [cursor=pointer]:
+                - img [ref=e4347] [cursor=pointer]
+              - button [ref=e4358] [cursor=pointer]:
+                - img [ref=e4360] [cursor=pointer]
+              - button [ref=e4371] [cursor=pointer]:
+                - img [ref=e4373] [cursor=pointer]
+              - button [ref=e4384] [cursor=pointer]:
+                - img [ref=e4386] [cursor=pointer]
+              - button [ref=e4397] [cursor=pointer]:
+                - img [ref=e4399] [cursor=pointer]
+              - button [ref=e4410] [cursor=pointer]:
+                - img [ref=e4412] [cursor=pointer]
+              - button [ref=e4423] [cursor=pointer]:
+                - img [ref=e4425] [cursor=pointer]
+              - button [ref=e4436] [cursor=pointer]:
+                - img [ref=e4438] [cursor=pointer]
+              - button [ref=e4449] [cursor=pointer]:
+                - img [ref=e4451] [cursor=pointer]
+              - button [ref=e4462] [cursor=pointer]:
+                - img [ref=e4464] [cursor=pointer]
+              - button [ref=e4475] [cursor=pointer]:
+                - img [ref=e4477] [cursor=pointer]
+              - button [ref=e4488] [cursor=pointer]:
+                - img [ref=e4490] [cursor=pointer]
+              - button [ref=e4501] [cursor=pointer]:
+                - img [ref=e4503] [cursor=pointer]
+              - button [ref=e4514] [cursor=pointer]:
+                - img [ref=e4516] [cursor=pointer]
+              - button [ref=e4527] [cursor=pointer]:
+                - img [ref=e4529] [cursor=pointer]
+              - button [ref=e4540] [cursor=pointer]:
+                - img [ref=e4542] [cursor=pointer]
+              - button [ref=e4553] [cursor=pointer]:
+                - img [ref=e4555] [cursor=pointer]
+              - button [ref=e4566] [cursor=pointer]:
+                - img [ref=e4568] [cursor=pointer]
+              - button [ref=e4579] [cursor=pointer]:
+                - img [ref=e4581] [cursor=pointer]
+              - button [ref=e4592] [cursor=pointer]:
+                - img [ref=e4594] [cursor=pointer]
+              - button [ref=e4605] [cursor=pointer]:
+                - img [ref=e4607] [cursor=pointer]
+              - button [ref=e4618] [cursor=pointer]:
+                - img [ref=e4620] [cursor=pointer]
+              - button [ref=e4631] [cursor=pointer]:
+                - img [ref=e4633] [cursor=pointer]
+              - button [ref=e4644] [cursor=pointer]:
+                - img [ref=e4646] [cursor=pointer]
+              - button [ref=e4657] [cursor=pointer]:
+                - img [ref=e4659] [cursor=pointer]
+              - button [ref=e4670] [cursor=pointer]:
+                - img [ref=e4672] [cursor=pointer]
+              - button [ref=e4683] [cursor=pointer]:
+                - img [ref=e4685] [cursor=pointer]
+              - button [ref=e4696] [cursor=pointer]:
+                - img [ref=e4698] [cursor=pointer]
+              - button [ref=e4709] [cursor=pointer]:
+                - img [ref=e4711] [cursor=pointer]
+              - button [ref=e4722] [cursor=pointer]:
+                - img [ref=e4724] [cursor=pointer]
+              - button [ref=e4735] [cursor=pointer]:
+                - img [ref=e4737] [cursor=pointer]
+              - button [ref=e4748] [cursor=pointer]:
+                - img [ref=e4750] [cursor=pointer]
+              - button [ref=e4761] [cursor=pointer]:
+                - img [ref=e4763] [cursor=pointer]
+              - button [ref=e4774] [cursor=pointer]:
+                - img [ref=e4776] [cursor=pointer]
+              - button [ref=e4787] [cursor=pointer]:
+                - img [ref=e4789] [cursor=pointer]
+              - button [ref=e4800] [cursor=pointer]:
+                - img [ref=e4802] [cursor=pointer]
+              - button [ref=e4813] [cursor=pointer]:
+                - img [ref=e4815] [cursor=pointer]
+              - button [ref=e4826] [cursor=pointer]:
+                - img [ref=e4828] [cursor=pointer]
+              - button [ref=e4839] [cursor=pointer]:
+                - img [ref=e4841] [cursor=pointer]
+              - button [ref=e4852] [cursor=pointer]:
+                - img [ref=e4854] [cursor=pointer]
+              - button [ref=e4865] [cursor=pointer]:
+                - img [ref=e4867] [cursor=pointer]
+              - button [ref=e4878] [cursor=pointer]:
+                - img [ref=e4880] [cursor=pointer]
+              - button [ref=e4891] [cursor=pointer]:
+                - img [ref=e4893] [cursor=pointer]
+              - button [ref=e4904] [cursor=pointer]:
+                - img [ref=e4906] [cursor=pointer]
+              - button [ref=e4917] [cursor=pointer]:
+                - img [ref=e4919] [cursor=pointer]
+              - button [ref=e4930] [cursor=pointer]:
+                - img [ref=e4932] [cursor=pointer]
+              - button [ref=e4943] [cursor=pointer]:
+                - img [ref=e4945] [cursor=pointer]
+              - button [ref=e4956] [cursor=pointer]:
+                - img [ref=e4958] [cursor=pointer]
+              - button [ref=e4969] [cursor=pointer]:
+                - img [ref=e4971] [cursor=pointer]
+              - button [ref=e4982] [cursor=pointer]:
+                - img [ref=e4984] [cursor=pointer]
+              - button [ref=e4995] [cursor=pointer]:
+                - img [ref=e4997] [cursor=pointer]
+              - button [ref=e5008] [cursor=pointer]:
+                - img [ref=e5010] [cursor=pointer]
+              - button [ref=e5021] [cursor=pointer]:
+                - img [ref=e5023] [cursor=pointer]
+              - button [ref=e5034] [cursor=pointer]:
+                - img [ref=e5036] [cursor=pointer]
+              - button [ref=e5047] [cursor=pointer]:
+                - img [ref=e5049] [cursor=pointer]
+              - button [ref=e5060] [cursor=pointer]:
+                - img [ref=e5062] [cursor=pointer]
+              - button [ref=e5073] [cursor=pointer]:
+                - img [ref=e5075] [cursor=pointer]
+              - button [ref=e5086] [cursor=pointer]:
+                - img [ref=e5088] [cursor=pointer]
+              - button [ref=e5099] [cursor=pointer]:
+                - img [ref=e5101] [cursor=pointer]
+              - button [ref=e5112] [cursor=pointer]:
+                - img [ref=e5114] [cursor=pointer]
+              - button [ref=e5125] [cursor=pointer]:
+                - img [ref=e5127] [cursor=pointer]
+              - button [ref=e5138] [cursor=pointer]:
+                - img [ref=e5140] [cursor=pointer]
+              - button [ref=e5151] [cursor=pointer]:
+                - img [ref=e5153] [cursor=pointer]
+              - button [ref=e5164] [cursor=pointer]:
+                - img [ref=e5166] [cursor=pointer]
+              - button [ref=e5177] [cursor=pointer]:
+                - img [ref=e5179] [cursor=pointer]
+              - button [ref=e5190] [cursor=pointer]:
+                - img [ref=e5192] [cursor=pointer]
+              - button [ref=e5203] [cursor=pointer]:
+                - img [ref=e5205] [cursor=pointer]
+              - button [ref=e5214] [cursor=pointer]:
+                - img [ref=e5216] [cursor=pointer]
+              - button [ref=e5227] [cursor=pointer]:
+                - img [ref=e5229] [cursor=pointer]
+              - button [ref=e5240] [cursor=pointer]:
+                - img [ref=e5242] [cursor=pointer]
+              - button [ref=e5253] [cursor=pointer]:
+                - img [ref=e5255] [cursor=pointer]
+              - button [ref=e5266] [cursor=pointer]:
+                - img [ref=e5268] [cursor=pointer]
+              - button [ref=e5279] [cursor=pointer]:
+                - img [ref=e5281] [cursor=pointer]
+              - button [ref=e5292] [cursor=pointer]:
+                - img [ref=e5294] [cursor=pointer]
+              - button [ref=e5305] [cursor=pointer]:
+                - img [ref=e5307] [cursor=pointer]
+              - button [ref=e5318] [cursor=pointer]:
+                - img [ref=e5320] [cursor=pointer]
+              - button [ref=e5331] [cursor=pointer]:
+                - img [ref=e5333] [cursor=pointer]
+              - button [ref=e5344] [cursor=pointer]:
+                - img [ref=e5346] [cursor=pointer]
+              - button [ref=e5357] [cursor=pointer]:
+                - img [ref=e5359] [cursor=pointer]
+              - button [ref=e5370] [cursor=pointer]:
+                - img [ref=e5372] [cursor=pointer]
+              - button [ref=e5383] [cursor=pointer]:
+                - img [ref=e5385] [cursor=pointer]
+              - button [ref=e5396] [cursor=pointer]:
+                - img [ref=e5398] [cursor=pointer]
+              - button [ref=e5409] [cursor=pointer]:
+                - img [ref=e5411] [cursor=pointer]
+              - button [ref=e5422] [cursor=pointer]:
+                - img [ref=e5424] [cursor=pointer]
+              - button [ref=e5431] [cursor=pointer]:
+                - img [ref=e5433] [cursor=pointer]
+              - button [ref=e5440] [cursor=pointer]:
+                - img [ref=e5442] [cursor=pointer]
+              - button [ref=e5451] [cursor=pointer]:
+                - img [ref=e5453] [cursor=pointer]
+              - button [ref=e5462] [cursor=pointer]:
+                - img [ref=e5464] [cursor=pointer]
+              - button [ref=e5475] [cursor=pointer]:
+                - img [ref=e5477] [cursor=pointer]
+              - button [ref=e5486] [cursor=pointer]:
+                - img [ref=e5488] [cursor=pointer]
+              - button [ref=e5497] [cursor=pointer]:
+                - img [ref=e5499] [cursor=pointer]
+              - button [ref=e5508] [cursor=pointer]:
+                - img [ref=e5510] [cursor=pointer]
+              - button [ref=e5519] [cursor=pointer]:
+                - img [ref=e5521] [cursor=pointer]
+              - button [ref=e5530] [cursor=pointer]:
+                - img [ref=e5532] [cursor=pointer]
+              - button [ref=e5539] [cursor=pointer]:
+                - img [ref=e5541] [cursor=pointer]
+              - button [ref=e5552] [cursor=pointer]:
+                - img [ref=e5554] [cursor=pointer]
+              - button [ref=e5561] [cursor=pointer]:
+                - img [ref=e5563] [cursor=pointer]
+          - generic:
+            - generic [ref=e5572]:
+              - button "Zoom in" [ref=e5573] [cursor=pointer]:
+                - generic [ref=e5574] [cursor=pointer]: +
+              - button "Zoom out" [ref=e5575] [cursor=pointer]:
+                - generic [ref=e5576] [cursor=pointer]: −
+            - generic [ref=e5577]:
+              - link "Leaflet" [ref=e5578] [cursor=pointer]:
+                - /url: https://leafletjs.com
+                - img [ref=e5579] [cursor=pointer]
+                - text: Leaflet
+              - generic [ref=e5583]: "|"
+              - text: ©
+              - link "OpenStreetMap" [ref=e5584] [cursor=pointer]:
+                - /url: https://www.openstreetmap.org/copyright
+              - text: contributors
+        - generic [ref=e5585]:
+          - generic [ref=e5586]:
+            - generic [ref=e5587]:
+              - img [ref=e5588]
+              - heading "RTD Live Map" [level=3] [ref=e5591]
+            - button [ref=e5592] [cursor=pointer]:
+              - img [ref=e5593] [cursor=pointer]
+          - generic [ref=e5597]:
+            - generic [ref=e5598]: "Showing vehicles:"
+            - generic [ref=e5599]: 428 / 428
+        - generic [ref=e5601]:
+          - img [ref=e5602]
+          - generic [ref=e5604]: Live RTD transit data • Updated every 30s
+      - generic [ref=e5607]:
+        - generic [ref=e5608]:
+          - generic [ref=e5609]:
+            - generic [ref=e5610]:
+              - img [ref=e5611]
+              - heading "Data Sources" [level=3] [ref=e5615]
+            - button "Refresh sources" [ref=e5616] [cursor=pointer]:
+              - img [ref=e5617] [cursor=pointer]
+          - generic [ref=e5622]:
+            - generic [ref=e5623]: 0 of 6 connected
+            - generic [ref=e5624]: 2 selected
+        - generic [ref=e5625]:
+          - generic [ref=e5628] [cursor=pointer]:
+            - generic [ref=e5629] [cursor=pointer]:
+              - generic [ref=e5631] [cursor=pointer]:
+                - img [ref=e5632] [cursor=pointer]
+                - img [ref=e5636] [cursor=pointer]
+              - generic [ref=e5640] [cursor=pointer]:
+                - generic [ref=e5641] [cursor=pointer]:
+                  - generic [ref=e5642] [cursor=pointer]: Kafka Vehicle Positions
+                  - generic [ref=e5643] [cursor=pointer]: disconnected
+                - generic [ref=e5644] [cursor=pointer]: Real-time vehicle positions from Kafka topic
+            - button [ref=e5646] [cursor=pointer]:
+              - img [ref=e5647] [cursor=pointer]
+          - generic [ref=e5651] [cursor=pointer]:
+            - generic [ref=e5652] [cursor=pointer]:
+              - generic [ref=e5654] [cursor=pointer]:
+                - img [ref=e5655] [cursor=pointer]
+                - img [ref=e5659] [cursor=pointer]
+              - generic [ref=e5663] [cursor=pointer]:
+                - generic [ref=e5664] [cursor=pointer]:
+                  - generic [ref=e5665] [cursor=pointer]: Kafka Trip Updates
+                  - generic [ref=e5666] [cursor=pointer]: disconnected
+                - generic [ref=e5667] [cursor=pointer]: Trip updates and delays from Kafka
+            - button [ref=e5669] [cursor=pointer]:
+              - img [ref=e5670] [cursor=pointer]
+          - generic [ref=e5674] [cursor=pointer]:
+            - generic [ref=e5675] [cursor=pointer]:
+              - generic [ref=e5677] [cursor=pointer]:
+                - img [ref=e5678] [cursor=pointer]
+                - img [ref=e5681] [cursor=pointer]
+              - generic [ref=e5685] [cursor=pointer]:
+                - generic [ref=e5686] [cursor=pointer]:
+                  - generic [ref=e5687] [cursor=pointer]: Flink Aggregated Data
+                  - generic [ref=e5688] [cursor=pointer]: disconnected
+                - generic [ref=e5689] [cursor=pointer]: Processed and aggregated vehicle data from Flink
+            - button [ref=e5691] [cursor=pointer]:
+              - img [ref=e5692] [cursor=pointer]
+          - generic [ref=e5696] [cursor=pointer]:
+            - generic [ref=e5697] [cursor=pointer]:
+              - generic [ref=e5699] [cursor=pointer]:
+                - img [ref=e5700] [cursor=pointer]
+                - img [ref=e5705] [cursor=pointer]
+              - generic [ref=e5709] [cursor=pointer]:
+                - generic [ref=e5710] [cursor=pointer]:
+                  - generic [ref=e5711] [cursor=pointer]: RTD Direct API
+                  - generic [ref=e5712] [cursor=pointer]: disconnected
+                - generic [ref=e5713] [cursor=pointer]: Direct connection to RTD GTFS-RT feeds
+            - button [ref=e5715] [cursor=pointer]:
+              - img [ref=e5716] [cursor=pointer]
+          - generic [ref=e5720] [cursor=pointer]:
+            - generic [ref=e5721] [cursor=pointer]:
+              - generic [ref=e5723] [cursor=pointer]:
+                - img [ref=e5724] [cursor=pointer]
+                - img [ref=e5729] [cursor=pointer]
+              - generic [ref=e5733] [cursor=pointer]:
+                - generic [ref=e5734] [cursor=pointer]:
+                  - generic [ref=e5735] [cursor=pointer]: PostgreSQL Historical
+                  - generic [ref=e5736] [cursor=pointer]: disconnected
+                - generic [ref=e5737] [cursor=pointer]: Historical vehicle data from PostgreSQL
+            - button [ref=e5739] [cursor=pointer]:
+              - img [ref=e5740] [cursor=pointer]
+          - generic [ref=e5744] [cursor=pointer]:
+            - generic [ref=e5745] [cursor=pointer]:
+              - generic [ref=e5747] [cursor=pointer]:
+                - img [ref=e5748] [cursor=pointer]
+                - img [ref=e5751] [cursor=pointer]
+              - generic [ref=e5755] [cursor=pointer]:
+                - generic [ref=e5756] [cursor=pointer]:
+                  - generic [ref=e5757] [cursor=pointer]: WebSocket Stream
+                  - generic [ref=e5758] [cursor=pointer]: disconnected
+                - generic [ref=e5759] [cursor=pointer]: Live WebSocket stream for real-time updates
+            - button [ref=e5761] [cursor=pointer]:
+              - img [ref=e5762] [cursor=pointer]
+        - generic [ref=e5765]:
+          - generic [ref=e5766]:
+            - img [ref=e5767]
+            - generic [ref=e5774]: Select connected sources to query data
+          - button "Add Source" [ref=e5775] [cursor=pointer]
+    - generic [ref=e5778]:
+      - img [ref=e5779]
+      - generic [ref=e5782]: Powered by OpenStreetMap & RTD GTFS-RT • Enhanced with Multi-Source Data Query
+```

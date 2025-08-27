@@ -12,10 +12,15 @@ echo "🚊 Unsubscribing from Rail Communication feed..."
 ./rtd-control.sh rail-comm unsubscribe
 
 echo ""
+echo "🚈 Unsubscribing from LRGPS feed..."
+./rtd-control.sh lrgps unsubscribe
+
+echo ""
 echo "✅ All feed subscriptions stopped!"
 echo ""
 echo "📊 To check status:"
 echo "   Bus SIRI status:    ./rtd-control.sh bus-comm status"
 echo "   Rail Comm status:   ./rtd-control.sh rail-comm status"
+echo "   LRGPS status:       ./rtd-control.sh lrgps status"
 echo ""
 echo "🌐 Live tab will now show 0 vehicles (no active subscriptions)"

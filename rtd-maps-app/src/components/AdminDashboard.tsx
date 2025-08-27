@@ -54,7 +54,7 @@ interface Subscription {
   id: string;
   name: string;
   endpoint: string;
-  type: 'vehicles' | 'alerts' | 'trip-updates' | 'rail-comm' | 'bus-siri';
+  type: 'vehicles' | 'alerts' | 'trip-updates' | 'rail-comm' | 'bus-siri' | 'lrgps';
   status: 'active' | 'paused' | 'error';
   lastUpdate: Date | null;
   messageCount: number;
@@ -93,6 +93,17 @@ interface BusSiriMessage {
   size: number;
 }
 
+interface LrgpsMessage {
+  id: string;
+  timestamp: Date;
+  source: string;
+  sourceUrl: string;
+  proxyUrl?: string;
+  type: 'vehicle_monitoring' | 'position_update' | 'subscription_response' | 'heartbeat';
+  content: any;
+  size: number;
+}
+
 interface ErrorMessage {
   id: string;
   timestamp: Date;
@@ -122,6 +133,8 @@ const AdminDashboard = () => {
   const [showRailCommHistory, setShowRailCommHistory] = useState(false);
   const [busSiriMessages, setBusSiriMessages] = useState<BusSiriMessage[]>([]);
   const [showBusSiriHistory, setShowBusSiriHistory] = useState(false);
+  const [lrgpsMessages, setLrgpsMessages] = useState<LrgpsMessage[]>([]);
+  const [showLrgpsHistory, setShowLrgpsHistory] = useState(false);
   const [errorMessages, setErrorMessages] = useState<ErrorMessage[]>([]);
   const [showErrorHistory, setShowErrorHistory] = useState(false);
   const [errorSortBy, setErrorSortBy] = useState<'type' | 'count' | 'severity' | 'timestamp'>('count');
@@ -190,6 +203,16 @@ const AdminDashboard = () => {
         lastUpdate: new Date(Date.now() - 7200000),
         messageCount: 567,
         errorCount: 89
+      },
+      {
+        id: 'sub-6',
+        name: 'RTD LRGPS Feed',
+        endpoint: 'http://localhost:8083/lrgps',
+        type: 'lrgps',
+        status: 'active',
+        lastUpdate: new Date(Date.now() - 35000),
+        messageCount: 3240,
+        errorCount: 5
       }
     ];
 
@@ -251,6 +274,21 @@ const AdminDashboard = () => {
         lastMessage: new Date(Date.now() - 7200000),
         messageRate: 0,
         health: 'warning'
+      },
+      {
+        name: 'LRGPS Receiver',
+        type: 'lrgps',
+        isLive: true,
+        lastMessage: new Date(Date.now() - 35000),
+        messageRate: 0.15,
+        health: 'healthy',
+        sampleData: {
+          vehicle_id: 'LRV_001',
+          route_id: 'A-Line',
+          position: { latitude: 39.7392, longitude: -104.9903 },
+          speed_mph: 45.2,
+          next_stop: 'Union Station'
+        }
       }
     ];
 
@@ -688,6 +726,82 @@ const AdminDashboard = () => {
       (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
     );
 
+    // Mock LRGPS messages
+    const mockLrgpsMessages: LrgpsMessage[] = [
+      {
+        id: 'lrgps-msg-10',
+        timestamp: new Date(Date.now() - 15000),
+        source: 'RTD_LRGPS_001',
+        sourceUrl: 'http://localhost:8083/lrgps/position-monitoring',
+        proxyUrl: 'http://localhost:8084/lrgps-proxy/position-monitoring',
+        type: 'vehicle_monitoring',
+        content: {
+          vehicle_id: 'LRV_001',
+          route_id: 'A-Line',
+          direction: 'SOUTHBOUND',
+          position: { latitude: 39.7392, longitude: -104.9903 },
+          speed_mph: 45.2,
+          next_stop: 'Union Station',
+          occupancy_status: 'MANY_SEATS_AVAILABLE',
+          timestamp: Date.now() - 15000
+        },
+        size: 245
+      },
+      {
+        id: 'lrgps-msg-9',
+        timestamp: new Date(Date.now() - 35000),
+        source: 'RTD_LRGPS_002',
+        sourceUrl: 'http://localhost:8083/lrgps/position-update',
+        type: 'position_update',
+        content: {
+          vehicle_id: 'LRV_002',
+          route_id: 'W-Line',
+          direction: 'EASTBOUND',
+          position: { latitude: 39.7500, longitude: -105.0000 },
+          speed_mph: 40.0,
+          next_stop: 'Federal Center',
+          delay_seconds: 120
+        },
+        size: 195
+      }
+    ];
+
+    // Generate additional mock LRGPS messages
+    const additionalLrgpsMessages: LrgpsMessage[] = [];
+    for (let i = 8; i >= 1; i--) {
+      const messageTypes: Array<'vehicle_monitoring' | 'position_update' | 'subscription_response' | 'heartbeat'> = 
+        ['vehicle_monitoring', 'position_update', 'subscription_response', 'heartbeat'];
+      const routes = ['A-Line', 'W-Line', 'R-Line', 'H-Line', 'L-Line', 'N-Line'];
+      const vehicles = ['LRV_001', 'LRV_002', 'LRV_003', 'LRV_004', 'LRV_005'];
+      
+      additionalLrgpsMessages.push({
+        id: `lrgps-msg-${i}`,
+        timestamp: new Date(Date.now() - (i * 45000)),
+        source: `RTD_LRGPS_${String(i).padStart(3, '0')}`,
+        sourceUrl: 'http://localhost:8083/lrgps/vehicle-monitoring',
+        proxyUrl: 'http://localhost:8084/lrgps-proxy/monitoring',
+        type: messageTypes[Math.floor(Math.random() * messageTypes.length)],
+        content: {
+          vehicle_id: vehicles[Math.floor(Math.random() * vehicles.length)],
+          route_id: routes[Math.floor(Math.random() * routes.length)],
+          direction: Math.random() > 0.5 ? 'NORTHBOUND' : 'SOUTHBOUND',
+          position: {
+            latitude: 39.7 + (Math.random() * 0.2),
+            longitude: -104.9 + (Math.random() * 0.3)
+          },
+          speed_mph: Math.floor(Math.random() * 50) + 10,
+          next_stop: `Stop ${i}`,
+          occupancy_status: ['EMPTY', 'FEW_SEATS_AVAILABLE', 'MANY_SEATS_AVAILABLE', 'STANDING_ROOM_ONLY'][Math.floor(Math.random() * 4)],
+          timestamp: Date.now() - (i * 45000)
+        },
+        size: Math.floor(Math.random() * 200) + 180
+      });
+    }
+
+    const allLrgpsMessages = [...mockLrgpsMessages, ...additionalLrgpsMessages].sort(
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
+    );
+
     // Mock error messages
     const mockErrorMessages: ErrorMessage[] = [
       {
@@ -872,6 +986,7 @@ const AdminDashboard = () => {
     setFeedStatuses(mockFeedStatuses);
     setRailCommMessages(allRailCommMessages);
     setBusSiriMessages(allBusSiriMessages);
+    setLrgpsMessages(allLrgpsMessages);
     setErrorMessages(mockErrorMessages);
 
     // Load live occupancy analysis data
@@ -937,7 +1052,7 @@ const AdminDashboard = () => {
             isLive: receiverRunning,  // Show as live if receiver is accessible
             lastMessage: new Date(),
             messageRate: subscriptionActive ? Math.floor(Math.random() * 100) : 0,
-            health: receiverRunning ? (subscriptionActive ? 'healthy' : 'warning') : 'error'
+            health: receiverRunning ? (subscriptionActive ? 'healthy' as const : 'warning' as const) : 'error' as const
           };
         } else if (feed.type === 'rail-comm') {
           const receiverRunning = railCommStatus !== null;
@@ -947,7 +1062,7 @@ const AdminDashboard = () => {
             isLive: receiverRunning,  // Show as live if receiver is accessible
             lastMessage: new Date(),
             messageRate: isHealthy ? Math.floor(Math.random() * 50) : 0,
-            health: receiverRunning ? (isHealthy ? 'healthy' : 'warning') : 'error'
+            health: receiverRunning ? (isHealthy ? 'healthy' as const : 'warning' as const) : 'error' as const
           };
         }
         return feed;
@@ -960,14 +1075,14 @@ const AdminDashboard = () => {
         if (sub.type === 'bus-siri') {
           return {
             ...sub,
-            status: busSiriStatus.subscription_active ? 'active' : 'inactive',
-            lastUpdate: new Date().toISOString()
+            status: busSiriStatus.subscription_active ? 'active' as const : 'paused' as const,
+            lastUpdate: new Date()
           };
         } else if (sub.type === 'rail-comm') {
           return {
             ...sub,
-            status: railCommStatus.status === 'healthy' ? 'active' : 'inactive',
-            lastUpdate: new Date().toISOString()
+            status: railCommStatus.status === 'healthy' ? 'active' as const : 'paused' as const,
+            lastUpdate: new Date()
           };
         }
         return sub;
@@ -1371,6 +1486,16 @@ const AdminDashboard = () => {
     switch (type) {
       case 'stop_monitoring': return 'bg-green-100 text-green-800 border-green-200';
       case 'vehicle_monitoring': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'subscription_response': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'heartbeat': return 'bg-gray-100 text-gray-800 border-gray-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getLrgpsMessageTypeColor = (type: string) => {
+    switch (type) {
+      case 'vehicle_monitoring': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'position_update': return 'bg-green-100 text-green-800 border-green-200';
       case 'subscription_response': return 'bg-purple-100 text-purple-800 border-purple-200';
       case 'heartbeat': return 'bg-gray-100 text-gray-800 border-gray-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -2109,6 +2234,116 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* LRGPS Messages History */}
+        <div className="mt-8">
+          <div className="bg-white rounded-lg shadow-sm border">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Train className="w-6 h-6 text-blue-600" />
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900">RTD LRGPS Feed</h2>
+                    <p className="text-sm text-gray-600">Last 20 light rail message contents</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowLrgpsHistory(!showLrgpsHistory)}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                    showLrgpsHistory 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  <span>{showLrgpsHistory ? 'Hide' : 'Show'} Messages</span>
+                </button>
+              </div>
+            </div>
+
+            {showLrgpsHistory && (
+              <div className="p-6">
+                {lrgpsMessages.length === 0 ? (
+                  <div className="text-center text-gray-500 py-8">
+                    <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                    <p>No LRGPS messages available</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-4 gap-4 mb-6 text-center">
+                      <div className="bg-blue-50 rounded-lg p-3">
+                        <div className="font-semibold text-gray-900">
+                          {lrgpsMessages.filter(m => m.type === 'vehicle_monitoring').length}
+                        </div>
+                        <div className="text-gray-600">Vehicle Monitoring</div>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-3">
+                        <div className="font-semibold text-gray-900">
+                          {lrgpsMessages.filter(m => m.type === 'position_update').length}
+                        </div>
+                        <div className="text-gray-600">Position Updates</div>
+                      </div>
+                      <div className="bg-purple-50 rounded-lg p-3">
+                        <div className="font-semibold text-gray-900">
+                          {lrgpsMessages.filter(m => m.type === 'subscription_response').length}
+                        </div>
+                        <div className="text-gray-600">Subscriptions</div>
+                      </div>
+                      <div className="bg-gray-50 rounded-lg p-3">
+                        <div className="font-semibold text-gray-900">
+                          {lrgpsMessages.filter(m => m.type === 'heartbeat').length}
+                        </div>
+                        <div className="text-gray-600">Heartbeats</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {lrgpsMessages.slice(0, 20).map((message) => (
+                        <div
+                          key={message.id}
+                          className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center space-x-3">
+                              <span
+                                className={`px-2 py-1 rounded text-xs font-medium border ${getLrgpsMessageTypeColor(message.type)}`}
+                              >
+                                {message.type}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {formatDistanceToNow(message.timestamp)} ago
+                              </span>
+                              <span className="text-xs text-gray-400">
+                                {message.size} bytes
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => copyToClipboard(JSON.stringify(message.content, null, 2))}
+                              className="text-gray-400 hover:text-gray-600 transition-colors"
+                              title="Copy message content"
+                            >
+                              <Copy className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="text-sm text-gray-700 mb-2">
+                            <span className="font-medium">Source:</span> {message.source} 
+                            <span className="mx-2 text-gray-400">•</span>
+                            <span className="font-medium">URL:</span> {message.sourceUrl}
+                          </div>
+                          <div className="bg-gray-50 rounded-md p-3">
+                            <pre className="text-xs text-gray-800 overflow-x-auto whitespace-pre-wrap">
+                              {JSON.stringify(message.content, null, 2)}
+                            </pre>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
