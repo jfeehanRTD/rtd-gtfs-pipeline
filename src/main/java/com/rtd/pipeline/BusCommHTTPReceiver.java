@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rtd.pipeline.util.MetricsRecorder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -242,6 +243,7 @@ public class BusCommHTTPReceiver {
                 String siriPayload = new String(requestBody.readAllBytes(), StandardCharsets.UTF_8);
                 
                 if (siriPayload.trim().isEmpty()) {
+                    MetricsRecorder.recordError("siri");
                     sendErrorResponse(exchange, 400, "Empty request body");
                     return;
                 }
@@ -265,9 +267,17 @@ public class BusCommHTTPReceiver {
                 kafkaProducer.send(record, (metadata, exception) -> {
                     if (exception != null) {
                         LOG.error("Failed to send message to Kafka: {}", exception.getMessage());
+                        MetricsRecorder.recordError("siri");
                     } else {
                         LOG.info("Successfully sent bus SIRI data to topic {} partition {} offset {}", 
                             metadata.topic(), metadata.partition(), metadata.offset());
+                        
+                        // Record successful connection if this looks like valid SIRI data
+                        if (MetricsRecorder.isValidConnectionData(processedPayload)) {
+                            MetricsRecorder.recordConnection("siri");
+                        } else {
+                            MetricsRecorder.recordRegularMessage("siri");
+                        }
                     }
                 });
                 

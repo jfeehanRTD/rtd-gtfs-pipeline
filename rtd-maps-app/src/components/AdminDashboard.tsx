@@ -49,6 +49,7 @@ import {
   VehicleTypeAnalysis,
   OccupancyAnalysisStatus
 } from '../services/occupancyAnalysisService';
+import FeedMetricsPanel from './FeedMetricsPanel';
 
 interface Subscription {
   id: string;
@@ -1635,6 +1636,11 @@ const AdminDashboard = () => {
               <Bell className="w-8 h-8 text-red-500" />
             </div>
           </div>
+        </div>
+
+        {/* Feed Metrics Panel */}
+        <div className="mb-8">
+          <FeedMetricsPanel />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

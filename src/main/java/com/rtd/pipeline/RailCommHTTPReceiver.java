@@ -2,6 +2,7 @@ package com.rtd.pipeline;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rtd.pipeline.util.MetricsRecorder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -158,9 +159,17 @@ public class RailCommHTTPReceiver {
                 kafkaProducer.send(record, (metadata, exception) -> {
                     if (exception != null) {
                         LOG.error("Failed to send message to Kafka: {}", exception.getMessage());
+                        MetricsRecorder.recordError("railcomm");
                     } else {
                         LOG.info("Successfully sent rail comm data to topic {} partition {} offset {}", 
                             metadata.topic(), metadata.partition(), metadata.offset());
+                        
+                        // Record successful connection if this looks like valid rail comm data
+                        if (MetricsRecorder.isValidConnectionData(jsonPayload)) {
+                            MetricsRecorder.recordConnection("railcomm");
+                        } else {
+                            MetricsRecorder.recordRegularMessage("railcomm");
+                        }
                     }
                 });
                 

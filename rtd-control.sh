@@ -620,8 +620,97 @@ main() {
                     ./scripts/test-rail-comm.sh send
                     ;;
                 "monitor")
-                    print_status "Monitoring rail comm topic..."
-                    ./scripts/test-rail-comm.sh monitor
+                    print_status "Monitoring rail comm topic with metrics..."
+                    # Enhanced monitoring with connection counts and error tracking
+                    {
+                        echo -e "${BLUE}========================================${NC}"
+                        echo -e "${BLUE}Rail Comm Enhanced Monitoring - $(date)${NC}"
+                        echo -e "${BLUE}========================================${NC}"
+                        echo ""
+                        
+                        # Initialize counters
+                        local message_count=0
+                        local connection_count=0
+                        local error_count=0
+                        local start_time=$(date +%s)
+                        local last_interval=$(date +%s)
+                        local messages_this_interval=0
+                        local connections_this_interval=0
+                        local errors_this_interval=0
+                        
+                        print_status "Starting Rail Comm monitoring with metrics..."
+                        print_status "Press Ctrl+C to stop monitoring"
+                        echo ""
+                        
+                        # Start Kafka consumer in background and capture output
+                        ./scripts/kafka-console-consumer.sh --topic rtd.railcomm | while IFS= read -r line; do
+                            current_time=$(date +%s)
+                            message_count=$((message_count + 1))
+                            messages_this_interval=$((messages_this_interval + 1))
+                            
+                            # Check if this looks like a Rail Comm connection message
+                            if echo "$line" | grep -q "rail\|train\|track\|station\|departure\|arrival\|schedule" 2>/dev/null; then
+                                connection_count=$((connection_count + 1))
+                                connections_this_interval=$((connections_this_interval + 1))
+                            fi
+                            
+                            # Check for error patterns
+                            if echo "$line" | grep -qi "error\|failed\|exception\|timeout\|unavailable" 2>/dev/null; then
+                                error_count=$((error_count + 1))
+                                errors_this_interval=$((errors_this_interval + 1))
+                                print_error "Rail Comm Error detected: $(echo "$line" | cut -c1-80)..."
+                            fi
+                            
+                            # Print metrics summary every 5 seconds
+                            if [ $((current_time - last_interval)) -ge 5 ]; then
+                                elapsed_seconds=$(( current_time - start_time ))
+                                elapsed_minutes=$(( elapsed_seconds / 60 ))
+                                if [ $elapsed_minutes -eq 0 ]; then elapsed_minutes=1; fi
+                                
+                                avg_messages_per_min=$(( message_count / elapsed_minutes ))
+                                avg_connections_per_min=$(( connection_count / elapsed_minutes ))
+                                
+                                echo ""
+                                echo -e "${GREEN}📊 Rail Comm Metrics (${elapsed_seconds}s) - $(date '+%H:%M:%S')${NC}"
+                                echo -e "${BLUE}─────────────────────────────────────${NC}"
+                                echo -e "${YELLOW}Messages (last 5s):${NC} $messages_this_interval"
+                                echo -e "${YELLOW}Connections (last 5s):${NC} $connections_this_interval"
+                                echo -e "${YELLOW}Errors (last 5s):${NC} $errors_this_interval"
+                                echo ""
+                                echo -e "${GREEN}📈 Running Totals (${elapsed_minutes}m):${NC}"
+                                echo -e "${YELLOW}Total Messages:${NC} $message_count (avg: $avg_messages_per_min/min)"
+                                echo -e "${YELLOW}Total Connections:${NC} $connection_count (avg: $avg_connections_per_min/min)"
+                                echo -e "${YELLOW}Total Errors:${NC} $error_count"
+                                
+                                if [ $connection_count -gt 0 ]; then
+                                    connection_rate=$(echo "scale=1; $connection_count * 100 / $message_count" | bc 2>/dev/null || echo "N/A")
+                                    echo -e "${YELLOW}Connection Rate:${NC} ${connection_rate}%"
+                                fi
+                                
+                                if [ $error_count -gt 0 ]; then
+                                    error_rate=$(echo "scale=2; $error_count * 100 / $message_count" | bc 2>/dev/null || echo "N/A")
+                                    echo -e "${RED}Error Rate:${NC} ${error_rate}%"
+                                fi
+                                
+                                echo -e "${BLUE}─────────────────────────────────────${NC}"
+                                echo ""
+                                
+                                # Reset interval counters
+                                messages_this_interval=0
+                                connections_this_interval=0
+                                errors_this_interval=0
+                                last_interval=$current_time
+                            fi
+                            
+                            # Show raw message (truncated for readability)
+                            timestamp=$(date '+%H:%M:%S')
+                            truncated_line=$(echo "$line" | cut -c1-120)
+                            if [ ${#line} -gt 120 ]; then
+                                truncated_line="${truncated_line}..."
+                            fi
+                            echo -e "${BLUE}[$timestamp]${NC} $truncated_line"
+                        done
+                    }
                     ;;
                 "subscribe")
                     print_status "Subscribing to rail comm proxy feed..."
@@ -670,7 +759,7 @@ main() {
                     echo
                     print_status "Testing & Monitoring:"
                     print_status "  test             - Send test JSON payloads"
-                    print_status "  monitor          - Monitor rail comm topic"
+                    print_status "  monitor          - Monitor rail comm topic with connection metrics and error tracking"
                     print_status "  test-endpoints   - Test connectivity to all endpoints"
                     print_status "  test-bridge      - Test Direct Kafka Bridge functionality"
                     print_status "  benchmark        - Benchmark performance of all endpoints"
@@ -720,8 +809,97 @@ main() {
                     fi
                     ;;
                 "monitor")
-                    print_status "Monitoring bus SIRI topic..."
-                    ./scripts/kafka-console-consumer.sh --topic rtd.bus.siri
+                    print_status "Monitoring bus SIRI topic with metrics..."
+                    # Enhanced monitoring with connection counts and error tracking
+                    {
+                        echo -e "${BLUE}========================================${NC}"
+                        echo -e "${BLUE}Bus SIRI Enhanced Monitoring - $(date)${NC}"
+                        echo -e "${BLUE}========================================${NC}"
+                        echo ""
+                        
+                        # Initialize counters
+                        local message_count=0
+                        local connection_count=0
+                        local error_count=0
+                        local start_time=$(date +%s)
+                        local last_interval=$(date +%s)
+                        local messages_this_interval=0
+                        local connections_this_interval=0
+                        local errors_this_interval=0
+                        
+                        print_status "Starting Bus SIRI monitoring with metrics..."
+                        print_status "Press Ctrl+C to stop monitoring"
+                        echo ""
+                        
+                        # Start Kafka consumer in background and capture output
+                        ./scripts/kafka-console-consumer.sh --topic rtd.bus.siri | while IFS= read -r line; do
+                            current_time=$(date +%s)
+                            message_count=$((message_count + 1))
+                            messages_this_interval=$((messages_this_interval + 1))
+                            
+                            # Check if this looks like a Bus SIRI connection message
+                            if echo "$line" | grep -q "bus\|vehicle\|route\|stop\|siri\|journey" 2>/dev/null; then
+                                connection_count=$((connection_count + 1))
+                                connections_this_interval=$((connections_this_interval + 1))
+                            fi
+                            
+                            # Check for error patterns
+                            if echo "$line" | grep -qi "error\|failed\|exception\|timeout\|unavailable" 2>/dev/null; then
+                                error_count=$((error_count + 1))
+                                errors_this_interval=$((errors_this_interval + 1))
+                                print_error "Bus SIRI Error detected: $(echo "$line" | cut -c1-80)..."
+                            fi
+                            
+                            # Print metrics summary every 5 seconds
+                            if [ $((current_time - last_interval)) -ge 5 ]; then
+                                elapsed_seconds=$(( current_time - start_time ))
+                                elapsed_minutes=$(( elapsed_seconds / 60 ))
+                                if [ $elapsed_minutes -eq 0 ]; then elapsed_minutes=1; fi
+                                
+                                avg_messages_per_min=$(( message_count / elapsed_minutes ))
+                                avg_connections_per_min=$(( connection_count / elapsed_minutes ))
+                                
+                                echo ""
+                                echo -e "${GREEN}📊 Bus SIRI Metrics (${elapsed_seconds}s) - $(date '+%H:%M:%S')${NC}"
+                                echo -e "${BLUE}─────────────────────────────────────${NC}"
+                                echo -e "${YELLOW}Messages (last 5s):${NC} $messages_this_interval"
+                                echo -e "${YELLOW}Connections (last 5s):${NC} $connections_this_interval"
+                                echo -e "${YELLOW}Errors (last 5s):${NC} $errors_this_interval"
+                                echo ""
+                                echo -e "${GREEN}📈 Running Totals (${elapsed_minutes}m):${NC}"
+                                echo -e "${YELLOW}Total Messages:${NC} $message_count (avg: $avg_messages_per_min/min)"
+                                echo -e "${YELLOW}Total Connections:${NC} $connection_count (avg: $avg_connections_per_min/min)"
+                                echo -e "${YELLOW}Total Errors:${NC} $error_count"
+                                
+                                if [ $connection_count -gt 0 ]; then
+                                    connection_rate=$(echo "scale=1; $connection_count * 100 / $message_count" | bc 2>/dev/null || echo "N/A")
+                                    echo -e "${YELLOW}Connection Rate:${NC} ${connection_rate}%"
+                                fi
+                                
+                                if [ $error_count -gt 0 ]; then
+                                    error_rate=$(echo "scale=2; $error_count * 100 / $message_count" | bc 2>/dev/null || echo "N/A")
+                                    echo -e "${RED}Error Rate:${NC} ${error_rate}%"
+                                fi
+                                
+                                echo -e "${BLUE}─────────────────────────────────────${NC}"
+                                echo ""
+                                
+                                # Reset interval counters
+                                messages_this_interval=0
+                                connections_this_interval=0
+                                errors_this_interval=0
+                                last_interval=$current_time
+                            fi
+                            
+                            # Show raw message (truncated for readability)
+                            timestamp=$(date '+%H:%M:%S')
+                            truncated_line=$(echo "$line" | cut -c1-120)
+                            if [ ${#line} -gt 120 ]; then
+                                truncated_line="${truncated_line}..."
+                            fi
+                            echo -e "${BLUE}[$timestamp]${NC} $truncated_line"
+                        done
+                    }
                     ;;
                 "status")
                     print_status "Checking Bus SIRI status..."
@@ -739,7 +917,7 @@ main() {
                     print_status "  test             - Test SIRI subscription with defaults"
                     echo
                     print_status "Monitoring:"
-                    print_status "  monitor          - Monitor bus SIRI topic"
+                    print_status "  monitor          - Monitor bus SIRI topic with connection metrics and error tracking"
                     print_status "  status           - Check receiver status"
                     exit 1
                     ;;
@@ -780,8 +958,97 @@ main() {
                     fi
                     ;;
                 "monitor")
-                    print_status "Monitoring LRGPS topic..."
-                    ./scripts/kafka-console-consumer.sh --topic rtd.lrgps
+                    print_status "Monitoring LRGPS topic with metrics..."
+                    # Enhanced monitoring with connection counts and error tracking
+                    {
+                        echo -e "${BLUE}========================================${NC}"
+                        echo -e "${BLUE}LRGPS Enhanced Monitoring - $(date)${NC}"
+                        echo -e "${BLUE}========================================${NC}"
+                        echo ""
+                        
+                        # Initialize counters
+                        local message_count=0
+                        local connection_count=0
+                        local error_count=0
+                        local start_time=$(date +%s)
+                        local last_interval=$(date +%s)
+                        local messages_this_interval=0
+                        local connections_this_interval=0
+                        local errors_this_interval=0
+                        
+                        print_status "Starting LRGPS monitoring with metrics..."
+                        print_status "Press Ctrl+C to stop monitoring"
+                        echo ""
+                        
+                        # Start Kafka consumer in background and capture output
+                        ./scripts/kafka-console-consumer.sh --topic rtd.lrgps | while IFS= read -r line; do
+                            current_time=$(date +%s)
+                            message_count=$((message_count + 1))
+                            messages_this_interval=$((messages_this_interval + 1))
+                            
+                            # Check if this looks like an LRGPS connection message
+                            if echo "$line" | grep -q "vehicle\|position\|gps\|coordinate\|location" 2>/dev/null; then
+                                connection_count=$((connection_count + 1))
+                                connections_this_interval=$((connections_this_interval + 1))
+                            fi
+                            
+                            # Check for error patterns
+                            if echo "$line" | grep -qi "error\|failed\|exception\|timeout\|unavailable" 2>/dev/null; then
+                                error_count=$((error_count + 1))
+                                errors_this_interval=$((errors_this_interval + 1))
+                                print_error "LRGPS Error detected: $(echo "$line" | cut -c1-80)..."
+                            fi
+                            
+                            # Print metrics summary every 5 seconds
+                            if [ $((current_time - last_interval)) -ge 5 ]; then
+                                elapsed_seconds=$(( current_time - start_time ))
+                                elapsed_minutes=$(( elapsed_seconds / 60 ))
+                                if [ $elapsed_minutes -eq 0 ]; then elapsed_minutes=1; fi
+                                
+                                avg_messages_per_min=$(( message_count / elapsed_minutes ))
+                                avg_connections_per_min=$(( connection_count / elapsed_minutes ))
+                                
+                                echo ""
+                                echo -e "${GREEN}📊 LRGPS Metrics (${elapsed_seconds}s) - $(date '+%H:%M:%S')${NC}"
+                                echo -e "${BLUE}─────────────────────────────────────${NC}"
+                                echo -e "${YELLOW}Messages (last 5s):${NC} $messages_this_interval"
+                                echo -e "${YELLOW}Connections (last 5s):${NC} $connections_this_interval"
+                                echo -e "${YELLOW}Errors (last 5s):${NC} $errors_this_interval"
+                                echo ""
+                                echo -e "${GREEN}📈 Running Totals (${elapsed_minutes}m):${NC}"
+                                echo -e "${YELLOW}Total Messages:${NC} $message_count (avg: $avg_messages_per_min/min)"
+                                echo -e "${YELLOW}Total Connections:${NC} $connection_count (avg: $avg_connections_per_min/min)"
+                                echo -e "${YELLOW}Total Errors:${NC} $error_count"
+                                
+                                if [ $connection_count -gt 0 ]; then
+                                    connection_rate=$(echo "scale=1; $connection_count * 100 / $message_count" | bc 2>/dev/null || echo "N/A")
+                                    echo -e "${YELLOW}Connection Rate:${NC} ${connection_rate}%"
+                                fi
+                                
+                                if [ $error_count -gt 0 ]; then
+                                    error_rate=$(echo "scale=2; $error_count * 100 / $message_count" | bc 2>/dev/null || echo "N/A")
+                                    echo -e "${RED}Error Rate:${NC} ${error_rate}%"
+                                fi
+                                
+                                echo -e "${BLUE}─────────────────────────────────────${NC}"
+                                echo ""
+                                
+                                # Reset interval counters
+                                messages_this_interval=0
+                                connections_this_interval=0
+                                errors_this_interval=0
+                                last_interval=$current_time
+                            fi
+                            
+                            # Show raw message (truncated for readability)
+                            timestamp=$(date '+%H:%M:%S')
+                            truncated_line=$(echo "$line" | cut -c1-120)
+                            if [ ${#line} -gt 120 ]; then
+                                truncated_line="${truncated_line}..."
+                            fi
+                            echo -e "${BLUE}[$timestamp]${NC} $truncated_line"
+                        done
+                    }
                     ;;
                 "status")
                     print_status "Checking LRGPS status..."
@@ -811,7 +1078,7 @@ main() {
                     print_status "  unsubscribe      - Unsubscribe from LRGPS feed"
                     echo
                     print_status "Monitoring:"
-                    print_status "  monitor          - Monitor LRGPS topic"
+                    print_status "  monitor          - Monitor LRGPS topic with connection metrics and error tracking"
                     print_status "  status           - Check receiver status"
                     exit 1
                     ;;
@@ -1080,7 +1347,7 @@ main() {
             echo "  $0 rail-comm run          # Start rail comm pipeline"
             echo "  $0 rail-comm receiver     # Start HTTP receiver for proxy data"
             echo "  $0 rail-comm test         # Send test JSON payloads"
-            echo "  $0 rail-comm monitor      # Monitor rail comm topic"
+            echo "  $0 rail-comm monitor      # Monitor rail comm topic with connection metrics"
             echo "  $0 rail-comm subscribe    # Subscribe to proxy feed"
             echo "  $0 rail-comm unsubscribe  # Unsubscribe from proxy feed"
             echo
@@ -1089,7 +1356,7 @@ main() {
             echo "  $0 bus-comm receiver      # Start SIRI HTTP receiver"
             echo "  $0 bus-comm subscribe     # Subscribe to SIRI bus feed"
             echo "  $0 bus-comm test          # Test SIRI subscription"
-            echo "  $0 bus-comm monitor       # Monitor bus SIRI topic"
+            echo "  $0 bus-comm monitor       # Monitor bus SIRI topic with connection metrics"
             echo "  $0 bus-comm status        # Check receiver status"
             echo ""
             echo "LRGPS Pipeline:"
@@ -1098,7 +1365,7 @@ main() {
             echo "  $0 lrgps subscribe        # Subscribe to LRGPS feed"
             echo "  $0 lrgps test             # Test LRGPS subscription"
             echo "  $0 lrgps unsubscribe      # Unsubscribe from LRGPS feed"
-            echo "  $0 lrgps monitor          # Monitor LRGPS topic"
+            echo "  $0 lrgps monitor          # Monitor LRGPS topic with connection metrics"
             echo "  $0 lrgps status           # Check receiver status"
             echo ""
             echo "GTFS-RT Generation Pipeline:"

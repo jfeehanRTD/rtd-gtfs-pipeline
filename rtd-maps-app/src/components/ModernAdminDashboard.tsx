@@ -42,6 +42,7 @@ import {
   VehicleTypeAnalysis,
   OccupancyAnalysisStatus
 } from '../services/occupancyAnalysisService';
+import FeedMetricsPanel from './FeedMetricsPanel';
 
 interface Subscription {
   id: string;
@@ -626,6 +627,9 @@ const ModernAdminDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Feed Metrics Panel */}
+      <FeedMetricsPanel />
     </div>
   );
 
