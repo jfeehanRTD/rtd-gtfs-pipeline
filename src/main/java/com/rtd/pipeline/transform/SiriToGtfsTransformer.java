@@ -61,8 +61,15 @@ public class SiriToGtfsTransformer {
             }
             
             JsonNode vehicleMonitoring = serviceDelivery.path("VehicleMonitoringDelivery");
+            JsonNode delivery = null;
+            
             if (vehicleMonitoring.isArray() && vehicleMonitoring.size() > 0) {
-                JsonNode delivery = vehicleMonitoring.get(0);
+                delivery = vehicleMonitoring.get(0);
+            } else if (!vehicleMonitoring.isMissingNode()) {
+                delivery = vehicleMonitoring;
+            }
+            
+            if (delivery != null) {
                 JsonNode vehicleActivities = delivery.path("VehicleActivity");
                 
                 if (vehicleActivities.isArray()) {
@@ -71,6 +78,12 @@ public class SiriToGtfsTransformer {
                         if (position != null) {
                             positions.add(position);
                         }
+                    }
+                } else if (!vehicleActivities.isMissingNode()) {
+                    // Handle single VehicleActivity
+                    GtfsRealtime.VehiclePosition position = transformVehicleActivity(vehicleActivities);
+                    if (position != null) {
+                        positions.add(position);
                     }
                 }
             }
@@ -103,8 +116,15 @@ public class SiriToGtfsTransformer {
             
             // Look for EstimatedTimetableDelivery or VehicleMonitoringDelivery with delay info
             JsonNode vehicleMonitoring = serviceDelivery.path("VehicleMonitoringDelivery");
+            JsonNode delivery = null;
+            
             if (vehicleMonitoring.isArray() && vehicleMonitoring.size() > 0) {
-                JsonNode delivery = vehicleMonitoring.get(0);
+                delivery = vehicleMonitoring.get(0);
+            } else if (!vehicleMonitoring.isMissingNode()) {
+                delivery = vehicleMonitoring;
+            }
+            
+            if (delivery != null) {
                 JsonNode vehicleActivities = delivery.path("VehicleActivity");
                 
                 if (vehicleActivities.isArray()) {
@@ -113,6 +133,12 @@ public class SiriToGtfsTransformer {
                         if (tripUpdate != null) {
                             tripUpdates.add(tripUpdate);
                         }
+                    }
+                } else if (!vehicleActivities.isMissingNode()) {
+                    // Handle single VehicleActivity
+                    GtfsRealtime.TripUpdate tripUpdate = transformToTripUpdate(vehicleActivities);
+                    if (tripUpdate != null) {
+                        tripUpdates.add(tripUpdate);
                     }
                 }
             }
@@ -179,6 +205,12 @@ public class SiriToGtfsTransformer {
             
             if (latitude == 0.0 || longitude == 0.0) {
                 LOG.debug("Invalid coordinates for vehicle {}: lat={}, lon={}", vehicleRef, latitude, longitude);
+                return null;
+            }
+            
+            // Validate Colorado bounds
+            if (!isValidColoradoCoordinates((float) latitude, (float) longitude)) {
+                LOG.debug("Coordinates outside Colorado bounds for vehicle {}: lat={}, lon={}", vehicleRef, latitude, longitude);
                 return null;
             }
             
@@ -250,6 +282,7 @@ public class SiriToGtfsTransformer {
         try {
             JsonNode monitoredVehicleJourney = activity.path("MonitoredVehicleJourney");
             if (monitoredVehicleJourney.isMissingNode()) {
+                LOG.debug("No MonitoredVehicleJourney found in activity");
                 return null;
             }
             
@@ -259,33 +292,38 @@ public class SiriToGtfsTransformer {
             
             // Extract delay information
             JsonNode delay = monitoredVehicleJourney.path("Delay");
-            if (delay.isMissingNode()) {
-                return null; // No delay information available
-            }
-            
             int delaySeconds = 0;
-            if (delay.isTextual()) {
-                // Parse ISO 8601 duration (PT30S = 30 seconds)
-                delaySeconds = parseIsoDuration(delay.asText());
-            } else if (delay.isNumber()) {
-                delaySeconds = delay.asInt();
+            
+            if (!delay.isMissingNode()) {
+                if (delay.isTextual()) {
+                    // Parse ISO 8601 duration (PT30S = 30 seconds)
+                    delaySeconds = parseIsoDuration(delay.asText());
+                } else if (delay.isNumber()) {
+                    delaySeconds = delay.asInt();
+                }
             }
             
-            if (delaySeconds == 0) {
-                return null; // No meaningful delay
+            // Check for MonitoredCall timing information as alternative source
+            JsonNode monitoredCall = monitoredVehicleJourney.path("MonitoredCall");
+            if (!monitoredCall.isMissingNode() && (delaySeconds != 0 || monitoredCall.has("ExpectedArrivalTime") || monitoredCall.has("ExpectedDepartureTime"))) {
+                // We have timing information to create a trip update
+            } else if (delaySeconds == 0) {
+                return null; // No meaningful delay or timing information
             }
             
             // Build TripUpdate
             GtfsRealtime.TripUpdate.Builder builder = GtfsRealtime.TripUpdate.newBuilder();
             
             // Trip descriptor
-            if (tripRef != null && !tripRef.isEmpty() && lineRef != null && !lineRef.isEmpty()) {
+            if (lineRef != null && !lineRef.isEmpty()) {
                 GtfsRealtime.TripDescriptor.Builder tripBuilder = GtfsRealtime.TripDescriptor.newBuilder();
-                tripBuilder.setTripId(tripRef);
+                if (tripRef != null && !tripRef.isEmpty()) {
+                    tripBuilder.setTripId(tripRef);
+                }
                 tripBuilder.setRouteId(lineRef);
                 builder.setTrip(tripBuilder.build());
             } else {
-                return null; // Cannot create trip update without trip info
+                return null; // Cannot create trip update without at least route info
             }
             
             // Vehicle descriptor
@@ -295,20 +333,67 @@ public class SiriToGtfsTransformer {
                 builder.setVehicle(vehicleBuilder.build());
             }
             
-            // Add stop time update with delay
+            // Add stop time update with delay or timing information
             GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeBuilder = 
                 GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
             
-            // Add delay to arrival/departure
-            GtfsRealtime.TripUpdate.StopTimeEvent.Builder arrivalBuilder = 
-                GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();
-            arrivalBuilder.setDelay(delaySeconds);
-            stopTimeBuilder.setArrival(arrivalBuilder.build());
-            
-            GtfsRealtime.TripUpdate.StopTimeEvent.Builder departureBuilder = 
-                GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();
-            departureBuilder.setDelay(delaySeconds);
-            stopTimeBuilder.setDeparture(departureBuilder.build());
+            // Set stop ID from MonitoredCall if available
+            if (!monitoredCall.isMissingNode()) {
+                String stopId = extractText(monitoredCall.path("StopPointRef"));
+                if (stopId != null && !stopId.isEmpty()) {
+                    stopTimeBuilder.setStopId(stopId);
+                }
+                
+                // Handle expected arrival/departure times
+                String expectedArrival = extractText(monitoredCall.path("ExpectedArrivalTime"));
+                String expectedDeparture = extractText(monitoredCall.path("ExpectedDepartureTime"));
+                
+                if (expectedArrival != null || expectedDeparture != null) {
+                    if (expectedArrival != null) {
+                        long arrivalTime = parseTimestamp(expectedArrival) / 1000;
+                        GtfsRealtime.TripUpdate.StopTimeEvent.Builder arrivalBuilder = 
+                            GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();
+                        arrivalBuilder.setTime(arrivalTime);
+                        if (delaySeconds != 0) {
+                            arrivalBuilder.setDelay(delaySeconds);
+                        }
+                        stopTimeBuilder.setArrival(arrivalBuilder.build());
+                    }
+                    
+                    if (expectedDeparture != null) {
+                        long departureTime = parseTimestamp(expectedDeparture) / 1000;
+                        GtfsRealtime.TripUpdate.StopTimeEvent.Builder departureBuilder = 
+                            GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();
+                        departureBuilder.setTime(departureTime);
+                        if (delaySeconds != 0) {
+                            departureBuilder.setDelay(delaySeconds);
+                        }
+                        stopTimeBuilder.setDeparture(departureBuilder.build());
+                    }
+                } else if (delaySeconds != 0) {
+                    // Only delay information available
+                    GtfsRealtime.TripUpdate.StopTimeEvent.Builder arrivalBuilder = 
+                        GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();
+                    arrivalBuilder.setDelay(delaySeconds);
+                    stopTimeBuilder.setArrival(arrivalBuilder.build());
+                    
+                    GtfsRealtime.TripUpdate.StopTimeEvent.Builder departureBuilder = 
+                        GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();
+                    departureBuilder.setDelay(delaySeconds);
+                    stopTimeBuilder.setDeparture(departureBuilder.build());
+                }
+            } else if (delaySeconds != 0) {
+                // Only delay information available
+                GtfsRealtime.TripUpdate.StopTimeEvent.Builder arrivalBuilder = 
+                    GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();
+                arrivalBuilder.setDelay(delaySeconds);
+                stopTimeBuilder.setArrival(arrivalBuilder.build());
+                
+                GtfsRealtime.TripUpdate.StopTimeEvent.Builder departureBuilder = 
+                    GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();
+                departureBuilder.setDelay(delaySeconds);
+                stopTimeBuilder.setDeparture(departureBuilder.build());
+            }
             
             builder.addStopTimeUpdate(stopTimeBuilder.build());
             
@@ -325,6 +410,11 @@ public class SiriToGtfsTransformer {
             LOG.error("Error transforming to trip update: {}", e.getMessage(), e);
             return null;
         }
+    }
+    
+    private boolean isValidColoradoCoordinates(float latitude, float longitude) {
+        // Colorado approximate bounds
+        return latitude >= 39.0f && latitude <= 41.0f && longitude >= -106.0f && longitude <= -104.0f;
     }
     
     private String extractText(JsonNode node) {

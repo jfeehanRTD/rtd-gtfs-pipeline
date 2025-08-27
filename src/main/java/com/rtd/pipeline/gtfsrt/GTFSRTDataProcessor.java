@@ -26,7 +26,7 @@ public class GTFSRTDataProcessor {
     private static final double MAX_LONGITUDE = -104.0; // Eastern Colorado boundary
     private static final float MAX_REASONABLE_SPEED = 100.0f; // 100 mph max
     private static final long MAX_TIMESTAMP_AGE_MS = 24 * 60 * 60 * 1000L; // 24 hours
-    private static final int MAX_DELAY_SECONDS = 2 * 60 * 60; // 2 hours max delay
+    private static final int MAX_DELAY_SECONDS = 60 * 60; // 1 hour max delay
     
     /**
      * Process and validate vehicle positions
@@ -53,11 +53,10 @@ public class GTFSRTDataProcessor {
                 String vehicleId = position.getVehicle().getId();
                 if (seenVehicleIds.contains(vehicleId)) {
                     duplicateCount++;
-                    // Remove previous entry and add new one (assuming newer is better)
-                    processed.removeIf(vp -> vp.getVehicle().getId().equals(vehicleId));
-                } else {
-                    seenVehicleIds.add(vehicleId);
+                    // Skip duplicate - we already have a more recent entry
+                    continue;
                 }
+                seenVehicleIds.add(vehicleId);
                 
                 // Add processed position
                 GtfsRealtime.VehiclePosition enrichedPosition = enrichVehiclePosition(position);
@@ -98,18 +97,41 @@ public class GTFSRTDataProcessor {
                     continue;
                 }
                 
-                // Deduplicate by trip ID
-                String tripId = tripUpdate.getTrip().getTripId();
-                if (seenTripIds.contains(tripId)) {
-                    duplicateCount++;
-                    // Remove previous entry and add new one
-                    processed.removeIf(tu -> tu.getTrip().getTripId().equals(tripId));
+                // Deduplicate by trip ID or route+vehicle if no trip ID
+                String deduplicationKey;
+                if (tripUpdate.getTrip().hasTripId() && !tripUpdate.getTrip().getTripId().isEmpty()) {
+                    deduplicationKey = tripUpdate.getTrip().getTripId();
                 } else {
-                    seenTripIds.add(tripId);
+                    // Use route + vehicle ID for deduplication when no trip ID
+                    String routeId = tripUpdate.getTrip().getRouteId();
+                    String vehicleId = tripUpdate.hasVehicle() ? tripUpdate.getVehicle().getId() : "unknown";
+                    deduplicationKey = routeId + ":" + vehicleId;
                 }
                 
+                if (seenTripIds.contains(deduplicationKey)) {
+                    duplicateCount++;
+                    // Remove previous entry and add new one
+                    final String finalKey = deduplicationKey;
+                    processed.removeIf(tu -> {
+                        String existingKey;
+                        if (tu.getTrip().hasTripId() && !tu.getTrip().getTripId().isEmpty()) {
+                            existingKey = tu.getTrip().getTripId();
+                        } else {
+                            String existingRoute = tu.getTrip().getRouteId();
+                            String existingVehicle = tu.hasVehicle() ? tu.getVehicle().getId() : "unknown";
+                            existingKey = existingRoute + ":" + existingVehicle;
+                        }
+                        return existingKey.equals(finalKey);
+                    });
+                } else {
+                    seenTripIds.add(deduplicationKey);
+                }
+                
+                // Validate and normalize delays
+                GtfsRealtime.TripUpdate normalizedTripUpdate = validateAndNormalizeDelays(tripUpdate);
+                
                 // Add processed trip update
-                GtfsRealtime.TripUpdate enrichedTripUpdate = enrichTripUpdate(tripUpdate);
+                GtfsRealtime.TripUpdate enrichedTripUpdate = enrichTripUpdate(normalizedTripUpdate);
                 processed.add(enrichedTripUpdate);
                 
             } catch (Exception e) {
@@ -189,10 +211,13 @@ public class GTFSRTDataProcessor {
         }
         
         // Validate speed if present
-        if (pos.hasSpeed() && pos.getSpeed() > MAX_REASONABLE_SPEED) {
-            LOG.debug("Vehicle {} has unreasonable speed: {} mph", 
-                position.getVehicle().getId(), pos.getSpeed());
-            return false;
+        if (pos.hasSpeed()) {
+            float speed = pos.getSpeed();
+            if (speed < 0.0f || speed > MAX_REASONABLE_SPEED) {
+                LOG.debug("Vehicle {} has invalid speed: {} mph", 
+                    position.getVehicle().getId(), speed);
+                return false;
+            }
         }
         
         // Validate timestamp if present
@@ -214,41 +239,72 @@ public class GTFSRTDataProcessor {
      * Validate trip update data
      */
     private boolean isValidTripUpdate(GtfsRealtime.TripUpdate tripUpdate) {
-        // Must have trip descriptor
-        if (!tripUpdate.hasTrip() || !tripUpdate.getTrip().hasTripId() ||
-            tripUpdate.getTrip().getTripId().trim().isEmpty()) {
-            LOG.debug("Trip update missing trip ID");
+        // Must have trip descriptor with route ID at minimum
+        if (!tripUpdate.hasTrip() || !tripUpdate.getTrip().hasRouteId() ||
+            tripUpdate.getTrip().getRouteId().trim().isEmpty()) {
+            LOG.debug("Trip update missing route ID");
             return false;
         }
         
         // Must have at least one stop time update
         if (tripUpdate.getStopTimeUpdateCount() == 0) {
-            LOG.debug("Trip update {} has no stop time updates", tripUpdate.getTrip().getTripId());
+            String tripId = tripUpdate.getTrip().hasTripId() ? tripUpdate.getTrip().getTripId() : tripUpdate.getTrip().getRouteId();
+            LOG.debug("Trip update {} has no stop time updates", tripId);
             return false;
         }
         
-        // Validate delays are reasonable
+        // Delays will be validated and normalized in the processing step
+        
+        return true;
+    }
+    
+    /**
+     * Validate and normalize delays in trip updates
+     */
+    private GtfsRealtime.TripUpdate validateAndNormalizeDelays(GtfsRealtime.TripUpdate tripUpdate) {
+        GtfsRealtime.TripUpdate.Builder builder = GtfsRealtime.TripUpdate.newBuilder(tripUpdate);
+        List<GtfsRealtime.TripUpdate.StopTimeUpdate> validStopUpdates = new ArrayList<>();
+        
         for (GtfsRealtime.TripUpdate.StopTimeUpdate stopUpdate : tripUpdate.getStopTimeUpdateList()) {
+            GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopBuilder = 
+                GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder(stopUpdate);
+            
+            // Validate and cap arrival delay
             if (stopUpdate.hasArrival() && stopUpdate.getArrival().hasDelay()) {
                 int delay = stopUpdate.getArrival().getDelay();
                 if (Math.abs(delay) > MAX_DELAY_SECONDS) {
-                    LOG.debug("Trip {} has unreasonable delay: {} seconds", 
-                        tripUpdate.getTrip().getTripId(), delay);
-                    return false;
+                    LOG.debug("Trip {} arrival delay capped from {} to {} seconds", 
+                        tripUpdate.getTrip().getTripId(), delay, 
+                        delay > 0 ? MAX_DELAY_SECONDS : -MAX_DELAY_SECONDS);
+                    
+                    GtfsRealtime.TripUpdate.StopTimeEvent.Builder arrivalBuilder = 
+                        GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder(stopUpdate.getArrival());
+                    arrivalBuilder.setDelay(delay > 0 ? MAX_DELAY_SECONDS : -MAX_DELAY_SECONDS);
+                    stopBuilder.setArrival(arrivalBuilder.build());
                 }
             }
             
+            // Validate and cap departure delay
             if (stopUpdate.hasDeparture() && stopUpdate.getDeparture().hasDelay()) {
                 int delay = stopUpdate.getDeparture().getDelay();
                 if (Math.abs(delay) > MAX_DELAY_SECONDS) {
-                    LOG.debug("Trip {} has unreasonable delay: {} seconds", 
-                        tripUpdate.getTrip().getTripId(), delay);
-                    return false;
+                    LOG.debug("Trip {} departure delay capped from {} to {} seconds", 
+                        tripUpdate.getTrip().getTripId(), delay, 
+                        delay > 0 ? MAX_DELAY_SECONDS : -MAX_DELAY_SECONDS);
+                    
+                    GtfsRealtime.TripUpdate.StopTimeEvent.Builder departureBuilder = 
+                        GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder(stopUpdate.getDeparture());
+                    departureBuilder.setDelay(delay > 0 ? MAX_DELAY_SECONDS : -MAX_DELAY_SECONDS);
+                    stopBuilder.setDeparture(departureBuilder.build());
                 }
             }
+            
+            validStopUpdates.add(stopBuilder.build());
         }
         
-        return true;
+        builder.clearStopTimeUpdate();
+        builder.addAllStopTimeUpdate(validStopUpdates);
+        return builder.build();
     }
     
     /**
@@ -367,7 +423,7 @@ public class GTFSRTDataProcessor {
             return vehicleId;
         }
         
-        String normalized = vehicleId.trim().toUpperCase();
+        String normalized = vehicleId.trim();
         
         // Remove common prefixes
         if (normalized.startsWith("VEHICLE_") || normalized.startsWith("VEH_")) {

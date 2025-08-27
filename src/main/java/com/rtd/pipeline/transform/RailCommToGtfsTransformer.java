@@ -161,6 +161,12 @@ public class RailCommToGtfsTransformer {
                 return null;
             }
             
+            // Validate Colorado bounds
+            if (!isValidColoradoCoordinates((float) latitude, (float) longitude)) {
+                LOG.debug("Coordinates outside Colorado bounds for train {}: lat={}, lon={}", trainId, latitude, longitude);
+                return null;
+            }
+            
             // Build VehiclePosition
             GtfsRealtime.VehiclePosition.Builder builder = GtfsRealtime.VehiclePosition.newBuilder();
             
@@ -177,9 +183,12 @@ public class RailCommToGtfsTransformer {
             builder.setVehicle(vehicleBuilder.build());
             
             // Trip descriptor
-            if (tripId != null && !tripId.isEmpty()) {
+            if (tripId != null && !tripId.isEmpty() || routeId != null && !routeId.isEmpty()) {
                 GtfsRealtime.TripDescriptor.Builder tripBuilder = GtfsRealtime.TripDescriptor.newBuilder();
-                tripBuilder.setTripId(tripId);
+                
+                if (tripId != null && !tripId.isEmpty()) {
+                    tripBuilder.setTripId(tripId);
+                }
                 
                 if (routeId != null && !routeId.isEmpty()) {
                     tripBuilder.setRouteId(normalizeRouteId(routeId));
@@ -218,7 +227,12 @@ public class RailCommToGtfsTransformer {
             // Extract speed if available
             double speed = extractDouble(trainNode, "speed", "velocity");
             if (speed > 0) {
-                positionBuilder.setSpeed((float) speed);
+                // Validate speed is within reasonable bounds (0-100 mph)
+                if (speed <= 100.0) {
+                    positionBuilder.setSpeed((float) speed);
+                } else {
+                    LOG.debug("Speed {} exceeds reasonable bounds for train {}", speed, trainId);
+                }
             }
             
             builder.setPosition(positionBuilder.build());
@@ -256,16 +270,22 @@ public class RailCommToGtfsTransformer {
             String routeId = extractText(trainNode, "routeId", "route", "lineId");
             String tripId = extractText(trainNode, "tripId", "trip", "serviceId");
             
-            if (trainId == null || tripId == null) {
-                return null; // Need both for trip update
+            if (trainId == null) {
+                return null; // Need at least vehicle ID for trip update
             }
             
             // Look for delay information
             double delaySeconds = extractDouble(trainNode, "delay", "delaySeconds", "scheduleDeviation");
             String scheduleAdherence = extractText(trainNode, "scheduleAdherence", "adherence", "onTime");
             
-            // Skip if no delay information
-            if (delaySeconds == 0 && (scheduleAdherence == null || "ON_TIME".equalsIgnoreCase(scheduleAdherence))) {
+            // Check for timing information as alternative to delay
+            String arrivalTime = extractText(trainNode, "arrivalTime", "nextArrival", "estimatedArrival");
+            String departureTime = extractText(trainNode, "departureTime", "nextDeparture", "estimatedDeparture");
+            String nextStopId = extractText(trainNode, "nextStopId", "currentStopId", "stopId");
+            
+            // Skip if no meaningful timing or delay information
+            if (delaySeconds == 0 && (scheduleAdherence == null || "ON_TIME".equalsIgnoreCase(scheduleAdherence)) && 
+                arrivalTime == null && departureTime == null && nextStopId == null) {
                 return null;
             }
             
@@ -274,7 +294,9 @@ public class RailCommToGtfsTransformer {
             
             // Trip descriptor
             GtfsRealtime.TripDescriptor.Builder tripBuilder = GtfsRealtime.TripDescriptor.newBuilder();
-            tripBuilder.setTripId(tripId);
+            if (tripId != null && !tripId.isEmpty()) {
+                tripBuilder.setTripId(tripId);
+            }
             if (routeId != null && !routeId.isEmpty()) {
                 tripBuilder.setRouteId(normalizeRouteId(routeId));
             }
@@ -295,18 +317,40 @@ public class RailCommToGtfsTransformer {
                         builder.addStopTimeUpdate(stopTimeUpdate);
                     }
                 }
-            } else if (delaySeconds != 0) {
-                // Create generic delay update
+            } else {
+                // Create stop time update with available timing information
                 GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeBuilder = 
                     GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
                 
-                String currentStopId = extractText(trainNode, "currentStopId", "nextStopId", "stopId");
-                if (currentStopId != null && !currentStopId.isEmpty()) {
-                    stopTimeBuilder.setStopId(currentStopId);
+                if (nextStopId != null && !nextStopId.isEmpty()) {
+                    stopTimeBuilder.setStopId(nextStopId);
                 }
                 
-                // Add delay to both arrival and departure
-                if (delaySeconds != 0) {
+                // Add timing information
+                if (arrivalTime != null) {
+                    long arrivalTimeSeconds = parseTimestamp(arrivalTime) / 1000;
+                    GtfsRealtime.TripUpdate.StopTimeEvent.Builder arrivalBuilder = 
+                        GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();
+                    arrivalBuilder.setTime(arrivalTimeSeconds);
+                    if (delaySeconds != 0) {
+                        arrivalBuilder.setDelay((int) delaySeconds);
+                    }
+                    stopTimeBuilder.setArrival(arrivalBuilder.build());
+                }
+                
+                if (departureTime != null) {
+                    long departureTimeSeconds = parseTimestamp(departureTime) / 1000;
+                    GtfsRealtime.TripUpdate.StopTimeEvent.Builder departureBuilder = 
+                        GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();
+                    departureBuilder.setTime(departureTimeSeconds);
+                    if (delaySeconds != 0) {
+                        departureBuilder.setDelay((int) delaySeconds);
+                    }
+                    stopTimeBuilder.setDeparture(departureBuilder.build());
+                }
+                
+                // If we only have delay, add it to both arrival and departure
+                if (arrivalTime == null && departureTime == null && delaySeconds != 0) {
                     GtfsRealtime.TripUpdate.StopTimeEvent.Builder arrivalBuilder = 
                         GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();
                     arrivalBuilder.setDelay((int) delaySeconds);
@@ -456,19 +500,50 @@ public class RailCommToGtfsTransformer {
         // Normalize to standard RTD light rail route format
         String normalized = routeId.toUpperCase().trim();
         
-        // Handle common variations
+        // Handle common variations and patterns
         if (normalized.startsWith("LINE_") || normalized.startsWith("ROUTE_")) {
             normalized = normalized.substring(normalized.indexOf("_") + 1);
         }
         
-        // Ensure it's a valid light rail route
+        // Handle "Light Rail X Line" patterns
+        if (normalized.startsWith("LIGHT RAIL ") && normalized.endsWith(" LINE")) {
+            String middle = normalized.substring(11, normalized.length() - 5).trim();
+            for (String validRoute : LIGHT_RAIL_ROUTES) {
+                if (middle.equals(validRoute)) {
+                    return validRoute;
+                }
+            }
+        }
+        
+        // Handle "X-Line" or "X-LINE" patterns
+        if (normalized.endsWith("-LINE")) {
+            String prefix = normalized.substring(0, normalized.length() - 5).trim();
+            for (String validRoute : LIGHT_RAIL_ROUTES) {
+                if (prefix.equals(validRoute)) {
+                    return validRoute;
+                }
+            }
+        }
+        
+        // Check if it exactly matches or contains a valid light rail route
         for (String validRoute : LIGHT_RAIL_ROUTES) {
-            if (normalized.equals(validRoute) || normalized.contains(validRoute)) {
+            if (normalized.equals(validRoute)) {
+                return validRoute;
+            }
+            // Check if the normalized string contains the route letter
+            if (normalized.contains(" " + validRoute + " ") || 
+                normalized.contains(" " + validRoute) ||
+                normalized.contains(validRoute + " ")) {
                 return validRoute;
             }
         }
         
         return normalized;
+    }
+    
+    private boolean isValidColoradoCoordinates(float latitude, float longitude) {
+        // Colorado approximate bounds
+        return latitude >= 39.0f && latitude <= 41.0f && longitude >= -106.0f && longitude <= -104.0f;
     }
     
     private long parseTimestamp(String timestamp) {

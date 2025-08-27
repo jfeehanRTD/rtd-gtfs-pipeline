@@ -52,6 +52,7 @@ class GTFSRTPipelineIntegrationTest {
         List<GtfsRealtime.TripUpdate> processedTripUpdates = dataProcessor.processTripUpdates(rawTripUpdates);
         List<GtfsRealtime.Alert> processedAlerts = dataProcessor.processAlerts(new ArrayList<>());
 
+
         assertFalse(processedVehiclePositions.isEmpty(), "Should process vehicle positions");
         assertFalse(processedTripUpdates.isEmpty(), "Should process trip updates");
 
@@ -133,6 +134,7 @@ class GTFSRTPipelineIntegrationTest {
         List<GtfsRealtime.TripUpdate> processedTripUpdates = dataProcessor.processTripUpdates(combinedTripUpdates);
         List<GtfsRealtime.Alert> processedAlerts = dataProcessor.processAlerts(new ArrayList<>());
 
+
         assertEquals(2, processedVehiclePositions.size(), "Should process both SIRI and RailComm vehicle positions");
         assertEquals(2, processedTripUpdates.size(), "Should process both SIRI and RailComm trip updates");
 
@@ -211,14 +213,22 @@ class GTFSRTPipelineIntegrationTest {
     }
 
     private String createValidSiriPayload() {
+        // Use current time to avoid stale timestamp issues
+        long currentTimeMs = System.currentTimeMillis();
+        java.time.Instant now = java.time.Instant.ofEpochMilli(currentTimeMs);
+        java.time.Instant future = now.plus(java.time.Duration.ofMinutes(15));
+        java.time.Instant futureDeparture = now.plus(java.time.Duration.ofMinutes(16));
+        
         return """
             <?xml version="1.0"?>
             <Siri version="2.0">
               <ServiceDelivery>
                 <VehicleMonitoringDelivery>
                   <VehicleActivity>
-                    <RecordedAtTime>2025-01-01T10:00:00Z</RecordedAtTime>
-                    <ValidUntilTime>2025-01-01T10:05:00Z</ValidUntilTime>
+                    <RecordedAtTime>""" + now.toString() + """
+</RecordedAtTime>
+                    <ValidUntilTime>""" + future.toString() + """
+</ValidUntilTime>
                     <MonitoredVehicleJourney>
                       <LineRef>15</LineRef>
                       <VehicleRef>bus-1234</VehicleRef>
@@ -231,8 +241,10 @@ class GTFSRTPipelineIntegrationTest {
                       <InPanic>false</InPanic>
                       <MonitoredCall>
                         <StopPointRef>stop-001</StopPointRef>
-                        <ExpectedArrivalTime>2025-01-01T10:15:00Z</ExpectedArrivalTime>
-                        <ExpectedDepartureTime>2025-01-01T10:16:00Z</ExpectedDepartureTime>
+                        <ExpectedArrivalTime>""" + future.toString() + """
+</ExpectedArrivalTime>
+                        <ExpectedDepartureTime>""" + futureDeparture.toString() + """
+</ExpectedDepartureTime>
                       </MonitoredCall>
                     </MonitoredVehicleJourney>
                   </VehicleActivity>
@@ -243,6 +255,11 @@ class GTFSRTPipelineIntegrationTest {
     }
 
     private String createValidRailCommPayload() {
+        // Use current time to avoid stale timestamp issues  
+        java.time.Instant now = java.time.Instant.ofEpochMilli(System.currentTimeMillis());
+        java.time.Instant future = now.plus(java.time.Duration.ofMinutes(15));
+        java.time.Instant futureDeparture = now.plus(java.time.Duration.ofMinutes(16));
+        
         return """
             {
               "trains": [
@@ -253,10 +270,13 @@ class GTFSRTPipelineIntegrationTest {
                   "longitude": -105.0000,
                   "speed": 25.0,
                   "heading": 180.0,
-                  "timestamp": "2025-01-01T11:00:00Z",
+                  "timestamp": \"""" + now.toString() + """
+",
                   "nextStopId": "A01",
-                  "arrivalTime": "2025-01-01T11:15:00Z",
-                  "departureTime": "2025-01-01T11:16:00Z",
+                  "arrivalTime": \"""" + future.toString() + """
+",
+                  "departureTime": \"""" + futureDeparture.toString() + """
+",
                   "delay": 120
                 }
               ]

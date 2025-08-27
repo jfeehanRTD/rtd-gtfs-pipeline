@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("RTD GTFS-RT Feed Comparison Tests")
 class RTDFeedComparisonTest {
 
-    private static final String RTD_VEHICLE_POSITIONS_URL = "https://www.rtd-denver.com/files/gtfs-rt/VehiclePosition.pb";
-    private static final String RTD_TRIP_UPDATES_URL = "https://www.rtd-denver.com/files/gtfs-rt/TripUpdate.pb";
+    private static final String RTD_VEHICLE_POSITIONS_URL = "https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/VehiclePosition.pb";
+    private static final String RTD_TRIP_UPDATES_URL = "https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/TripUpdate.pb";
     
     private static final String LOCAL_GTFS_RT_DIR = "data/gtfs-rt";
     private static final String LOCAL_VEHICLE_POSITIONS_FILE = "VehiclePosition.pb";
@@ -47,7 +47,7 @@ class RTDFeedComparisonTest {
 
     @Test
     @DisplayName("Should compare vehicle positions feeds")
-    @EnabledIf("isNetworkAvailable")
+    @EnabledIf("areTestConditionsMet")
     void shouldCompareVehiclePositionsFeeds() throws Exception {
         System.out.println("🚌 Comparing Vehicle Positions feeds...");
         
@@ -81,7 +81,7 @@ class RTDFeedComparisonTest {
 
     @Test
     @DisplayName("Should compare trip updates feeds")
-    @EnabledIf("isNetworkAvailable") 
+    @EnabledIf("areTestConditionsMet")
     void shouldCompareTripUpdatesFeeds() throws Exception {
         System.out.println("🚊 Comparing Trip Updates feeds...");
         
@@ -109,7 +109,7 @@ class RTDFeedComparisonTest {
 
     @Test
     @DisplayName("Should analyze data coverage overlap")
-    @EnabledIf("isNetworkAvailable")
+    @EnabledIf("areTestConditionsMet")
     void shouldAnalyzeDataCoverageOverlap() throws Exception {
         System.out.println("🔍 Analyzing data coverage overlap...");
         
@@ -136,7 +136,7 @@ class RTDFeedComparisonTest {
 
     @Test
     @DisplayName("Should validate feed structure compatibility")
-    @EnabledIf("isNetworkAvailable")
+    @EnabledIf("areTestConditionsMet")
     void shouldValidateFeedStructureCompatibility() throws Exception {
         System.out.println("🏗️ Validating feed structure compatibility...");
         
@@ -445,7 +445,7 @@ class RTDFeedComparisonTest {
     // Helper method to check if network is available for conditional test execution
     static boolean isNetworkAvailable() {
         try {
-            URL url = new URL("https://www.rtd-denver.com");
+            URL url = new URL("https://nodejs-prod.rtd-denver.com");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(5000);
@@ -457,6 +457,25 @@ class RTDFeedComparisonTest {
             System.out.println("⚠️ Network not available, skipping online comparison tests: " + e.getMessage());
             return false;
         }
+    }
+    
+    // Helper method to check if local GTFS-RT files are available
+    static boolean areLocalFeedsAvailable() {
+        Path gtfsRtDir = Paths.get(LOCAL_GTFS_RT_DIR);
+        Path vehiclePositionsPath = gtfsRtDir.resolve(LOCAL_VEHICLE_POSITIONS_FILE);
+        Path tripUpdatesPath = gtfsRtDir.resolve(LOCAL_TRIP_UPDATES_FILE);
+        
+        boolean available = Files.exists(vehiclePositionsPath) && Files.exists(tripUpdatesPath);
+        if (!available) {
+            System.out.println("⚠️ Local GTFS-RT files not found, skipping comparison tests");
+            System.out.println("💡 Run the GTFS-RT pipeline first: ./rtd-control.sh gtfs-rt all");
+        }
+        return available;
+    }
+    
+    // Helper method to check if all test conditions are met
+    static boolean areTestConditionsMet() {
+        return isNetworkAvailable() && areLocalFeedsAvailable();
     }
 
     // Data structures for comparison results
