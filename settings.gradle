@@ -1,1 +1,40 @@
+// RTD GTFS Pipeline - Multi-Project Configuration
 rootProject.name = 'rtd-gtfs-pipeline'
+
+// =====================================
+// RTD SERVICE MODULES (Phase 3)
+// =====================================
+
+// Main Java pipeline and services (current structure is root project)
+
+// Web application
+include 'rtd-webapp'
+
+// =====================================
+// PROJECT DIRECTORY MAPPING
+// =====================================
+
+// Map logical project names to actual directories  
+project(':rtd-webapp').projectDir = file('rtd-maps-app')
+
+// =====================================
+// VERSION CATALOGS (Centralized Dependencies)
+// =====================================
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            library('flink-core', 'org.apache.flink', 'flink-core').version('2.1.0')
+            library('flink-streaming', 'org.apache.flink', 'flink-streaming-java').version('2.1.0')
+            library('flink-kafka', 'org.apache.flink', 'flink-connector-kafka').version('4.0.0-2.0')
+            library('kafka-clients', 'org.apache.kafka', 'kafka-clients').version('4.0.0')
+            library('jackson-core', 'com.fasterxml.jackson.core', 'jackson-core').version('2.18.1')
+            library('jackson-databind', 'com.fasterxml.jackson.core', 'jackson-databind').version('2.18.1')
+            library('spring-boot-starter', 'org.springframework.boot', 'spring-boot-starter').version('3.4.1')
+            library('spring-boot-web', 'org.springframework.boot', 'spring-boot-starter-web').version('3.4.1')
+            library('junit-jupiter', 'org.junit.jupiter', 'junit-jupiter').version('5.11.0')
+            library('slf4j-api', 'org.slf4j', 'slf4j-api').version('2.0.16')
+            library('log4j-core', 'org.apache.logging.log4j', 'log4j-core').version('2.24.3')
+        }
+    }
+}

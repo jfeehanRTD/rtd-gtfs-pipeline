@@ -269,6 +269,8 @@
                     <compilerArgs>
                         <arg>--add-opens=java.base/sun.nio.ch=ALL-UNNAMED</arg>
                         <arg>--add-opens=java.base/java.io=ALL-UNNAMED</arg>
+                        <arg>--add-opens=java.base/sun.misc=ALL-UNNAMED</arg>
+                        <arg>--add-opens=java.base/java.lang=ALL-UNNAMED</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
@@ -462,7 +464,12 @@
                         --add-opens java.base/java.util=ALL-UNNAMED
                         --add-opens java.base/java.util.concurrent=ALL-UNNAMED
                         --add-opens java.base/java.net=ALL-UNNAMED
+                        --add-opens java.base/java.util.concurrent.atomic=ALL-UNNAMED
+                        --add-opens java.base/java.security=ALL-UNNAMED
+                        --enable-native-access=ALL-UNNAMED
                         -XX:+IgnoreUnrecognizedVMOptions
+                        -Xmx4g
+                        -Xms1g
                         -Djava.util.logging.config.file=logging.properties
                     </argLine>
                     <redirectTestOutputToFile>false</redirectTestOutputToFile>
@@ -481,12 +488,31 @@
                 <version>3.1.0</version>
                 <configuration>
                     <options>
+                        <!-- Java Module System Warnings Fix -->
                         <option>--add-opens=java.base/sun.misc=ALL-UNNAMED</option>
                         <option>--add-opens=java.base/java.nio=ALL-UNNAMED</option>
                         <option>--add-opens=java.base/sun.nio.ch=ALL-UNNAMED</option>
                         <option>--add-opens=java.base/java.io=ALL-UNNAMED</option>
+                        <option>--add-opens=java.base/java.lang=ALL-UNNAMED</option>
+                        <option>--add-opens=java.base/java.lang.reflect=ALL-UNNAMED</option>
+                        <option>--add-opens=java.base/java.util=ALL-UNNAMED</option>
+                        <option>--add-opens=java.base/java.util.concurrent=ALL-UNNAMED</option>
+                        <option>--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED</option>
+                        <option>--add-opens=java.base/java.net=ALL-UNNAMED</option>
+                        <option>--add-opens=java.base/java.security=ALL-UNNAMED</option>
+                        <!-- Enable native access for Gradle and native libraries -->
+                        <option>--enable-native-access=ALL-UNNAMED</option>
+                        <!-- Memory and timeout settings -->
+                        <option>-Xmx4g</option>
+                        <option>-Xms1g</option>
+                        <option>-XX:+UseG1GC</option>
+                        <option>-XX:MaxGCPauseMillis=200</option>
+                        <!-- Disable deprecation warnings for cleaner output -->
+                        <option>-XX:+UnlockExperimentalVMOptions</option>
+                        <option>-XX:+IgnoreUnrecognizedVMOptions</option>
                     </options>
                     <classpathScope>compile</classpathScope>
+                    <commandlineArgs>-Djava.awt.headless=true</commandlineArgs>
                 </configuration>
             </plugin>
         </plugins>

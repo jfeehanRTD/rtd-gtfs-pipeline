@@ -1,0 +1,213 @@
+// RTD React Web Application - Gradle Build Configuration
+plugins {
+    id 'base'
+    id 'com.github.node-gradle.node' version '7.0.2'
+}
+
+description = 'RTD Maps Web Application - React/TypeScript Dashboard'
+
+// =====================================
+// NODE.JS CONFIGURATION  
+// =====================================
+
+node {
+    version = '20.18.0'
+    npmVersion = '10.8.2'
+    download = true
+    
+    // Use local node_modules if available
+    nodeProjectDir = file('.')
+}
+
+// =====================================
+// RTD WEBAPP TASKS
+// =====================================
+
+task npmInstallDeps(type: NpmTask) {
+    group = 'rtd-webapp'
+    description = 'Install React app dependencies'
+    args = ['install']
+    inputs.file('package.json')
+    inputs.file('package-lock.json')
+    outputs.dir('node_modules')
+}
+
+task buildReact(type: NpmTask) {
+    group = 'rtd-webapp'
+    description = 'Build React application for production'
+    dependsOn npmInstallDeps
+    args = ['run', 'build']
+    inputs.dir('src')
+    inputs.file('package.json')
+    inputs.file('tsconfig.json')
+    inputs.file('vite.config.ts')
+    outputs.dir('dist')
+}
+
+task testReact(type: NpmTask) {
+    group = 'rtd-webapp'
+    description = 'Run React Playwright tests'
+    dependsOn npmInstallDeps
+    args = ['test']
+    inputs.dir('src')
+    inputs.dir('tests')
+    inputs.file('playwright.config.ts')
+}
+
+task startReactDev(type: NpmTask) {
+    group = 'rtd-webapp'
+    description = 'Start React development server'
+    dependsOn npmInstallDeps
+    args = ['start']
+}
+
+task lintReact(type: NpmTask) {
+    group = 'rtd-webapp' 
+    description = 'Lint React TypeScript code'
+    dependsOn npmInstallDeps
+    args = ['run', 'lint']
+    inputs.dir('src')
+    inputs.file('.eslintrc.js')
+}
+
+task previewReact(type: NpmTask) {
+    group = 'rtd-webapp'
+    description = 'Preview production React build'
+    dependsOn buildReact
+    args = ['run', 'preview']
+}
+
+// =====================================
+// RTD-SPECIFIC WEBAPP TASKS
+// =====================================
+
+task testLRGPSIntegration(type: NpmTask) {
+    group = 'rtd-webapp'
+    description = 'Run LRGPS-specific integration tests'
+    dependsOn npmInstallDeps
+    args = ['run', 'test', 'tests/lrgps-functionality.spec.ts']
+}
+
+task testAdminDashboard(type: NpmTask) {
+    group = 'rtd-webapp'
+    description = 'Run admin dashboard tests'
+    dependsOn npmInstallDeps
+    args = ['run', 'test', 'tests/example.spec.ts']
+}
+
+task testDataSourceSeparation(type: NpmTask) {
+    group = 'rtd-webapp' 
+    description = 'Run data source separation tests'
+    dependsOn npmInstallDeps
+    args = ['run', 'test', 'tests/data-source-separation.spec.ts']
+}
+
+task checkWebapp {
+    group = 'rtd-webapp'
+    description = 'Check if React webapp is running (port 3000)'
+    doLast {
+        try {
+            def url = new URL('http://localhost:3000')
+            def connection = url.openConnection()
+            connection.requestMethod = 'GET'
+            connection.connectTimeout = 3000
+            connection.readTimeout = 3000
+            def response = connection.responseCode
+            if (response == 200) {
+                println '✅ RTD React Dashboard (3000): RUNNING'
+            } else {
+                println "⚠️ RTD React Dashboard (3000): HTTP ${response}"
+            }
+        } catch (Exception e) {
+            println '❌ RTD React Dashboard (3000): STOPPED'
+        }
+    }
+}
+
+// =====================================
+// INTEGRATION WITH ROOT PROJECT
+// =====================================
+
+// Make React build part of main build process
+build.dependsOn buildReact
+check.dependsOn testReact
+
+// Clean task
+clean {
+    delete 'dist'
+    delete 'node_modules'
+    delete '.vite'
+    delete 'test-results'
+    delete 'playwright-report'
+}
+
+// =====================================
+// ARTIFACT PUBLISHING (Optional)
+// =====================================
+
+task packageWebapp(type: Tar) {
+    group = 'rtd-webapp'
+    description = 'Package built React webapp for deployment'
+    dependsOn buildReact
+    
+    archiveFileName = "rtd-webapp-${project.version}.tar.gz"
+    compression = Compression.GZIP
+    
+    from('dist') {
+        into 'webapp'
+    }
+    from('package.json')
+    
+    destinationDirectory = file("${rootProject.projectDir}/build/distributions")
+}
+
+// =====================================
+// DEVELOPMENT WORKFLOW TASKS
+// =====================================
+
+task dev {
+    group = 'rtd-webapp'
+    description = 'Full development setup: install deps + start dev server'
+    dependsOn npmInstallDeps, startReactDev
+}
+
+task ci {
+    group = 'rtd-webapp'
+    description = 'Continuous integration: build + test + lint'
+    dependsOn buildReact, testReact, lintReact
+}
+
+task webappHelp {
+    group = 'rtd-webapp'
+    description = 'Show RTD webapp-specific Gradle tasks'
+    doLast {
+        println '''
+=== RTD React Web Application - Gradle Tasks ===
+
+🚀 Development:
+  gradle :rtd-webapp:dev              - Install deps + start dev server
+  gradle :rtd-webapp:startReactDev    - Start React dev server (port 3000)
+  gradle :rtd-webapp:buildReact       - Build for production
+  gradle :rtd-webapp:previewReact     - Preview production build
+
+🧪 Testing:
+  gradle :rtd-webapp:testReact              - Run all Playwright tests
+  gradle :rtd-webapp:testLRGPSIntegration   - Test LRGPS functionality
+  gradle :rtd-webapp:testAdminDashboard     - Test admin dashboard
+  gradle :rtd-webapp:testDataSourceSeparation - Test data source separation
+
+🔧 Quality:  
+  gradle :rtd-webapp:lintReact        - Lint TypeScript code
+  gradle :rtd-webapp:checkWebapp      - Check if webapp is running
+
+📦 Packaging:
+  gradle :rtd-webapp:packageWebapp    - Package webapp for deployment
+  gradle :rtd-webapp:ci               - Full CI pipeline (build+test+lint)
+
+💡 Examples:
+  gradle :rtd-webapp:dev                    # Start development
+  gradle build                             # Build entire project (Java + React)
+  gradle :rtd-webapp:testLRGPSIntegration  # Test LRGPS features
+        '''
+    }
+}

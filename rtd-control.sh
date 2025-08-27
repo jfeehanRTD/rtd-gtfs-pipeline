@@ -822,7 +822,7 @@ main() {
                 "pipeline")
                     print_status "Starting RTD GTFS-RT Generation Pipeline..."
                     if ! check_process "WorkingGTFSRTPipeline"; then
-                        MAVEN_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.misc=ALL-UNNAMED" \
+                        MAVEN_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.misc=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.util.concurrent=ALL-UNNAMED --add-opens java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED --enable-native-access=ALL-UNNAMED -Xmx4g -Xms1g -XX:+UseG1GC -XX:+IgnoreUnrecognizedVMOptions" \
                         mvn exec:java -Dexec.mainClass="com.rtd.pipeline.WorkingGTFSRTPipeline"
                     else
                         print_warning "GTFS-RT pipeline is already running"

@@ -195,6 +195,285 @@ test {
     systemProperty 'junit.jupiter.execution.parallel.enabled', 'false'
 }
 
+// ========================================
+// RTD SERVICE-SPECIFIC TASKS
+// ========================================
+
+// LRGPS Service Tasks
+task startLRGPS(type: JavaExec) {
+    group = 'rtd-services'
+    description = 'Start LRGPS HTTP Receiver service'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.LRGPSHTTPReceiver'
+    jvmArgs = [
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.nio=ALL-UNNAMED'
+    ]
+}
+
+task testLRGPS(type: JavaExec) {
+    group = 'rtd-services'  
+    description = 'Test LRGPS service with sample data'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.LRGPSHTTPReceiver'
+    args = ['http://localhost:8083', 'lrgps', '90000']
+}
+
+// Bus SIRI Service Tasks
+task startSIRI(type: JavaExec) {
+    group = 'rtd-services'
+    description = 'Start Bus SIRI HTTP Receiver service'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.BusCommHTTPReceiver'
+    jvmArgs = [
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED'
+    ]
+}
+
+// Rail Communication Service Tasks  
+task startRailComm(type: JavaExec) {
+    group = 'rtd-services'
+    description = 'Start Rail Communication HTTP Receiver service'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.RailCommHTTPReceiver'
+    jvmArgs = [
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED'
+    ]
+}
+
+// GTFS-RT Pipeline Tasks
+task runGTFSRTPipeline(type: JavaExec) {
+    group = 'rtd-pipelines'
+    description = 'Run Working GTFS-RT Generation Pipeline'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.WorkingGTFSRTPipeline'
+    jvmArgs = [
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.nio=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.misc=ALL-UNNAMED'
+    ]
+}
+
+task runStaticPipeline(type: JavaExec) {
+    group = 'rtd-pipelines'
+    description = 'Run RTD Static Data Pipeline'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.RTDStaticDataPipeline'
+}
+
+// API Server Tasks
+task runAPIServer(type: JavaExec) {
+    group = 'rtd-services'
+    description = 'Run RTD API Application (Spring Boot)'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.RTDApiApplication'
+}
+
+// ========================================
+// RTD UTILITY TASKS
+// ========================================
+
+task checkServices {
+    group = 'rtd-utilities'
+    description = 'Check status of all RTD services'
+    doLast {
+        println '=== RTD Service Status Check ==='
+        
+        // Check LRGPS (port 8083)
+        try {
+            def lrgpsUrl = new URL('http://localhost:8083/health')
+            def lrgpsConnection = lrgpsUrl.openConnection()
+            lrgpsConnection.requestMethod = 'GET'
+            lrgpsConnection.connectTimeout = 3000
+            lrgpsConnection.readTimeout = 3000
+            def lrgpsResponse = lrgpsConnection.responseCode
+            println "✅ LRGPS Service (8083): ${lrgpsResponse == 200 ? 'RUNNING' : 'ERROR (' + lrgpsResponse + ')'}"
+        } catch (Exception e) {
+            println "❌ LRGPS Service (8083): STOPPED"
+        }
+        
+        // Check SIRI (port 8082)
+        try {
+            def siriUrl = new URL('http://localhost:8082/health')
+            def siriConnection = siriUrl.openConnection()
+            siriConnection.requestMethod = 'GET'
+            siriConnection.connectTimeout = 3000
+            siriConnection.readTimeout = 3000
+            def siriResponse = siriConnection.responseCode
+            println "✅ Bus SIRI Service (8082): ${siriResponse == 200 ? 'RUNNING' : 'ERROR (' + siriResponse + ')'}"
+        } catch (Exception e) {
+            println "❌ Bus SIRI Service (8082): STOPPED"
+        }
+        
+        // Check Rail Comm (port 8081)
+        try {
+            def railUrl = new URL('http://localhost:8081/health')
+            def railConnection = railUrl.openConnection()
+            railConnection.requestMethod = 'GET'
+            railConnection.connectTimeout = 3000
+            railConnection.readTimeout = 3000
+            def railResponse = railConnection.responseCode
+            println "✅ Rail Communication Service (8081): ${railResponse == 200 ? 'RUNNING' : 'ERROR (' + railResponse + ')'}"
+        } catch (Exception e) {
+            println "❌ Rail Communication Service (8081): STOPPED"
+        }
+        
+        // Check React App (port 3000)
+        try {
+            def reactUrl = new URL('http://localhost:3000')
+            def reactConnection = reactUrl.openConnection()
+            reactConnection.requestMethod = 'GET'
+            reactConnection.connectTimeout = 3000
+            reactConnection.readTimeout = 3000
+            def reactResponse = reactConnection.responseCode
+            println "✅ React Dashboard (3000): ${reactResponse == 200 ? 'RUNNING' : 'ERROR (' + reactResponse + ')'}"
+        } catch (Exception e) {
+            println "❌ React Dashboard (3000): STOPPED"
+        }
+    }
+}
+
+// ========================================
+// MULTI-PROJECT ORCHESTRATION TASKS
+// ========================================
+
+task buildAll {
+    group = 'rtd-orchestration'
+    description = 'Build entire RTD system (Java pipeline + React webapp)'
+    dependsOn 'build', ':rtd-webapp:buildReact'
+}
+
+task testAll {
+    group = 'rtd-orchestration' 
+    description = 'Run all tests (Java + React Playwright)'
+    dependsOn 'test', ':rtd-webapp:testReact'
+}
+
+task cleanAll {
+    group = 'rtd-orchestration'
+    description = 'Clean all build artifacts (Java + React)'
+    dependsOn 'cleanRTD', ':rtd-webapp:clean'
+}
+
+task checkAllServices {
+    group = 'rtd-orchestration'
+    description = 'Check status of all RTD services including webapp'
+    dependsOn 'checkServices', ':rtd-webapp:checkWebapp'
+}
+
+task startFullSystem {
+    group = 'rtd-orchestration'
+    description = 'Start complete RTD system (build + services + webapp)'
+    dependsOn buildAll
+    doLast {
+        println '''
+🚀 RTD System Starting...
+
+To complete system startup, run these in separate terminals:
+1. gradle startLRGPS           # LRGPS service (port 8083)
+2. gradle startSIRI            # Bus SIRI service (port 8082) 
+3. gradle startRailComm        # Rail communication (port 8081)
+4. gradle :rtd-webapp:dev      # React dashboard (port 3000)
+5. gradle runGTFSRTPipeline    # GTFS-RT generation pipeline
+
+Then check status: gradle checkAllServices
+        '''
+    }
+}
+
+task deployRTD {
+    group = 'rtd-orchestration'
+    description = 'Full RTD deployment: build + test + package'
+    dependsOn buildAll, testAll, ':rtd-webapp:packageWebapp'
+    doLast {
+        println '✅ RTD system ready for deployment'
+        println "📦 Webapp package: ${rootProject.projectDir}/build/distributions/"
+        println "🚀 Java artifacts: ${rootProject.projectDir}/target/"
+    }
+}
+
+task rtdHelp {
+    group = 'rtd-utilities'
+    description = 'Show RTD-specific Gradle tasks'
+    doLast {
+        println '''
+=== RTD GTFS Pipeline - Gradle Multi-Project Tasks ===
+
+🎯 Multi-Project Orchestration:
+  gradle buildAll         - Build entire RTD system (Java + React)
+  gradle testAll          - Run all tests (Java + React Playwright)
+  gradle cleanAll         - Clean all build artifacts
+  gradle checkAllServices - Check status of all RTD services
+  gradle startFullSystem  - Build + show startup instructions
+  gradle deployRTD        - Full deployment pipeline
+
+🚀 RTD Backend Services:
+  gradle startLRGPS       - Start LRGPS HTTP Receiver (port 8083)
+  gradle startSIRI        - Start Bus SIRI HTTP Receiver (port 8082) 
+  gradle startRailComm    - Start Rail Communication Receiver (port 8081)
+  gradle runAPIServer     - Start RTD API Server (Spring Boot)
+
+🔄 RTD Pipelines:
+  gradle runGTFSRTPipeline  - Run Working GTFS-RT Generation Pipeline
+  gradle runStaticPipeline  - Run RTD Static Data Pipeline
+
+🌐 RTD Frontend (React):
+  gradle :rtd-webapp:dev              - Start React dev server (port 3000)
+  gradle :rtd-webapp:buildReact       - Build React for production
+  gradle :rtd-webapp:testLRGPSIntegration - Test LRGPS functionality
+  gradle :rtd-webapp:webappHelp       - Show React-specific tasks
+
+🛠️ RTD Utilities:
+  gradle checkServices    - Check backend service status
+  gradle rtdHelp         - Show this help message
+
+💡 Quick Examples:
+  gradle buildAll                        # Build everything
+  gradle testAll                         # Test everything  
+  gradle checkAllServices               # Check all services
+  gradle startLRGPS                     # Start LRGPS service
+  gradle :rtd-webapp:testLRGPSIntegration # Test LRGPS integration
+
+📚 Help:
+  gradle tasks --group rtd-orchestration # Show orchestration tasks
+  gradle tasks --group rtd-services      # Show service tasks  
+  gradle :rtd-webapp:webappHelp          # Show React tasks
+        '''
+    }
+}
+
+// ========================================
+// BUILD OPTIMIZATION
+// ========================================
+
+// Parallel build optimization
+tasks.withType(JavaCompile).configureEach {
+    options.fork = true
+    options.forkOptions.jvmArgs += [
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED'
+    ]
+}
+
+// Custom clean task for RTD-specific artifacts
+task cleanRTD {
+    group = 'rtd-utilities'
+    description = 'Clean RTD-specific build artifacts and logs'
+    doLast {
+        delete fileTree('.') { include '*.log' }
+        delete 'data/gtfs-rt'
+        delete 'data/vehicles'  
+        delete 'data/schedule'
+        println 'Cleaned RTD logs and data directories'
+    }
+}
+
+clean.dependsOn cleanRTD
+
 // Wrapper configuration
 wrapper {
     gradleVersion = '8.14'
