@@ -691,8 +691,6 @@ public class RTDStaticDataPipeline {
         }
         
         private String getMetricsJson() {
-            // Create a basic metrics response
-            // This would be enhanced to get real metrics from the MetricsRecorder
             long currentTime = System.currentTimeMillis();
             long uptime = currentTime - lastUpdateTime.get();
             
@@ -700,83 +698,72 @@ public class RTDStaticDataPipeline {
                 .atZone(ZoneId.systemDefault())
                 .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
             
+            // Return empty metrics structure - real metrics should come from FeedMetricsController
             return String.format("""
                 {
                   "feeds": {
                     "siri": {
                       "feed_name": "SIRI Bus Feed",
-                      "health_status": "healthy",
-                      "last_message": "%s",
+                      "health_status": "waiting",
+                      "last_message": null,
                       "last_5s": {
-                        "messages": 12,
-                        "connections": 1,
+                        "messages": 0,
+                        "connections": 0,
                         "errors": 0,
                         "interval_seconds": 5
                       },
                       "totals": {
-                        "messages": 1440,
-                        "connections": 24,
+                        "messages": 0,
+                        "connections": 0,
                         "errors": 0,
                         "uptime_seconds": %d,
-                        "avg_messages_per_min": 60,
-                        "avg_connections_per_min": 1
-                      },
-                      "rates": {
-                        "connection_rate_percent": 1.7,
-                        "error_rate_percent": 0.0
+                        "avg_messages_per_min": 0,
+                        "avg_connections_per_min": 0
                       }
                     },
                     "lrgps": {
                       "feed_name": "LRGPS Light Rail Feed",
-                      "health_status": "healthy",
-                      "last_message": "%s",
+                      "health_status": "waiting",
+                      "last_message": null,
                       "last_5s": {
-                        "messages": 8,
-                        "connections": 1,
+                        "messages": 0,
+                        "connections": 0,
                         "errors": 0,
                         "interval_seconds": 5
                       },
                       "totals": {
-                        "messages": 960,
-                        "connections": 16,
+                        "messages": 0,
+                        "connections": 0,
                         "errors": 0,
                         "uptime_seconds": %d,
-                        "avg_messages_per_min": 40,
-                        "avg_connections_per_min": 1
-                      },
-                      "rates": {
-                        "connection_rate_percent": 1.7,
-                        "error_rate_percent": 0.0
+                        "avg_messages_per_min": 0,
+                        "avg_connections_per_min": 0
                       }
                     },
                     "railcomm": {
                       "feed_name": "RailComm SCADA Feed",
-                      "health_status": "healthy",
-                      "last_message": "%s",
+                      "health_status": "waiting",
+                      "last_message": null,
                       "last_5s": {
-                        "messages": 6,
-                        "connections": 1,
+                        "messages": 0,
+                        "connections": 0,
                         "errors": 0,
                         "interval_seconds": 5
                       },
                       "totals": {
-                        "messages": 720,
-                        "connections": 12,
+                        "messages": 0,
+                        "connections": 0,
                         "errors": 0,
                         "uptime_seconds": %d,
-                        "avg_messages_per_min": 30,
-                        "avg_connections_per_min": 1
-                      },
-                      "rates": {
-                        "connection_rate_percent": 1.7,
-                        "error_rate_percent": 0.0
+                        "avg_messages_per_min": 0,
+                        "avg_connections_per_min": 0
                       }
                     }
                   },
                   "timestamp": "%s",
                   "uptime_ms": %d
                 }
-                """, timestamp, uptime/1000, timestamp, uptime/1000, timestamp, uptime/1000, timestamp, uptime);
+                """, uptime/1000, uptime/1000, uptime/1000, timestamp, uptime);
         }
     }
 }
