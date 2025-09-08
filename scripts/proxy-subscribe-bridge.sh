@@ -33,13 +33,18 @@ print_info() {
     echo -e "${CYAN}ℹ️${NC} $1"
 }
 
+# Load environment variables from .env file
+if [ -f ".env" ]; then
+    export $(cat .env | grep -v '^#' | xargs)
+fi
+
 # Configuration
-PROXY_SUBSCRIBE_URL="http://10.4.51.37:80/rtd/tli/consumer/tim"
-PROXY_UNSUBSCRIBE_URL="http://10.4.51.37:80/rtd/tli/consumer/tim"
+PROXY_SUBSCRIBE_URL="${TIS_PROXY_HOST:-http://tisproxy.rtd-denver.com}/rtd/tli/consumer/tim"
+PROXY_UNSUBSCRIBE_URL="${TIS_PROXY_HOST:-http://tisproxy.rtd-denver.com}/rtd/tli/consumer/tim"
 PROXY_IP="10.4.51.37"
-TTL_SECONDS=90000
-USERNAME="rc-proxy-admin"
-PASSWORD="aE@jeLAM76zLNqQLeXuu"
+TTL_SECONDS="${TIS_PROXY_TTL:-90000}"
+USERNAME="${TIS_PROXY_USERNAME:-rc-proxy-admin}"
+PASSWORD="${TIS_PROXY_PASSWORD:-aE@jeLAM76zLNqQLeXuu}"
 
 # Endpoint configurations
 ORIGINAL_HTTP_PORT=8081

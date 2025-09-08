@@ -51,6 +51,7 @@ const Navigation = () => {
             </Link>
             <Link
               to="/admin"
+              data-testid="admin-tab"
               className={`px-3 py-1 rounded-md text-sm font-medium transition-colors flex items-center space-x-1 ${
                 isAdmin 
                   ? 'bg-rtd-primary text-white' 

@@ -567,63 +567,314 @@ docker-compose down                 # Stop containers
 docker-compose logs kafka           # View Kafka logs
 ```
 
-### 🚆 Rail Communication Pipeline (New!)
+## Feed Subscription and Monitoring Guide
 
-**Complete rail communication system integration with proxy subscription and real-time data processing:**
+This section provides comprehensive instructions for subscribing to and monitoring RTD's real-time transit feeds.
 
+### 🚆 Rail Communication Pipeline (Live Train Data)
+
+The rail communication system provides direct access to RTD's internal train tracking data with precise positioning and operational details.
+
+#### Prerequisites
+- Kafka running: `./rtd-control.sh docker start`
+- TIS Proxy credentials configured in `.env` file
+
+#### Complete Rail Communication Setup
+
+**Step 1: Start Infrastructure**
 ```bash
-# Complete rail comm setup (run these in separate terminals)
-
-# Terminal 1: Start Kafka and create topic
+# Start Kafka and create rail communication topic
 ./rtd-control.sh docker start
+```
 
-# Terminal 2: Start HTTP receiver for proxy data
+**Step 2: Start HTTP Receiver**
+```bash
+# Start HTTP receiver for proxy data (Terminal 2)
 ./rtd-control.sh rail-comm receiver
 
-# Terminal 3: Start Flink rail comm pipeline
+# The receiver will start on port 8081 and display:
+# ✅ Rail Communication HTTP Receiver started on http://localhost:8081/rail-comm
+```
+
+**Step 3: Start Processing Pipeline**
+```bash
+# Start Flink rail communication pipeline (Terminal 3)
 ./rtd-control.sh rail-comm run
 
-# Terminal 4: Subscribe to proxy feed (auto-detected IP)
-./rtd-control.sh rail-comm subscribe
+# This starts the RTDRailCommPipeline with live data processing
+```
 
-# Monitor live rail communication data
+**Step 4: Subscribe to Proxy Feed**
+```bash
+# Subscribe to RTD's rail communication proxy (Terminal 4)
+./rtd-control.sh rail-comm subscribe-bridge
+
+# This will:
+# - Auto-detect your network IP for callback
+# - Subscribe to RTD's TIS proxy rail feed
+# - Configure TTL-based subscription renewal
+```
+
+#### Rail Communication Monitoring
+
+**Real-time Monitoring with Metrics**
+```bash
+# Monitor live rail data with enhanced metrics
 ./rtd-control.sh rail-comm monitor
 
-# Send test data (for development)
-./rtd-control.sh rail-comm test
-
-# Unsubscribe when done
-./rtd-control.sh rail-comm unsubscribe
+# This provides:
+# - Connection counts and error tracking
+# - Messages per minute statistics
+# - Real-time rail position data
+# - Train consist information
+# - Schedule adherence metrics
 ```
 
-### 🚌 Bus Communication Pipeline (SIRI Integration - NEW!)
-
-**Complete bus communication system with SIRI (Service Interface for Real-time Information) support:**
-
+**Status and Health Checks**
 ```bash
-# Complete bus comm setup (run these in separate terminals)
+# Check receiver status
+curl http://localhost:8081/status
 
-# Terminal 1: Start Kafka and create bus topic
+# View latest received data
+curl http://localhost:8081/latest
+
+# Check subscription health
+./rtd-control.sh rail-comm test-endpoints
+```
+
+#### Rail Communication Data Features
+- **Precise Train Positions**: GPS coordinates with track circuit data
+- **Train Consists**: Individual rail car tracking and composition
+- **Schedule Adherence**: Real-time delay calculations
+- **Operator Messages**: Live communications and status updates
+- **Multi-Source Data**: TRACK_CIRCUIT, TWC, and TIMER sources
+
+### 🚌 Bus Communication Pipeline (SIRI Integration)
+
+The bus communication system uses SIRI (Service Interface for Real-time Information) protocol for real-time bus tracking.
+
+#### Prerequisites
+- Kafka running: `./rtd-control.sh docker start`
+- TIS Proxy credentials configured in `.env` file
+
+#### Complete Bus Communication Setup
+
+**Step 1: Start Infrastructure**
+```bash
+# Start Kafka and create bus SIRI topic
 ./rtd-control.sh docker start
+```
 
-# Terminal 2: Start SIRI HTTP receiver (listens on port 8082)
+**Step 2: Start SIRI HTTP Receiver**
+```bash
+# Start SIRI HTTP receiver (Terminal 2)
 ./rtd-control.sh bus-comm receiver
 
-# Terminal 3: Start Bus Communication Pipeline (Table API style)
+# The receiver will start and display:
+# ✅ Bus SIRI HTTP Receiver started on http://localhost:8082/bus-siri
+# ✅ Using network IP: [detected IP address]
+```
+
+**Step 3: Start Bus Processing Pipeline**
+```bash
+# Start Bus Communication Pipeline (Terminal 3)
 ./rtd-control.sh bus-comm run
 
-# Terminal 4: Subscribe to SIRI bus feed with your endpoint
-./rtd-control.sh bus-comm subscribe http://172.23.4.136:8080 siri 90000
+# This starts RTDBusCommSimplePipeline with Table API processing
+# Avoids Flink DataStream serialization issues
+```
 
-# Monitor live bus communication data
+**Step 4: Subscribe to SIRI Feed**
+```bash
+# Subscribe to SIRI bus feed (Terminal 4)
+./rtd-control.sh bus-comm subscribe
+
+# Or specify custom parameters:
+./rtd-control.sh bus-comm subscribe [host] [service] [ttl]
+# Example: ./rtd-control.sh bus-comm subscribe http://tisproxy.rtd-denver.com siri 90000
+```
+
+#### Bus Communication Monitoring
+
+**Real-time SIRI Monitoring**
+```bash
+# Monitor live bus SIRI data with enhanced metrics
 ./rtd-control.sh bus-comm monitor
 
+# This provides:
+# - Bus position updates with route information
+# - Passenger occupancy levels
+# - Schedule adherence tracking
+# - Connection quality metrics
+# - Error rate monitoring
+```
+
+**Status and Health Checks**
+```bash
 # Check SIRI receiver status
 ./rtd-control.sh bus-comm status
+# Alternative: curl http://localhost:8082/status
 
-# Send test SIRI data (for development)
+# View latest SIRI data
+curl http://localhost:8082/latest
+
+# Test SIRI subscription
 ./rtd-control.sh bus-comm test
 ```
+
+#### Bus Communication Data Features
+- **Real-time Bus Positions**: GPS coordinates with route assignments
+- **SIRI Compliance**: Standard SIRI protocol support
+- **Passenger Occupancy**: Load levels (EMPTY, FEW_SEATS, STANDING_ROOM, etc.)
+- **Schedule Adherence**: Delay calculations and predictions
+- **TTL-Based Subscriptions**: Automatic renewal every 90 seconds
+
+### 🛰️ LRGPS Pipeline (Vehicle GPS Tracking)
+
+The LRGPS system provides enhanced GPS tracking for all RTD vehicles with high-precision positioning.
+
+#### Prerequisites
+- Kafka running: `./rtd-control.sh docker start`
+- TIS Proxy credentials configured in `.env` file
+
+#### Complete LRGPS Setup
+
+**Step 1: Start Infrastructure**
+```bash
+# Start Kafka and create LRGPS topic
+./rtd-control.sh docker start
+```
+
+**Step 2: Start LRGPS HTTP Receiver**
+```bash
+# Start LRGPS HTTP receiver (Terminal 2)
+./rtd-control.sh lrgps receiver
+
+# The receiver will start on port 8083
+```
+
+**Step 3: Start LRGPS Processing Pipeline**
+```bash
+# Start LRGPS Pipeline (Terminal 3)
+./rtd-control.sh lrgps run
+
+# This starts the LRGPS data processing pipeline
+```
+
+**Step 4: Subscribe to LRGPS Feed**
+```bash
+# Subscribe to LRGPS feed (Terminal 4)
+./rtd-control.sh lrgps subscribe
+
+# Or specify custom parameters:
+./rtd-control.sh lrgps subscribe [host] [service] [ttl]
+```
+
+#### LRGPS Monitoring
+
+**Real-time GPS Monitoring**
+```bash
+# Monitor live LRGPS data with enhanced metrics
+./rtd-control.sh lrgps monitor
+
+# This provides:
+# - High-precision vehicle positions
+# - GPS signal quality indicators
+# - Speed and bearing information
+# - Connection statistics
+# - Data freshness tracking
+```
+
+**Status and Health Checks**
+```bash
+# Check LRGPS receiver status
+./rtd-control.sh lrgps status
+# Alternative: curl http://localhost:8083/status
+
+# View latest LRGPS data
+curl http://localhost:8083/latest
+
+# Unsubscribe when done
+./rtd-control.sh lrgps unsubscribe
+```
+
+#### LRGPS Data Features
+- **High-Precision GPS**: Enhanced accuracy for all vehicle types
+- **Speed and Bearing**: Real-time movement data
+- **Signal Quality**: GPS reception strength indicators
+- **Universal Coverage**: All buses, trains, and special vehicles
+
+### 📊 Monitoring Commands Quick Reference
+
+#### View Real-time Logs
+```bash
+# View logs for different services
+./rtd-control.sh logs java          # Main pipeline logs
+./rtd-control.sh logs react         # React app logs
+./rtd-control.sh logs bus           # Bus SIRI receiver logs
+```
+
+#### Direct Kafka Topic Monitoring
+```bash
+# Monitor raw Kafka topics directly
+./scripts/kafka-console-consumer --topic rtd.rail.comm --from-beginning
+./scripts/kafka-console-consumer --topic rtd.bus.siri --from-beginning
+./scripts/kafka-console-consumer --topic rtd.lrgps --from-beginning
+```
+
+#### Service Status Checks
+```bash
+# Overall system status
+./rtd-control.sh status
+
+# Individual service status
+curl http://localhost:8081/status    # Rail Comm receiver
+curl http://localhost:8082/status    # Bus SIRI receiver
+curl http://localhost:8083/status    # LRGPS receiver
+```
+
+### 🔧 Troubleshooting Feed Subscriptions
+
+#### Common Issues
+
+**1. Subscription Failures**
+```bash
+# Check TIS proxy credentials
+echo $TIS_PROXY_USERNAME
+echo $TIS_PROXY_PASSWORD
+
+# Verify .env file configuration
+cat .env | grep TIS_PROXY
+```
+
+**2. Network Connectivity Issues**
+```bash
+# Test proxy connectivity
+curl -u $TIS_PROXY_USERNAME:$TIS_PROXY_PASSWORD http://tisproxy.rtd-denver.com
+
+# Check auto-detected IP
+./scripts/detect-vpn-ip.sh
+```
+
+**3. No Data Received**
+```bash
+# Check if receivers are running
+./rtd-control.sh status
+
+# Verify Kafka topics exist
+./scripts/kafka-topics --list
+
+# Check topic for messages
+./scripts/kafka-console-consumer --topic rtd.rail.comm --max-messages 1
+```
+
+#### Best Practices
+
+1. **Always start Kafka first**: `./rtd-control.sh docker start`
+2. **Check credentials**: Ensure `.env` file has valid TIS proxy credentials
+3. **Monitor logs**: Use `./rtd-control.sh logs [service]` for troubleshooting
+4. **Use monitoring commands**: Real-time `monitor` commands provide best visibility
+5. **Graceful shutdown**: Use `unsubscribe` commands before stopping services
 
 **Bus Communication Data Features:**
 - **SIRI Standard Compliance**: Service Interface for Real-time Information (SIRI) protocol support

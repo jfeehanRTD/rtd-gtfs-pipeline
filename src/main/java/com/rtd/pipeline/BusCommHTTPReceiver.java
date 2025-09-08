@@ -52,6 +52,7 @@ public class BusCommHTTPReceiver {
     private long ttl = 90000; // 90 seconds default TTL
     private String authUsername = null;
     private String authPassword = null;
+    private String callbackHost = null; // Will be auto-detected or set explicitly
     
     private final KafkaProducer<String, String> kafkaProducer;
     private final HttpServer httpServer;
@@ -61,11 +62,23 @@ public class BusCommHTTPReceiver {
     private final Queue<String> latestSiriData;
     
     public BusCommHTTPReceiver() throws IOException {
+        this(null); // Default constructor delegates to parameterized constructor
+    }
+    
+    public BusCommHTTPReceiver(String bindAddress) throws IOException {
         // Initialize Kafka producer
         this.kafkaProducer = createKafkaProducer();
         
-        // Initialize HTTP server
-        this.httpServer = HttpServer.create(new InetSocketAddress(HTTP_PORT), 0);
+        // Initialize HTTP server with specific bind address
+        InetSocketAddress address;
+        if (bindAddress != null && !bindAddress.trim().isEmpty()) {
+            address = new InetSocketAddress(bindAddress, HTTP_PORT);
+            LOG.info("Binding HTTP server to specific address: {}:{}", bindAddress, HTTP_PORT);
+        } else {
+            address = new InetSocketAddress(HTTP_PORT);
+            LOG.info("Binding HTTP server to all interfaces on port: {}", HTTP_PORT);
+        }
+        this.httpServer = HttpServer.create(address, 0);
         this.httpServer.createContext(HTTP_PATH, new BusSIRIHandler());
         this.httpServer.createContext(SUBSCRIPTION_PATH, new SubscriptionHandler());
         this.httpServer.createContext("/bus-siri/latest", new LatestDataHandler());
@@ -161,18 +174,71 @@ public class BusCommHTTPReceiver {
     }
     
     /**
+     * Configure callback host for SIRI subscription (auto-detects if not set)
+     */
+    public void configureCallbackHost(String host) {
+        this.callbackHost = host;
+        LOG.info("Callback host configured: {}", host);
+    }
+    
+    /**
+     * Auto-detect callback host IP (prioritizes VPN IP)
+     */
+    private String detectCallbackHost() {
+        if (callbackHost != null && !callbackHost.trim().isEmpty()) {
+            return callbackHost;
+        }
+        
+        // Try to detect VPN IP first
+        try {
+            ProcessBuilder pb = new ProcessBuilder("bash", "-c", 
+                "ifconfig | grep -E 'utun[0-9]+' -A 3 | grep 'inet ' | grep -v '127.0.0.1' | head -1 | awk '{print $2}'");
+            Process process = pb.start();
+            String result = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8).trim();
+            
+            if (!result.isEmpty() && !result.equals("127.0.0.1")) {
+                LOG.info("Auto-detected VPN IP for callback: {}", result);
+                return result;
+            }
+        } catch (Exception e) {
+            LOG.debug("Could not auto-detect VPN IP: {}", e.getMessage());
+        }
+        
+        // Fall back to regular network detection
+        try {
+            ProcessBuilder pb = new ProcessBuilder("bash", "-c", 
+                "route get default 2>/dev/null | grep interface | awk '{print $2}' | xargs ifconfig 2>/dev/null | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}' | head -1");
+            Process process = pb.start();
+            String result = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8).trim();
+            
+            if (!result.isEmpty()) {
+                LOG.info("Auto-detected network IP for callback: {}", result);
+                return result;
+            }
+        } catch (Exception e) {
+            LOG.debug("Could not auto-detect network IP: {}", e.getMessage());
+        }
+        
+        LOG.warn("Could not auto-detect callback IP, using localhost");
+        return "localhost";
+    }
+    
+    /**
      * Send subscription request to SIRI endpoint
      */
     private void sendSubscriptionRequest() {
         try {
             // Create subscription request payload
+            String detectedCallbackHost = detectCallbackHost();
             ObjectNode subscriptionRequest = objectMapper.createObjectNode();
             subscriptionRequest.put("host", siriHost);
             subscriptionRequest.put("service", siriService);
             subscriptionRequest.put("ttl", ttl);
-            subscriptionRequest.put("callback_url", String.format("http://localhost:%d%s", HTTP_PORT, HTTP_PATH));
+            subscriptionRequest.put("callback_url", String.format("http://%s:%d%s", detectedCallbackHost, HTTP_PORT, HTTP_PATH));
             subscriptionRequest.put("subscription_type", "VehicleMonitoring");
             subscriptionRequest.put("route_filter", "bus"); // Filter for bus routes only
+            
+            LOG.info("Subscription callback URL: http://{}:{}{}", detectedCallbackHost, HTTP_PORT, HTTP_PATH);
             
             String jsonPayload = objectMapper.writeValueAsString(subscriptionRequest);
             
@@ -495,13 +561,36 @@ public class BusCommHTTPReceiver {
     
     public static void main(String[] args) {
         try {
-            BusCommHTTPReceiver receiver = new BusCommHTTPReceiver();
+            // Check for bind address parameter
+            String bindAddress = null;
+            String[] configArgs = args;
+            
+            // Look for --bind-address parameter
+            for (int i = 0; i < args.length; i++) {
+                if ("--bind-address".equals(args[i]) && i + 1 < args.length) {
+                    bindAddress = args[i + 1];
+                    // Remove --bind-address and its value from args
+                    String[] newArgs = new String[args.length - 2];
+                    System.arraycopy(args, 0, newArgs, 0, i);
+                    System.arraycopy(args, i + 2, newArgs, i, args.length - i - 2);
+                    configArgs = newArgs;
+                    break;
+                }
+            }
+            
+            BusCommHTTPReceiver receiver = new BusCommHTTPReceiver(bindAddress);
+            
+            // Set callback host to the same IP we're binding to (if specified)
+            if (bindAddress != null && !bindAddress.trim().isEmpty()) {
+                receiver.configureCallbackHost(bindAddress);
+                LOG.info("Using bind address for callback: {}", bindAddress);
+            }
             
             // Check for command line arguments for SIRI configuration
-            if (args.length >= 3) {
-                String host = args[0];
-                String service = args[1];
-                long ttl = Long.parseLong(args[2]);
+            if (configArgs.length >= 3) {
+                String host = configArgs[0];
+                String service = configArgs[1];
+                long ttl = Long.parseLong(configArgs[2]);
                 receiver.configureSIRISubscription(host, service, ttl);
                 
                 // First check environment variables for credentials (most secure)
@@ -513,9 +602,9 @@ public class BusCommHTTPReceiver {
                     LOG.info("Using authentication credentials from environment variables");
                 } 
                 // Fall back to command line arguments if no env vars (less secure)
-                else if (args.length >= 5) {
-                    String username = args[3];
-                    String password = args[4];
+                else if (configArgs.length >= 5) {
+                    String username = configArgs[3];
+                    String password = configArgs[4];
                     receiver.configureAuthentication(username, password);
                     LOG.warn("Using authentication credentials from command line arguments (consider using environment variables instead)");
                 } else {

@@ -459,8 +459,17 @@ logs() {
                 print_error "React log file not found: $REACT_LOG_FILE"
             fi
             ;;
+        "bus")
+            if [ -f "bus-siri-receiver.log" ]; then
+                print_status "Showing Bus SIRI receiver logs (Ctrl+C to exit):"
+                tail -f "bus-siri-receiver.log"
+            else
+                print_error "Bus SIRI receiver log file not found: bus-siri-receiver.log"
+                print_status "Use './rtd-control.sh bus-comm receiver' to start the Bus SIRI receiver"
+            fi
+            ;;
         *)
-            print_error "Please specify 'java' or 'react' for logs"
+            print_error "Please specify 'java', 'react', or 'bus' for logs"
             ;;
     esac
 }
@@ -642,8 +651,8 @@ main() {
                         print_status "Press Ctrl+C to stop monitoring"
                         echo ""
                         
-                        # Start Kafka consumer in background and capture output
-                        ./scripts/kafka-console-consumer.sh --topic rtd.railcomm | while IFS= read -r line; do
+                        # Start Kafka consumer in background and capture output (simple mode for just values)
+                        ./scripts/kafka-console-consumer.sh --topic rtd.railcomm --simple | while IFS= read -r line; do
                             current_time=$(date +%s)
                             message_count=$((message_count + 1))
                             messages_this_interval=$((messages_this_interval + 1))
@@ -702,13 +711,16 @@ main() {
                                 last_interval=$current_time
                             fi
                             
-                            # Show raw message (truncated for readability)
+                            # Show full message content formatted
                             timestamp=$(date '+%H:%M:%S')
-                            truncated_line=$(echo "$line" | cut -c1-120)
-                            if [ ${#line} -gt 120 ]; then
-                                truncated_line="${truncated_line}..."
+                            echo -e "${BLUE}[$timestamp] MESSAGE:${NC}"
+                            # Pretty print JSON if it's JSON, otherwise show raw
+                            if echo "$line" | jq . 2>/dev/null; then
+                                echo "$line" | jq -C '.' 2>/dev/null
+                            else
+                                echo "$line"
                             fi
-                            echo -e "${BLUE}[$timestamp]${NC} $truncated_line"
+                            echo -e "${BLUE}─────────────────────────────────────${NC}"
                         done
                     }
                     ;;
@@ -787,7 +799,26 @@ main() {
                 "receiver")
                     print_status "Starting RTD Bus SIRI HTTP Receiver..."
                     if ! check_process "BusCommHTTPReceiver"; then
-                        mvn exec:java -Dexec.mainClass="com.rtd.pipeline.BusCommHTTPReceiver"
+                        # Detect VPN IP if available
+                        VPN_IP=""
+                        if [[ -f "./scripts/detect-vpn-ip.sh" ]]; then
+                            source <(./scripts/detect-vpn-ip.sh export 2>/dev/null)
+                            if [[ -n "$SIRI_HOST_IP" ]]; then
+                                VPN_IP="$SIRI_HOST_IP"
+                                if [[ "$USE_VPN_IP" == "true" ]]; then
+                                    print_status "Using VPN IP for receiver: $VPN_IP"
+                                else
+                                    print_status "Using network IP for receiver: $VPN_IP"
+                                fi
+                            fi
+                        fi
+                        
+                        if [[ -n "$VPN_IP" ]]; then
+                            mvn exec:java -Dexec.mainClass="com.rtd.pipeline.BusCommHTTPReceiver" -Dexec.args="--bind-address $VPN_IP"
+                        else
+                            print_warning "Could not detect IP address, binding to all interfaces"
+                            mvn exec:java -Dexec.mainClass="com.rtd.pipeline.BusCommHTTPReceiver"
+                        fi
                     else
                         print_warning "Bus SIRI HTTP receiver is already running"
                     fi
@@ -831,8 +862,8 @@ main() {
                         print_status "Press Ctrl+C to stop monitoring"
                         echo ""
                         
-                        # Start Kafka consumer in background and capture output
-                        ./scripts/kafka-console-consumer.sh --topic rtd.bus.siri | while IFS= read -r line; do
+                        # Start Kafka consumer in background and capture output (simple mode for just values)
+                        ./scripts/kafka-console-consumer.sh --topic rtd.bus.siri --simple | while IFS= read -r line; do
                             current_time=$(date +%s)
                             message_count=$((message_count + 1))
                             messages_this_interval=$((messages_this_interval + 1))
@@ -891,13 +922,16 @@ main() {
                                 last_interval=$current_time
                             fi
                             
-                            # Show raw message (truncated for readability)
+                            # Show full message content formatted
                             timestamp=$(date '+%H:%M:%S')
-                            truncated_line=$(echo "$line" | cut -c1-120)
-                            if [ ${#line} -gt 120 ]; then
-                                truncated_line="${truncated_line}..."
+                            echo -e "${BLUE}[$timestamp] MESSAGE:${NC}"
+                            # Pretty print JSON if it's JSON, otherwise show raw
+                            if echo "$line" | jq . 2>/dev/null; then
+                                echo "$line" | jq -C '.' 2>/dev/null
+                            else
+                                echo "$line"
                             fi
-                            echo -e "${BLUE}[$timestamp]${NC} $truncated_line"
+                            echo -e "${BLUE}─────────────────────────────────────${NC}"
                         done
                     }
                     ;;
@@ -980,8 +1014,8 @@ main() {
                         print_status "Press Ctrl+C to stop monitoring"
                         echo ""
                         
-                        # Start Kafka consumer in background and capture output
-                        ./scripts/kafka-console-consumer.sh --topic rtd.lrgps | while IFS= read -r line; do
+                        # Start Kafka consumer in background and capture output (simple mode for just values)
+                        ./scripts/kafka-console-consumer.sh --topic rtd.lrgps --simple | while IFS= read -r line; do
                             current_time=$(date +%s)
                             message_count=$((message_count + 1))
                             messages_this_interval=$((messages_this_interval + 1))
@@ -1040,13 +1074,16 @@ main() {
                                 last_interval=$current_time
                             fi
                             
-                            # Show raw message (truncated for readability)
+                            # Show full message content formatted
                             timestamp=$(date '+%H:%M:%S')
-                            truncated_line=$(echo "$line" | cut -c1-120)
-                            if [ ${#line} -gt 120 ]; then
-                                truncated_line="${truncated_line}..."
+                            echo -e "${BLUE}[$timestamp] MESSAGE:${NC}"
+                            # Pretty print JSON if it's JSON, otherwise show raw
+                            if echo "$line" | jq . 2>/dev/null; then
+                                echo "$line" | jq -C '.' 2>/dev/null
+                            else
+                                echo "$line"
                             fi
-                            echo -e "${BLUE}[$timestamp]${NC} $truncated_line"
+                            echo -e "${BLUE}─────────────────────────────────────${NC}"
                         done
                     }
                     ;;

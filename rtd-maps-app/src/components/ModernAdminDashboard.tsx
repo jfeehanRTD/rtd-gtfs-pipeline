@@ -127,7 +127,12 @@ const ModernAdminDashboard: React.FC = () => {
         const busSiriResponse = await fetch('http://localhost:8082/status');
         if (busSiriResponse.ok) {
           busSiriStatus = 'active';
-          busSiriMessageCount = 8950; // Could be fetched from status endpoint
+          // Get real message count from FeedMetrics API
+          const metricsResponse = await fetch('http://localhost:8080/api/metrics/siri');
+          if (metricsResponse.ok) {
+            const metrics = await metricsResponse.json();
+            busSiriMessageCount = metrics.totals.messages;
+          }
         }
       } catch (e) {
         // SIRI might not be running
@@ -141,7 +146,12 @@ const ModernAdminDashboard: React.FC = () => {
         const railCommResponse = await fetch('http://localhost:8081/status');
         if (railCommResponse.ok) {
           railCommStatus = 'active';
-          railCommMessageCount = 15420; // Could be fetched from status endpoint
+          // Get real message count from FeedMetrics API
+          const metricsResponse = await fetch('http://localhost:8080/api/metrics/railcomm');
+          if (metricsResponse.ok) {
+            const metrics = await metricsResponse.json();
+            railCommMessageCount = metrics.totals.messages;
+          }
         }
       } catch (e) {
         // Rail comm might not be running

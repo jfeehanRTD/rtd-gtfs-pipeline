@@ -36,6 +36,7 @@ public class KafkaConsumerManager {
         boolean fromBeginning = false;
         int maxMessages = -1;
         String groupId = "kafka-console-consumer-" + UUID.randomUUID().toString();
+        boolean simpleOutput = false;  // Add simple output mode
         
         // Parse arguments
         for (int i = 0; i < args.length; i++) {
@@ -55,6 +56,10 @@ public class KafkaConsumerManager {
                 case "--group":
                     if (i + 1 < args.length) groupId = args[++i];
                     break;
+                case "--simple":
+                case "--value-only":
+                    simpleOutput = true;  // Enable simple output mode
+                    break;
             }
         }
         
@@ -67,7 +72,7 @@ public class KafkaConsumerManager {
         KafkaConsumerManager manager = new KafkaConsumerManager(bootstrapServers);
         
         try {
-            manager.consumeMessages(topicName, fromBeginning, maxMessages, groupId);
+            manager.consumeMessages(topicName, fromBeginning, maxMessages, groupId, simpleOutput);
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace();
@@ -101,7 +106,7 @@ public class KafkaConsumerManager {
         System.out.println("  java KafkaConsumerManager --topic rtd.route.summary --max-messages 10");
     }
     
-    public void consumeMessages(String topicName, boolean fromBeginning, int maxMessages, String groupId) {
+    public void consumeMessages(String topicName, boolean fromBeginning, int maxMessages, String groupId, boolean simpleOutput) {
         Properties props = new Properties();
         props.putAll(consumerProps);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -117,15 +122,17 @@ public class KafkaConsumerManager {
         try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props)) {
             consumer.subscribe(Collections.singletonList(topicName));
             
-            System.out.printf("Consuming from topic: %s%n", topicName);
-            System.out.printf("Bootstrap servers: %s%n", consumerProps.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG));
-            System.out.printf("Group ID: %s%n", groupId);
-            System.out.printf("From beginning: %s%n", fromBeginning);
-            if (maxMessages > 0) {
-                System.out.printf("Max messages: %d%n", maxMessages);
+            if (!simpleOutput) {
+                System.out.printf("Consuming from topic: %s%n", topicName);
+                System.out.printf("Bootstrap servers: %s%n", consumerProps.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG));
+                System.out.printf("Group ID: %s%n", groupId);
+                System.out.printf("From beginning: %s%n", fromBeginning);
+                if (maxMessages > 0) {
+                    System.out.printf("Max messages: %d%n", maxMessages);
+                }
+                System.out.println("Press Ctrl+C to exit");
+                System.out.println("-".repeat(50));
             }
-            System.out.println("Press Ctrl+C to exit");
-            System.out.println("-".repeat(50));
             
             int messageCount = 0;
             long startTime = System.currentTimeMillis();
@@ -141,21 +148,29 @@ public class KafkaConsumerManager {
                     ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
                     
                     if (records.isEmpty()) {
-                        // Show a progress indicator for long waits
-                        long elapsed = System.currentTimeMillis() - startTime;
-                        if (elapsed > 5000 && messageCount == 0) {
-                            System.out.printf("Waiting for messages... (%d seconds)%n", elapsed / 1000);
-                            startTime = System.currentTimeMillis(); // Reset timer
+                        // Show a progress indicator for long waits (not in simple mode)
+                        if (!simpleOutput) {
+                            long elapsed = System.currentTimeMillis() - startTime;
+                            if (elapsed > 5000 && messageCount == 0) {
+                                System.out.printf("Waiting for messages... (%d seconds)%n", elapsed / 1000);
+                                startTime = System.currentTimeMillis(); // Reset timer
+                            }
                         }
                         continue;
                     }
                     
                     for (ConsumerRecord<String, String> record : records) {
-                        System.out.printf("Partition: %d, Offset: %d, Key: %s, Value: %s%n",
-                            record.partition(),
-                            record.offset(),
-                            record.key() == null ? "null" : record.key(),
-                            record.value());
+                        if (simpleOutput) {
+                            // Simple output mode - just print the value
+                            System.out.println(record.value());
+                        } else {
+                            // Full output mode with metadata
+                            System.out.printf("Partition: %d, Offset: %d, Key: %s, Value: %s%n",
+                                record.partition(),
+                                record.offset(),
+                                record.key() == null ? "null" : record.key(),
+                                record.value());
+                        }
                         
                         messageCount++;
                         if (maxMessages > 0 && messageCount >= maxMessages) {
@@ -171,7 +186,9 @@ public class KafkaConsumerManager {
                 // Ignore, this is expected during shutdown
             }
             
-            System.out.printf("%nTotal messages consumed: %d%n", messageCount);
+            if (!simpleOutput) {
+                System.out.printf("%nTotal messages consumed: %d%n", messageCount);
+            }
         }
     }
 }

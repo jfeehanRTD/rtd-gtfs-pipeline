@@ -29,8 +29,8 @@ print_error() {
 }
 
 # Configuration
-PROXY_SUBSCRIBE_URL="http://10.4.51.37:80/rtd/tli/consumer/tim"
-PROXY_UNSUBSCRIBE_URL="http://10.4.51.37:80/rtd/tli/consumer/tim"
+PROXY_SUBSCRIBE_URL="http://tisproxy.rtd-denver.com/rtd/tli/consumer/tim"
+PROXY_UNSUBSCRIBE_URL="http://tisproxy.rtd-denver.com/rtd/tli/consumer/tim"
 PROXY_IP="10.4.51.37"
 TTL_SECONDS=90000
 USERNAME="rc-proxy-admin"

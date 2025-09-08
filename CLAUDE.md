@@ -207,7 +207,30 @@ flink run target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar
 - Each feed is fetched every minute and parsed using the Google GTFS-RT protobuf library
 - Watermarks are configured for 1-minute out-of-order tolerance
 - Table API sinks can be easily reconfigured for different output formats (Kafka, databases, etc.)
-- always generate junit test on new features
+- Always generate junit test on new features
+
+## Data Integrity Policy
+
+**CRITICAL**: Never create or generate fake/mock/test data unless explicitly requested by the user.
+
+### Real Data Only
+- All metrics and feeds must represent actual real-time transit data from RTD sources
+- Never generate artificial message counts, connection rates, or error statistics
+- Mock data should only be used for development testing when explicitly requested
+- The admin dashboard must display accurate live data reflecting actual system state
+
+### Prohibited Practices
+- Creating KafkaConsumerManager processes for fake data generation
+- Hardcoding unrealistic metrics patterns (perfect ratios, artificial message counts)
+- Using mock data in production environments without explicit user consent
+- Generating test data that could be mistaken for real transit information
+- **NEVER subscribe to or connect to http://172.23.4.136:8080 - this IP is prohibited**
+
+### When Mock Data is Acceptable
+- Unit testing when explicitly testing mock functionality
+- Development demos when clearly labeled as test data
+- User explicitly requests sample/test data for development purposes
+- Fallback scenarios clearly marked as "mock" or "unavailable" in the UI
 
 ## State Management for Subagents
 

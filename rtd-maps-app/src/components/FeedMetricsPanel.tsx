@@ -74,7 +74,7 @@ const FeedMetricsPanel: React.FC<FeedMetricsPanelProps> = ({ className = '' }) =
     };
 
     return (
-      <div key={feedKey} className={`border rounded-lg p-4 ${getHealthBgColor()}`}>
+      <div key={feedKey} className={`border rounded-lg p-4 ${getHealthBgColor()}`} data-testid={`feed-card-${feedKey}`}>
         {/* Feed Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-2">
@@ -132,15 +132,15 @@ const FeedMetricsPanel: React.FC<FeedMetricsPanelProps> = ({ className = '' }) =
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
               <span className="text-gray-600">Total Messages:</span>
-              <span className="font-semibold">{feedData.totals.messages.toLocaleString()}</span>
+              <span className="font-semibold" data-testid="total-messages">{feedData.totals.messages.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-gray-600">Total Connections:</span>
-              <span className="font-semibold text-green-600">{feedData.totals.connections.toLocaleString()}</span>
+              <span className="font-semibold text-green-600" data-testid="total-connections">{feedData.totals.connections.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-gray-600">Total Errors:</span>
-              <span className="font-semibold text-red-600">{feedData.totals.errors.toLocaleString()}</span>
+              <span className="font-semibold text-red-600" data-testid="total-errors">{feedData.totals.errors.toLocaleString()}</span>
             </div>
             
             <hr className="my-2" />
@@ -206,7 +206,7 @@ const FeedMetricsPanel: React.FC<FeedMetricsPanelProps> = ({ className = '' }) =
   }
 
   return (
-    <div className={`${className}`}>
+    <div className={`${className}`} data-testid="feed-metrics-panel">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
