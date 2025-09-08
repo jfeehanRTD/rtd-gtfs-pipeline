@@ -167,10 +167,12 @@ public class LRGPSHTTPReceiver {
         try {
             // Create subscription request payload
             ObjectNode subscriptionRequest = objectMapper.createObjectNode();
-            subscriptionRequest.put("host", lrgpsHost);
+            // Use local IP address where TIS proxy should send data, not the proxy host itself
+            String localCallbackUrl = String.format("http://%s:%d%s", getLocalIPAddress(), HTTP_PORT, HTTP_PATH);
+            subscriptionRequest.put("host", localCallbackUrl);
             subscriptionRequest.put("service", lrgpsService);
             subscriptionRequest.put("ttl", ttl);
-            subscriptionRequest.put("callback_url", String.format("http://localhost:%d%s", HTTP_PORT, HTTP_PATH));
+            subscriptionRequest.put("callback_url", localCallbackUrl);
             subscriptionRequest.put("subscription_type", "VehicleMonitoring");
             subscriptionRequest.put("route_filter", "light_rail"); // Filter for light rail routes
             
@@ -492,6 +494,71 @@ public class LRGPSHTTPReceiver {
     private void sendErrorResponse(HttpExchange exchange, int statusCode, String message) throws IOException {
         String response = String.format("{\"error\": \"%s\"}", message);
         sendJsonResponse(exchange, statusCode, response);
+    }
+    
+    /**
+     * Get the local IP address for callback registration
+     * Prioritizes network interfaces in order: VPN (utun*), WiFi (en0), Ethernet (en1)
+     */
+    private String getLocalIPAddress() {
+        try {
+            java.util.Enumeration<java.net.NetworkInterface> interfaces = java.net.NetworkInterface.getNetworkInterfaces();
+            
+            // Priority 1: Look for VPN interfaces (utun*)
+            while (interfaces.hasMoreElements()) {
+                java.net.NetworkInterface ni = interfaces.nextElement();
+                if (ni.getName().startsWith("utun") && ni.isUp() && !ni.isLoopback()) {
+                    java.util.Enumeration<java.net.InetAddress> addresses = ni.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        java.net.InetAddress addr = addresses.nextElement();
+                        if (addr instanceof java.net.Inet4Address && !addr.isLoopbackAddress()) {
+                            LOG.info("Using VPN IP address: {}", addr.getHostAddress());
+                            return addr.getHostAddress();
+                        }
+                    }
+                }
+            }
+            
+            // Priority 2: Look for standard network interfaces (en0, en1)
+            interfaces = java.net.NetworkInterface.getNetworkInterfaces();
+            String[] preferredInterfaces = {"en0", "en1", "eth0", "wlan0"};
+            for (String interfaceName : preferredInterfaces) {
+                java.net.NetworkInterface ni = java.net.NetworkInterface.getByName(interfaceName);
+                if (ni != null && ni.isUp() && !ni.isLoopback()) {
+                    java.util.Enumeration<java.net.InetAddress> addresses = ni.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        java.net.InetAddress addr = addresses.nextElement();
+                        if (addr instanceof java.net.Inet4Address && !addr.isLoopbackAddress()) {
+                            LOG.info("Using network interface {} IP address: {}", interfaceName, addr.getHostAddress());
+                            return addr.getHostAddress();
+                        }
+                    }
+                }
+            }
+            
+            // Fallback: Use any available non-loopback IPv4 address
+            interfaces = java.net.NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                java.net.NetworkInterface ni = interfaces.nextElement();
+                if (ni.isUp() && !ni.isLoopback()) {
+                    java.util.Enumeration<java.net.InetAddress> addresses = ni.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        java.net.InetAddress addr = addresses.nextElement();
+                        if (addr instanceof java.net.Inet4Address && !addr.isLoopbackAddress()) {
+                            LOG.info("Using fallback IP address: {}", addr.getHostAddress());
+                            return addr.getHostAddress();
+                        }
+                    }
+                }
+            }
+            
+        } catch (Exception e) {
+            LOG.error("Failed to detect local IP address: {}", e.getMessage());
+        }
+        
+        // Final fallback
+        LOG.warn("Could not detect local IP, using localhost");
+        return "localhost";
     }
     
     public static void main(String[] args) {
