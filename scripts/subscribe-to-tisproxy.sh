@@ -42,18 +42,24 @@ DEFAULT_TTL="${TIS_PROXY_TTL:-90000}"
 DEFAULT_USERNAME="${TIS_PROXY_USERNAME:-}"
 DEFAULT_PASSWORD="${TIS_PROXY_PASSWORD:-}"
 
-# Feed type configurations
-declare -A FEED_SERVICES
-FEED_SERVICES[siri]="siri"
-FEED_SERVICES[lrgps]="lrgps"
-FEED_SERVICES[railcomm]="railcomm"
-FEED_SERVICES[rail]="railcomm"  # alias
+# Feed type configuration functions (compatible with older bash)
+get_service_name() {
+    case "$1" in
+        "siri") echo "siri" ;;
+        "lrgps") echo "lrgps" ;;
+        "railcomm"|"rail") echo "railcomm" ;;
+        *) echo "" ;;
+    esac
+}
 
-declare -A FEED_ENDPOINTS
-FEED_ENDPOINTS[siri]="/bus-siri"
-FEED_ENDPOINTS[lrgps]="/lrgps"
-FEED_ENDPOINTS[railcomm]="/rail-comm"
-FEED_ENDPOINTS[rail]="/rail-comm"  # alias
+get_endpoint() {
+    case "$1" in
+        "siri") echo "/bus-siri" ;;
+        "lrgps") echo "/lrgps" ;;
+        "railcomm"|"rail") echo "/rail-comm" ;;
+        *) echo "" ;;
+    esac
+}
 
 # Usage function
 show_usage() {
@@ -95,8 +101,8 @@ subscribe_to_feed() {
     local port="$2" 
     local feed_type="$3"
     
-    local service="${FEED_SERVICES[$feed_type]}"
-    local endpoint="${FEED_ENDPOINTS[$feed_type]}"
+    local service=$(get_service_name "$feed_type")
+    local endpoint=$(get_endpoint "$feed_type")
     local host_url="http://${ip}:${port}${endpoint}"
     
     print_status "Subscribing to ${feed_type} feed..."
@@ -255,15 +261,15 @@ main() {
     # Handle different feed types
     case "$feed_type" in
         "siri")
-            test_endpoint "$ip" "$port" "${FEED_ENDPOINTS[siri]}" "SIRI"
+            test_endpoint "$ip" "$port" "$(get_endpoint "siri")" "SIRI"
             subscribe_to_feed "$ip" "$port" "siri"
             ;;
         "lrgps")
-            test_endpoint "$ip" "$port" "${FEED_ENDPOINTS[lrgps]}" "LRGPS"
+            test_endpoint "$ip" "$port" "$(get_endpoint "lrgps")" "LRGPS"
             subscribe_to_feed "$ip" "$port" "lrgps"
             ;;
         "railcomm"|"rail")
-            test_endpoint "$ip" "$port" "${FEED_ENDPOINTS[railcomm]}" "Rail Comm"
+            test_endpoint "$ip" "$port" "$(get_endpoint "railcomm")" "Rail Comm"
             subscribe_to_feed "$ip" "$port" "railcomm"
             ;;
         "all")
@@ -274,19 +280,19 @@ main() {
             local total_feeds=3
             
             # Subscribe to each feed type
-            test_endpoint "$ip" "$port" "${FEED_ENDPOINTS[siri]}" "SIRI"
+            test_endpoint "$ip" "$port" "$(get_endpoint "siri")" "SIRI"
             if subscribe_to_feed "$ip" "$port" "siri"; then
                 ((success_count++))
             fi
             echo ""
             
-            test_endpoint "$ip" "$port" "${FEED_ENDPOINTS[lrgps]}" "LRGPS"
+            test_endpoint "$ip" "$port" "$(get_endpoint "lrgps")" "LRGPS"
             if subscribe_to_feed "$ip" "$port" "lrgps"; then
                 ((success_count++))
             fi
             echo ""
             
-            test_endpoint "$ip" "$port" "${FEED_ENDPOINTS[railcomm]}" "Rail Comm"
+            test_endpoint "$ip" "$port" "$(get_endpoint "railcomm")" "Rail Comm"
             if subscribe_to_feed "$ip" "$port" "railcomm"; then
                 ((success_count++))
             fi
