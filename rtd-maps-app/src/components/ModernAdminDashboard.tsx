@@ -157,15 +157,21 @@ const ModernAdminDashboard: React.FC = () => {
         // Rail comm might not be running
       }
 
-      // Check LRGPS status
+      // Check LRGPS status - only active if actually subscribed
       let lrgpsStatus = 'error';
       let lrgpsMessageCount = 0;
       let lrgpsErrors = 0;
       try {
         const lrgpsResponse = await fetch('http://localhost:8083/status');
         if (lrgpsResponse.ok) {
-          lrgpsStatus = 'active';
-          lrgpsMessageCount = 3240; // Could be fetched from status endpoint
+          const lrgpsData = await lrgpsResponse.json();
+          // Only consider active if subscription is actually active
+          if (lrgpsData.subscription_active === true) {
+            lrgpsStatus = 'active';
+            lrgpsMessageCount = lrgpsData.message_count || 0;
+          } else {
+            lrgpsStatus = 'paused'; // Service running but not subscribed
+          }
         }
       } catch (e) {
         // LRGPS might not be running
@@ -179,7 +185,7 @@ const ModernAdminDashboard: React.FC = () => {
           endpoint: 'http://localhost:8081/rail-comm',
           type: 'rail-comm',
           status: railCommStatus as 'active' | 'paused' | 'error',
-          lastUpdate: new Date(Date.now() - 30000),
+          lastUpdate: railCommStatus === 'active' && railCommMessageCount > 0 ? new Date(Date.now() - 30000) : null,
           messageCount: railCommMessageCount,
           errorCount: railCommErrors
         },
@@ -189,7 +195,7 @@ const ModernAdminDashboard: React.FC = () => {
           endpoint: 'http://localhost:8082/bus-siri',
           type: 'bus-siri',
           status: busSiriStatus as 'active' | 'paused' | 'error',
-          lastUpdate: new Date(Date.now() - 45000),
+          lastUpdate: busSiriStatus === 'active' && busSiriMessageCount > 0 ? new Date(Date.now() - 45000) : null,
           messageCount: busSiriMessageCount,
           errorCount: busSiriErrors
         },
@@ -199,7 +205,7 @@ const ModernAdminDashboard: React.FC = () => {
           endpoint: 'http://localhost:8083/lrgps',
           type: 'lrgps',
           status: lrgpsStatus as 'active' | 'paused' | 'error',
-          lastUpdate: new Date(Date.now() - 35000),
+          lastUpdate: lrgpsStatus === 'active' && lrgpsMessageCount > 0 ? new Date(Date.now() - 35000) : null,
           messageCount: lrgpsMessageCount,
           errorCount: lrgpsErrors
         },
@@ -228,26 +234,26 @@ const ModernAdminDashboard: React.FC = () => {
         {
           name: 'Rail Communication',
           type: 'Internal',
-          isLive: railCommStatus === 'active',
-          lastMessage: railCommStatus === 'active' ? new Date(Date.now() - 45000) : null,
-          messageRate: railCommStatus === 'active' ? 0.25 : 0,
-          health: railCommStatus === 'active' ? 'healthy' : 'error'
+          isLive: railCommStatus === 'active' && railCommMessageCount > 0,
+          lastMessage: railCommStatus === 'active' && railCommMessageCount > 0 ? new Date(Date.now() - 45000) : null,
+          messageRate: railCommStatus === 'active' && railCommMessageCount > 0 ? (railCommMessageCount / 3600) : 0,
+          health: railCommStatus === 'active' ? (railCommMessageCount > 0 ? 'healthy' : 'warning') : 'error'
         },
         {
           name: 'Bus SIRI Feed',
           type: 'SIRI',
-          isLive: busSiriStatus === 'active',
-          lastMessage: busSiriStatus === 'active' ? new Date(Date.now() - 45000) : null,
-          messageRate: busSiriStatus === 'active' ? 0.1 : 0,
-          health: busSiriStatus === 'active' ? 'healthy' : 'error'
+          isLive: busSiriStatus === 'active' && busSiriMessageCount > 0,
+          lastMessage: busSiriStatus === 'active' && busSiriMessageCount > 0 ? new Date(Date.now() - 45000) : null,
+          messageRate: busSiriStatus === 'active' && busSiriMessageCount > 0 ? (busSiriMessageCount / 3600) : 0,
+          health: busSiriStatus === 'active' ? (busSiriMessageCount > 0 ? 'healthy' : 'warning') : 'error'
         },
         {
           name: 'LRGPS Feed',
           type: 'LRGPS',
           isLive: lrgpsStatus === 'active',
-          lastMessage: lrgpsStatus === 'active' ? new Date(Date.now() - 35000) : null,
-          messageRate: lrgpsStatus === 'active' ? 0.15 : 0,
-          health: lrgpsStatus === 'active' ? 'healthy' : 'error'
+          lastMessage: lrgpsStatus === 'active' && lrgpsMessageCount > 0 ? new Date(Date.now() - 35000) : null,
+          messageRate: lrgpsStatus === 'active' && lrgpsMessageCount > 0 ? (lrgpsMessageCount / 3600) : 0, // Real rate based on message count
+          health: lrgpsStatus === 'active' ? 'healthy' : (lrgpsStatus === 'paused' ? 'warning' : 'error')
         }
       ];
 
