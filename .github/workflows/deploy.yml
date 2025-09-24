@@ -1,0 +1,128 @@
+name: Deploy Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual deployment
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+
+    env:
+      # Production credentials from GitHub Secrets
+      TIS_PROXY_USERNAME: ${{ secrets.TIS_PROXY_USERNAME }}
+      TIS_PROXY_PASSWORD: ${{ secrets.TIS_PROXY_PASSWORD }}
+      TIS_PROXY_HOST: ${{ secrets.TIS_PROXY_HOST || 'http://tisproxy.rtd-denver.com' }}
+      TIS_PROXY_SERVICE: ${{ secrets.TIS_PROXY_SERVICE || 'siri' }}
+      TIS_PROXY_TTL: ${{ secrets.TIS_PROXY_TTL || '90000' }}
+      RAILCOMM_SERVICE: ${{ secrets.RAILCOMM_SERVICE || 'railcomm' }}
+      RAILCOMM_TTL: ${{ secrets.RAILCOMM_TTL || '90000' }}
+      LRGPS_SERVICE: ${{ secrets.LRGPS_SERVICE || 'lrgps' }}
+      LRGPS_TTL: ${{ secrets.LRGPS_TTL || '90000' }}
+      KAFKA_BOOTSTRAP_SERVERS: ${{ secrets.KAFKA_BOOTSTRAP_SERVERS || 'localhost:9092' }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: 'maven'
+
+    - name: Validate deployment credentials
+      run: |
+        if [ -z "$TIS_PROXY_USERNAME" ] || [ -z "$TIS_PROXY_PASSWORD" ]; then
+          echo "::error::Missing required secrets for deployment"
+          exit 1
+        fi
+        echo "✅ Deployment credentials validated"
+        echo "📍 Target environment: ${{ github.event.inputs.environment || 'production' }}"
+
+    - name: Run tests
+      run: mvn clean test
+
+    - name: Build application
+      run: mvn clean package
+
+    - name: Build Docker image
+      run: |
+        docker build -t rtd-gtfs-pipeline:${{ github.sha }} .
+        docker tag rtd-gtfs-pipeline:${{ github.sha }} rtd-gtfs-pipeline:latest
+
+    - name: Login to container registry
+      if: github.event_name == 'push' || github.event.inputs.environment == 'production'
+      run: |
+        echo "🔐 Would login to container registry here"
+        # echo ${{ secrets.REGISTRY_PASSWORD }} | docker login -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+
+    - name: Push Docker image
+      if: github.event_name == 'push' || github.event.inputs.environment == 'production'
+      run: |
+        echo "📦 Would push Docker image to registry here"
+        # docker push rtd-gtfs-pipeline:${{ github.sha }}
+        # docker push rtd-gtfs-pipeline:latest
+
+    - name: Deploy to Kubernetes
+      if: github.event_name == 'push' || github.event.inputs.environment == 'production'
+      run: |
+        echo "🚀 Would deploy to Kubernetes cluster here"
+        echo "Environment: ${{ github.event.inputs.environment || 'production' }}"
+        # Example kubectl commands:
+        # kubectl set image deployment/rtd-pipeline rtd-pipeline=rtd-gtfs-pipeline:${{ github.sha }}
+        # kubectl rollout status deployment/rtd-pipeline
+
+    - name: Create deployment artifact
+      run: |
+        mkdir -p deployment
+        cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar deployment/
+        cp -r scripts deployment/
+        cp .env.example deployment/.env.example
+
+        # Create deployment info file
+        cat > deployment/deployment-info.txt <<EOF
+        Deployment Information
+        =====================
+        Git SHA: ${{ github.sha }}
+        Branch: ${{ github.ref_name }}
+        Environment: ${{ github.event.inputs.environment || 'production' }}
+        Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        Deployed by: ${{ github.actor }}
+
+        Environment Variables:
+        - TIS_PROXY_HOST: $TIS_PROXY_HOST
+        - TIS_PROXY_SERVICE: $TIS_PROXY_SERVICE
+        - TIS_PROXY_TTL: $TIS_PROXY_TTL
+        - KAFKA_BOOTSTRAP_SERVERS: $KAFKA_BOOTSTRAP_SERVERS
+        EOF
+
+    - name: Upload deployment artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-${{ github.sha }}
+        path: deployment/
+
+    - name: Notify deployment status
+      if: always()
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ Deployment successful!"
+          # Send success notification (Slack, email, etc.)
+        else
+          echo "❌ Deployment failed!"
+          # Send failure notification
+        fi

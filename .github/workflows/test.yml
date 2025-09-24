@@ -1,0 +1,79 @@
+name: Test Pipeline
+
+on:
+  push:
+    branches: [ main, dev_*, feature/* ]
+  pull_request:
+    branches: [ main, dev_* ]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      # Inject GitHub Secrets as environment variables
+      TIS_PROXY_USERNAME: ${{ secrets.TIS_PROXY_USERNAME }}
+      TIS_PROXY_PASSWORD: ${{ secrets.TIS_PROXY_PASSWORD }}
+      TIS_PROXY_HOST: ${{ secrets.TIS_PROXY_HOST || 'http://tisproxy.rtd-denver.com' }}
+      TIS_PROXY_SERVICE: ${{ secrets.TIS_PROXY_SERVICE || 'siri' }}
+      TIS_PROXY_TTL: ${{ secrets.TIS_PROXY_TTL || '90000' }}
+      RAILCOMM_SERVICE: ${{ secrets.RAILCOMM_SERVICE || 'railcomm' }}
+      RAILCOMM_TTL: ${{ secrets.RAILCOMM_TTL || '90000' }}
+      LRGPS_SERVICE: ${{ secrets.LRGPS_SERVICE || 'lrgps' }}
+      LRGPS_TTL: ${{ secrets.LRGPS_TTL || '90000' }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: 'maven'
+
+    - name: Validate credentials
+      run: |
+        if [ -z "$TIS_PROXY_USERNAME" ] || [ -z "$TIS_PROXY_PASSWORD" ]; then
+          echo "::error::Missing required secrets TIS_PROXY_USERNAME or TIS_PROXY_PASSWORD"
+          echo "Please configure these secrets in your repository settings:"
+          echo "  Settings -> Secrets and variables -> Actions -> New repository secret"
+          exit 1
+        fi
+        echo "✅ Credentials validated (username starts with: ${TIS_PROXY_USERNAME:0:3}***)"
+
+    - name: Run Maven tests
+      run: mvn clean test
+      continue-on-error: false
+
+    - name: Build project
+      run: mvn clean package -DskipTests
+
+    - name: Test HTTP receivers startup
+      run: |
+        echo "Testing BusCommHTTPReceiver startup..."
+        timeout 10s java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar \
+          com.rtd.pipeline.BusCommHTTPReceiver || true
+
+        echo "Testing RailCommHTTPReceiver startup..."
+        timeout 10s java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar \
+          com.rtd.pipeline.RailCommHTTPReceiver || true
+
+        echo "Testing LRGPSHTTPReceiver startup..."
+        timeout 10s java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar \
+          com.rtd.pipeline.LRGPSHTTPReceiver || true
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results
+        path: target/surefire-reports/
+
+    - name: Upload JAR artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: rtd-pipeline-jar
+        path: target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar

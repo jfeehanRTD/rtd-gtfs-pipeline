@@ -1,0 +1,59 @@
+# Build artifacts
+target/
+build/
+dist/
+*.jar
+!target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Environment files with secrets
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation (not needed in Docker image)
+*.md
+docs/
+README.md
+
+# Node modules (for React app)
+rtd-maps-app/node_modules/
+rtd-maps-app/build/
+rtd-maps-app/.env
+
+# Test files
+src/test/
+*.test.js
+*.spec.js
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Gradle files (if any)
+.gradle/
+gradle/
+
+# Maven wrapper (not needed in Docker)
+.mvn/
+mvnw
+mvnw.cmd

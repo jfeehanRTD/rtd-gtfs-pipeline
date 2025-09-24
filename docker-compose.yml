@@ -1,74 +1,155 @@
+version: '3.8'
+
 services:
-  # Apache Kafka with KRaft (no ZooKeeper) - ARM64 compatible
+  # Kafka and Zookeeper for message streaming
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: rtd-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - rtd-network
+
   kafka:
-    image: bitnami/kafka:3.8.0  # Bitnami Kafka with native ARM64 support
-    hostname: kafka
+    image: confluentinc/cp-kafka:7.5.0
     container_name: rtd-kafka
-    restart: unless-stopped
+    depends_on:
+      - zookeeper
     ports:
       - "9092:9092"
-      - "9093:9093"
     environment:
-      # KRaft configuration (Bitnami format)
-      KAFKA_CFG_NODE_ID: 1
-      KAFKA_CFG_PROCESS_ROLES: controller,broker
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_CFG_LISTENERS: PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:9092
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      
-      # Performance and storage settings (Bitnami format)
-      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CFG_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
-      
-      # Log settings optimized for RTD data (Bitnami format)
-      KAFKA_CFG_LOG_RETENTION_HOURS: 24
-      KAFKA_CFG_LOG_RETENTION_BYTES: 1073741824  # 1GB
-      KAFKA_CFG_LOG_SEGMENT_BYTES: 104857600     # 100MB
-      KAFKA_CFG_LOG_CLEANUP_POLICY: delete
-      
-      # JVM settings for development
-      KAFKA_HEAP_OPTS: "-Xmx1G -Xms1G"
-      
-    volumes:
-      - kafka-data:/var/lib/kafka/data
-      - /var/run/docker.sock:/var/run/docker.sock
-    healthcheck:
-      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
     networks:
       - rtd-network
 
-  # Kafka UI for easy management (optional)
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: rtd-kafka-ui
-    restart: unless-stopped
-    platform: linux/amd64  # Force x86_64 platform for compatibility
-    ports:
-      - "8090:8080"  # Changed from 8080 to 8090 to avoid conflict with RTD API
-    environment:
-      KAFKA_CLUSTERS_0_NAME: rtd-kafka-cluster
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
-      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: PLAINTEXT
+  # Main RTD Pipeline Application
+  rtd-pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rtd-pipeline
     depends_on:
       - kafka
+    environment:
+      # Credentials from environment or .env file
+      TIS_PROXY_USERNAME: ${TIS_PROXY_USERNAME}
+      TIS_PROXY_PASSWORD: ${TIS_PROXY_PASSWORD}
+      TIS_PROXY_HOST: ${TIS_PROXY_HOST:-http://tisproxy.rtd-denver.com}
+      TIS_PROXY_SERVICE: ${TIS_PROXY_SERVICE:-siri}
+      TIS_PROXY_TTL: ${TIS_PROXY_TTL:-90000}
+      RAILCOMM_SERVICE: ${RAILCOMM_SERVICE:-railcomm}
+      RAILCOMM_TTL: ${RAILCOMM_TTL:-90000}
+      LRGPS_SERVICE: ${LRGPS_SERVICE:-lrgps}
+      LRGPS_TTL: ${LRGPS_TTL:-90000}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      JAVA_OPTS: "-Xms1g -Xmx4g"
+    ports:
+      - "8080:8080"  # Main API
+      - "8081:8081"  # Rail Communication HTTP Receiver
+      - "8082:8082"  # Bus SIRI HTTP Receiver
+      - "8083:8083"  # LRGPS HTTP Receiver
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./output:/app/output
     networks:
       - rtd-network
+    restart: unless-stopped
+    command: ["java", "-jar", "app.jar", "com.rtd.pipeline.RTDStaticDataPipeline"]
 
-volumes:
-  kafka-data:
-    driver: local
+  # Bus SIRI HTTP Receiver
+  bus-receiver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rtd-bus-receiver
+    depends_on:
+      - kafka
+    environment:
+      TIS_PROXY_USERNAME: ${TIS_PROXY_USERNAME}
+      TIS_PROXY_PASSWORD: ${TIS_PROXY_PASSWORD}
+      TIS_PROXY_HOST: ${TIS_PROXY_HOST:-http://tisproxy.rtd-denver.com}
+      TIS_PROXY_SERVICE: ${TIS_PROXY_SERVICE:-siri}
+      TIS_PROXY_TTL: ${TIS_PROXY_TTL:-90000}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    ports:
+      - "8082:8082"
+    networks:
+      - rtd-network
+    restart: unless-stopped
+    command: ["java", "-cp", "app.jar", "com.rtd.pipeline.BusCommHTTPReceiver"]
+
+  # Rail Communication HTTP Receiver
+  rail-receiver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rtd-rail-receiver
+    depends_on:
+      - kafka
+    environment:
+      TIS_PROXY_USERNAME: ${TIS_PROXY_USERNAME}
+      TIS_PROXY_PASSWORD: ${TIS_PROXY_PASSWORD}
+      TIS_PROXY_HOST: ${TIS_PROXY_HOST:-http://tisproxy.rtd-denver.com}
+      RAILCOMM_SERVICE: ${RAILCOMM_SERVICE:-railcomm}
+      RAILCOMM_TTL: ${RAILCOMM_TTL:-90000}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    ports:
+      - "8081:8081"
+    networks:
+      - rtd-network
+    restart: unless-stopped
+    command: ["java", "-cp", "app.jar", "com.rtd.pipeline.RailCommHTTPReceiver"]
+
+  # LRGPS HTTP Receiver
+  lrgps-receiver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rtd-lrgps-receiver
+    depends_on:
+      - kafka
+    environment:
+      TIS_PROXY_USERNAME: ${TIS_PROXY_USERNAME}
+      TIS_PROXY_PASSWORD: ${TIS_PROXY_PASSWORD}
+      TIS_PROXY_HOST: ${TIS_PROXY_HOST:-http://tisproxy.rtd-denver.com}
+      LRGPS_SERVICE: ${LRGPS_SERVICE:-lrgps}
+      LRGPS_TTL: ${LRGPS_TTL:-90000}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    ports:
+      - "8083:8083"
+    networks:
+      - rtd-network
+    restart: unless-stopped
+    command: ["java", "-cp", "app.jar", "com.rtd.pipeline.LRGPSHTTPReceiver"]
+
+  # React Web Application (optional)
+  # web-app:
+  #   build:
+  #     context: ./rtd-maps-app
+  #     dockerfile: Dockerfile
+  #   container_name: rtd-web-app
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     REACT_APP_API_URL: http://localhost:8080
+  #   networks:
+  #     - rtd-network
+  #   restart: unless-stopped
 
 networks:
   rtd-network:
     driver: bridge
-    name: rtd-gtfs-network
+
+volumes:
+  kafka-data:
+  zookeeper-data:

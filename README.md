@@ -38,14 +38,71 @@ This application processes real-time transit data from RTD Denver through two pr
 
 The pipeline fetches data from RTD's public endpoints every minute and processes internal rail communication data in real-time, using Apache Flink's streaming capabilities to output structured data for databases, message queues, or other downstream systems.
 
+## GitHub Secrets Configuration
+
+### Setting Up GitHub Secrets for CI/CD
+
+This project now supports GitHub Secrets for secure credential management in CI/CD workflows. Follow these steps to configure:
+
+#### Option 1: Automated Setup (Recommended)
+```bash
+# Run the setup script
+./scripts/setup-github-secrets.sh
+```
+
+The script will guide you through setting up all required and optional secrets.
+
+#### Option 2: Manual Setup
+1. Go to your repository on GitHub
+2. Navigate to Settings → Secrets and variables → Actions
+3. Add the following secrets:
+
+**Required Secrets:**
+- `TIS_PROXY_USERNAME` - RTD TIS proxy username
+- `TIS_PROXY_PASSWORD` - RTD TIS proxy password
+
+**Optional Secrets:**
+- `TIS_PROXY_HOST` - Default: `http://tisproxy.rtd-denver.com`
+- `TIS_PROXY_SERVICE` - Default: `siri`
+- `TIS_PROXY_TTL` - Default: `90000`
+- `RAILCOMM_SERVICE` - Default: `railcomm`
+- `RAILCOMM_TTL` - Default: `90000`
+- `LRGPS_SERVICE` - Default: `lrgps`
+- `LRGPS_TTL` - Default: `90000`
+- `KAFKA_BOOTSTRAP_SERVERS` - Default: `localhost:9092`
+
+### GitHub Actions Workflows
+
+The project includes two main workflows:
+
+1. **Test Workflow** (`.github/workflows/test.yml`)
+   - Runs on push and pull requests
+   - Validates credentials
+   - Runs Maven tests
+   - Tests HTTP receiver startup
+   - Uploads test results and JAR artifacts
+
+2. **Deploy Workflow** (`.github/workflows/deploy.yml`)
+   - Runs on push to main or manual trigger
+   - Supports multiple environments (development, staging, production)
+   - Builds Docker images
+   - Creates deployment artifacts
+   - Ready for Kubernetes deployment
+
+### Local Development vs GitHub Actions
+
+- **Local Development**: Continue using `.env` file (see Security Configuration below)
+- **GitHub Actions**: Automatically uses GitHub Secrets
+- **Both methods work**: No code changes required, credentials load from environment variables
+
 ## Architecture
 
 ### Components
 - **RTDGTFSPipeline**: Main orchestration class that sets up the Flink job
 - **GTFSRealtimeSource**: Custom source function for downloading GTFS-RT protobuf feeds
-- **Data Models**: 
+- **Data Models**:
   - `VehiclePosition`: Real-time vehicle location and status
-  - `TripUpdate`: Trip schedule and delay information  
+  - `TripUpdate`: Trip schedule and delay information
   - `Alert`: Service disruption alerts
 - **Table API Integration**: Structured data processing and configurable output sinks
 
@@ -1367,6 +1424,18 @@ Enhanced vehicle-specific data:
 ## Built-in Tools
 
 The project includes several convenient command-line tools:
+
+### GTFS Validation Tool (NEW!)
+- **`./gtfs-validator.sh`**: Comprehensive GTFS feed validation for all RTD feeds
+- Validates all 8 RTD GTFS ZIP files from https://www.rtd-denver.com/open-records/open-spatial-information/gtfs
+- Comprehensive validation: file presence, structure, data format, cross-references, geographic bounds, service definitions
+- Supports individual feed validation or complete feed suite validation
+- Command examples:
+  ```bash
+  ./gtfs-validator.sh validate              # Validate all RTD feeds
+  ./gtfs-validator.sh validate google_transit  # Validate main feed
+  ./gtfs-validator.sh list                  # List all available feeds
+  ```
 
 ### RTD Query Client
 - **`./scripts/rtd-query`**: Query and monitor all Flink data sinks with formatted output
