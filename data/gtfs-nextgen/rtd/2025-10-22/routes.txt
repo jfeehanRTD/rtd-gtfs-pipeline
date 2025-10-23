@@ -1,0 +1,150 @@
+route_id,agency_id,route_short_name,route_long_name,route_desc,route_type,route_url,route_color,route_text_color,route_sort_order,network_id
+0,RTD,0,Broadway,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,15,standard_fare_network
+0B,RTD,0B,South Broadway,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,16,standard_fare_network
+0L,RTD,0L,South Broadway Limited,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,20,standard_fare_network
+1,RTD,1,West 1st Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,30,standard_fare_network
+10,RTD,10,East 12th Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,170,standard_fare_network
+100,RTD,100,Kipling Street,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1220,standard_fare_network
+101,RTD,101,Light Rail,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,3,standard_fare_network
+102,RTD,102,Light Rail Loop Extra,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,4,standard_fare_network
+103,RTD,103,Light Rail West Line,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,8,standard_fare_network
+104L,RTD,104L,Wagon Road / Denver Airport Limited,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1253,standard_fare_network
+105,RTD,105,Havana Street,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1260,standard_fare_network
+107,RTD,107,Light Rail R Line,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,7,standard_fare_network
+11,RTD,11,Mississippi Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,180,standard_fare_network
+112,RTD,112,West 112th Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1280,standard_fare_network
+113,RTD,113,Commuter Rail B- and G-Line,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2,standard_fare_network
+116X,RTD,116X,South Simms Express,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1290,standard_fare_network
+117,RTD,117,Commuter Rail N-Line,,0,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,6,standard_fare_network
+12,RTD,12,South Downing,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,200,standard_fare_network
+120,RTD,120,120th Avenue Crosstown,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1310,standard_fare_network
+120L,RTD,120L,Thornton / Brighton,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1315,standard_fare_network
+120X,RTD,120X,Wagon Road / Thornton Express,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1320,standard_fare_network
+121,RTD,121,Peoria Street,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1330,standard_fare_network
+130,RTD,130,Yale / Buckley,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1370,standard_fare_network
+133,RTD,133,Hampden/Tower,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1390,standard_fare_network
+135,RTD,135,Smoky Hill Road,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1400,standard_fare_network
+139,RTD,139,Quincy Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1410,standard_fare_network
+14,RTD,14,West Florida Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,220,standard_fare_network
+145X,RTD,145X,Brighton / Denver Airport ,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1420,standard_fare_network
+15,RTD,15,East Colfax Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,230,standard_fare_network
+153,RTD,153,Chambers Road,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1430,standard_fare_network
+15L,RTD,15L,East Colfax Limited,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,240,standard_fare_network
+16,RTD,16,West Colfax Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,250,standard_fare_network
+169,RTD,169,Buckley Road,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1450,standard_fare_network
+169L,RTD,169L,Buckley / Tower DIA Limited,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1460,standard_fare_network
+17,RTD,17,Golden/Colfax,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,270,standard_fare_network
+19,RTD,19,North Pecos ,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,290,standard_fare_network
+20,RTD,20,20th Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,320,standard_fare_network
+204,RTD,204,Table Mesa / Moorhead / North 19th,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1530,standard_fare_network
+205,RTD,205,28th St / Gunbarrel ,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1540,standard_fare_network
+206,RTD,206,Conestoga/ Arapahoe / Fairview H.S.,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1550,standard_fare_network
+208,RTD,208,Iris / Valmont,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1570,standard_fare_network
+21,RTD,21,Evans Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,330,standard_fare_network
+225,RTD,225,Boulder / Lafayette via Baseline,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1600,standard_fare_network
+228,RTD,228,Lafayette / Louisville / Broomfield,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1630,standard_fare_network
+24,RTD,24,University Blvd,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,360,standard_fare_network
+28,RTD,28,28th Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,410,standard_fare_network
+3,RTD,3,Alameda Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,70,standard_fare_network
+30,RTD,30,South Federal Blvd,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,440,standard_fare_network
+31,RTD,31,Federal Blvd ,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,460,standard_fare_network
+32,RTD,32,West 32nd Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,480,standard_fare_network
+323,RTD,323,Skyline Crosstown,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1730,standard_fare_network
+324,RTD,324,Main Street Crosstown,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1740,standard_fare_network
+326,RTD,326,Westside Crosstown,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1760,standard_fare_network
+327,RTD,327,Eastside Crosstown,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1770,standard_fare_network
+35,RTD,35,Hampden Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,500,standard_fare_network
+36,RTD,36,Fort Logan,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,520,standard_fare_network
+37,RTD,37,Smith Road Industrial,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,545,standard_fare_network
+38,RTD,38,West 38th Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,560,standard_fare_network
+3L,RTD,3L,East Alameda Limited,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,80,standard_fare_network
+4,RTD,4,Morrison Road,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,90,standard_fare_network
+40,RTD,40,Colorado Boulevard,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,580,standard_fare_network
+402L,RTD,402L,Highlands Ranch Parkway,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1810,standard_fare_network
+42,RTD,42,Montbello via Albrook/GVR,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,600,standard_fare_network
+43,RTD,43,Martin Luther King Blvd,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,610,standard_fare_network
+44,RTD,44,44th Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,620,standard_fare_network
+45,RTD,45,Montbello via 51st/GVR,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,640,standard_fare_network
+46,RTD,46,South Dahlia,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,650,standard_fare_network
+48,RTD,48,East 48th Avenue / Commerce City,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,680,standard_fare_network
+483,RTD,483,Parker Road - Lincoln Ave,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1850,standard_fare_network
+49,RTD,49,Denver/ Commerce City,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,690,standard_fare_network
+51,RTD,51,Sheridan Blvd,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,720,standard_fare_network
+52,RTD,52,W 52nd Avenue / South Bannock,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,740,standard_fare_network
+520,RTD,520,Brighton,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1855,standard_fare_network
+59,RTD,59,West Bowles,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,820,standard_fare_network
+6,RTD,6,East 6th Avenue ,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,110,standard_fare_network
+65,RTD,65,Monaco Parkway,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,890,standard_fare_network
+66,RTD,66,Arapahoe Road,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,900,standard_fare_network
+7,RTD,7,North Washington,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,120,standard_fare_network
+72,RTD,72,72nd Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,950,standard_fare_network
+73,RTD,73,Quebec Street,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,970,standard_fare_network
+76,RTD,76,Wadsworth Blvd,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1010,standard_fare_network
+8,RTD,8,North Broadway / Huron,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,140,standard_fare_network
+83,RTD,83,Cherry Creek / Parker Rd Limited,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1110,standard_fare_network
+88,RTD,88,Central Park/ 72nd Ave Station,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1150,standard_fare_network
+88L,RTD,88L,Thornton/Commerce City Limited,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1160,standard_fare_network
+9,RTD,9,West 10th Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,160,standard_fare_network
+92,RTD,92,92nd Avenue,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1200,standard_fare_network
+93L,RTD,93L,N Colorado Blvd Limited,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1205,standard_fare_network
+99,RTD,99,South Kipling Street,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1210,standard_fare_network
+A,RTD,A,Commuter Rail A-Line,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1,standard_fare_network
+AB,RTD,AB,Boulder / Denver Airport,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1910,standard_fare_network
+APFX,RTD,APFX,Arapahoe FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1921,standard_fare_network
+ART,RTD,ART,Art District Connector,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1930,standard_fare_network
+AT,RTD,AT,Arapahoe County / Denver Airport,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1940,standard_fare_network
+BMFX,RTD,BMFX,Broomfield FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1972,standard_fare_network
+BOLT,RTD,BOLT,Boulder / Longmont,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1995,standard_fare_network
+BOND,RTD,BOND,30th Street,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2000,standard_fare_network
+BRFX,RTD,BRFX,Brighton FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2005,standard_fare_network
+BWFX,RTD,BWFX,Belleview FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2010,standard_fare_network
+CCLX,RTD,CCLX,Comerce City Div Loop Extra,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2020,standard_fare_network
+CV,RTD,CV,Pine Junction / Conifer / Denver,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2030,standard_fare_network
+DASH,RTD,DASH,Boulder / Lafayette via Louisville,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2070,standard_fare_network
+DLX,RTD,DLX,Denver Loop Extra,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2090,standard_fare_network
+DRFX,RTD,DRFX,Dry Creek FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2105,standard_fare_network
+ELX,RTD,ELX,Englewood Loop Extra,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2113,standard_fare_network
+ESTS,RTD,ESTS,Bustang Estes Park Line,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2114,standard_fare_network
+EV,RTD,EV,Evergreen / Denver,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2115,standard_fare_network
+EVFX,RTD,EVFX,Evergreen FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2120,standard_fare_network
+FF,RTD,FF,Flatiron Flyer,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2125,standard_fare_network
+FFLX,RTD,FFLX,Flatiron Flyer Loop Extra,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2126,standard_fare_network
+FHFX,RTD,FHFX,Federal Heights FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2128,standard_fare_network
+FMR,RTD,FMR,Free MetroRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2130,standard_fare_network
+FREE,RTD,FREE,16th Street FreeRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2140,standard_fare_network
+GDFX,RTD,GDFX,Golden FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2150,standard_fare_network
+GMFX,RTD,GMFX,Green Mountain FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2160,standard_fare_network
+GS,RTD,GS,Golden / Boulder,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2170,standard_fare_network
+ILFX,RTD,ILFX,Interlocken FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2215,standard_fare_network
+JUMP,RTD,JUMP,Boulder / Lafayette/ Erie,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2230,standard_fare_network
+LD,RTD,LD,Longmont / Denver,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2250,standard_fare_network
+LGFX,RTD,LGFX,Longmont FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2312,standard_fare_network
+LNFX,RTD,LNFX,Lone Tree FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2322,standard_fare_network
+LNLX,RTD,LNLX,Trans Dev Longmont Loop Extra,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2323,standard_fare_network
+LSFX,RTD,LSFX,Louisville FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2325,standard_fare_network
+LX,RTD,LX,Longmont I-25 Express,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2255,standard_fare_network
+MDFX,RTD,MDFX,Meridian FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2345,standard_fare_network
+MLX,RTD,MLX,MOG Loop Extra,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2350,standard_fare_network
+NB,RTD,NB,Boulder/ Nederland/ Eldora,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2360,standard_fare_network
+NBFX,RTD,NBFX,North Broomfield FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2362,standard_fare_network
+NIFX,RTD,NIFX,North Inverness FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2365,standard_fare_network
+NLX,RTD,NLX,NOG Loop Extra,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2370,standard_fare_network
+NRTH,RTD,NRTH,Bustang North Line,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2371,standard_fare_network
+ORFX,RTD,ORFX,Orchard FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2372,standard_fare_network
+PD,RTD,PD,Parker / Denver,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2380,standard_fare_network
+PEGA,RTD,PEGA,Bustang Pegasus,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2382,standard_fare_network
+PKFX,RTD,PKFX,Parker FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2385,standard_fare_network
+PLFX,RTD,PLFX,Platte Valley FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,2387,standard_fare_network
+RX,RTD,RX,Brighton / Denver Express,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,5890,standard_fare_network
+SHOP,RTD,SHOP,Shopper's Special,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,5920,standard_fare_network
+SHUZ,RTD,SHUZ,Anschutz Shuttle,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,5921,standard_fare_network
+SIFX,RTD,SIFX,South Inverness FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,5922,standard_fare_network
+SJFX,RTD,SJFX,South Jeffco FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,5925,standard_fare_network
+SKIP,RTD,SKIP,Broadway,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,5930,standard_fare_network
+SNOW,RTD,SNOW,Bustang Snowstang,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,5975,standard_fare_network
+SOUT,RTD,SOUT,Bustang South Line,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,5933,standard_fare_network
+SPFX,RTD,SPFX,Superior FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,5935,standard_fare_network
+TNFX,RTD,TNFX,Thornton/Northglenn FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,5955,standard_fare_network
+WEST,RTD,WEST,Bustang West Line,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,5970,standard_fare_network
+WGFX,RTD,WGFX,Wagon Road FlexRide,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,5980,standard_fare_network
+bert,RTD,bert,bringing Englewood riders together,,3,http://www.rtd-denver.com/Schedules.shtml,,FFFFFF,1960,standard_fare_network

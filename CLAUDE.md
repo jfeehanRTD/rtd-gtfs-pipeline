@@ -200,6 +200,52 @@ flink run target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar
 - Trip Updates: `https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/TripUpdate.pb`
 - Alerts: `https://nodejs-prod.rtd-denver.com/api/download/gtfs-rt/Alerts.pb`
 
+## Oracle Database and VPN Requirements
+
+**CRITICAL**: Oracle TIES database requires VPN connection, but Claude Code does NOT work when VPN is connected.
+
+### Oracle Connection Details
+- **Host**: 10.1.77.23:1521/ops2p
+- **User**: ties
+- **Password**: tiesPr0d
+- **JDBC URL**: jdbc:oracle:thin:@10.1.77.23:1521/ops2p
+
+### VPN Workflow Constraint
+- **User must connect to VPN** to access Oracle database
+- **Claude Code does NOT work** when VPN is active
+- **Workaround**: Provide manual steps for user to run while on VPN, then user disconnects and shares results
+
+### Migration Steps for User (with VPN)
+When Oracle data migration is needed:
+
+1. **Connect to VPN first**
+2. **Load Oracle credentials**:
+   ```bash
+   source ~/ties-oracle-config.sh
+   ```
+3. **Run migration**:
+   ```bash
+   ./gradlew runTIESMigrationRTD
+   ```
+4. **Check results**:
+   ```bash
+   PGPASSWORD=TiesPassword123 psql -h localhost -p 5433 -U ties -d ties -c "
+   SELECT table_name,
+          (xpath('/row/c/text()', query_to_xml(format('select count(*) as c from %I', table_name), false, true, '')))[1]::text::int as row_count
+   FROM information_schema.tables
+   WHERE table_schema = 'public'
+     AND table_type = 'BASE TABLE'
+     AND table_name LIKE 'ties_%'
+   ORDER BY table_name;"
+   ```
+5. **Disconnect from VPN** and report results to Claude
+
+### Claude Code Behavior
+- **NEVER attempt** to connect to Oracle when user indicates VPN is not connected
+- **ALWAYS provide manual steps** when Oracle access is needed
+- **ASSUME VPN is not connected** unless user explicitly states otherwise
+- **VERIFY PostgreSQL results** after user completes manual migration
+
 ## Development Guidelines
 
 - Always run tests after making code changes to ensure functionality remains intact

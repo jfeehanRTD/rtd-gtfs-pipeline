@@ -1,0 +1,82 @@
+area_id,area_name
+airport_fare_zone,Airport
+airport_fare_zone,Airport
+airport_fare_zone,Airport
+airport_fare_zone,Airport
+airport_fare_zone,Airport
+airport_fare_zone,Airport
+airport_fare_zone,Airport
+avon,Avon
+avon,Avon
+avon,Avon
+avonvalt,Avon or alt
+avonvalt,Avon or alt
+avonvalt,Avon or alt
+berthoud,Berthoud Mobility Hub
+berthoud,Berthoud Mobility Hub
+berthoud,Berthoud Mobility Hub
+centerraloveland,Centerra Loveland Mobility Hub
+centerraloveland,Centerra Loveland Mobility Hub
+centerraloveland,Centerra Loveland Mobility Hub
+csprings,Colorado Springs
+csprings,Colorado Springs
+csprings,Colorado Springs
+denver_bustang,Denver
+denver_bustang,Denver
+denver_bustang,Denver
+eagle,Eagle
+eagle,Eagle
+eagle,Eagle
+firestonelongmont,Firestone-Longmont Mobility Hub
+firestonelongmont,Firestone-Longmont Mobility Hub
+firestonelongmont,Firestone-Longmont Mobility Hub
+free_service,Free Service
+free_service,Free Service
+free_service,Free Service
+free_service,Free Service
+free_service,Free Service
+free_service,Free Service
+free_service,Free Service
+frisco,Fricso
+frisco,Fricso
+frisco,Fricso
+ftcollins,Ft. Collins
+ftcollins,Ft. Collins
+ftcollins,Ft. Collins
+glenwood,Glenwood Springs
+glenwood,Glenwood Springs
+glenwood,Glenwood Springs
+grandjct,Grand Junction
+grandjct,Grand Junction
+grandjct,Grand Junction
+idahospgs,Idaho Springs
+idahospgs,Idaho Springs
+idahospgs,Idaho Springs
+local_fare_zone,Local Fare Zone
+local_fare_zone,Local Fare Zone
+local_fare_zone,Local Fare Zone
+local_fare_zone,Local Fare Zone
+local_fare_zone,Local Fare Zone
+local_fare_zone,Local Fare Zone
+local_fare_zone,Local Fare Zone
+monument,Monument Park and Ride
+monument,Monument Park and Ride
+monument,Monument Park and Ride
+natl_park,Rocky Mountain National Park
+natl_park,Rocky Mountain National Park
+natl_park,Rocky Mountain National Park
+parachute,Parachute
+parachute,Parachute
+parachute,Parachute
+rifle,Rifle
+rifle,Rifle
+rifle,Rifle
+ski_area,Ski Area
+ski_area,Ski Area
+ski_area,Ski Area
+vail,Vail
+vail,Vail
+vail,Vail
+woodmen,Woodmen Park and Ride
+woodmen,Woodmen Park and Ride
+woodmen,Woodmen Park and Ride

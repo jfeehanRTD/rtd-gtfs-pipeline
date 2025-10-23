@@ -1,0 +1,573 @@
+fare_product_id,fare_product_name,fare_media_id,amount,currency
+airport_day_pass,Airport Day Pass,cash,10.00,USD
+airport_day_pass,Airport Day Pass,my_ride_app,10.00,USD
+airport_day_pass,Airport Day Pass,my_ride_card,10.00,USD
+airport_day_pass,Airport Day Pass,paper_ticket,10.00,USD
+airport_day_pass,Airport Day Pass,cash,10.00,USD
+airport_day_pass,Airport Day Pass,my_ride_app,10.00,USD
+airport_day_pass,Airport Day Pass,my_ride_card,10.00,USD
+airport_day_pass,Airport Day Pass,paper_ticket,10.00,USD
+airport_day_pass,Airport Day Pass,cash,10.00,USD
+airport_day_pass,Airport Day Pass,my_ride_app,10.00,USD
+airport_day_pass,Airport Day Pass,cash,10.00,USD
+airport_day_pass,Airport Day Pass,cash,10.00,USD
+airport_day_pass,Airport Day Pass,cash,10.00,USD
+airport_day_pass,Airport Day Pass,my_ride_app,10.00,USD
+airport_day_pass,Airport Day Pass,paper_ticket,10.00,USD
+airport_day_pass,Airport Day Pass,my_ride_app,10.00,USD
+airport_day_pass,Airport Day Pass,paper_ticket,10.00,USD
+airport_day_pass,Airport Day Pass,paper_ticket,10.00,USD
+airport_day_pass,Airport Day Pass,my_ride_card,10.00,USD
+airport_day_pass,Airport Day Pass,my_ride_card,10.00,USD
+airport_day_pass,Airport Day Pass,my_ride_card,10.00,USD
+airport_day_pass,Airport Day Pass,my_ride_app,10.00,USD
+airport_day_pass,Airport Day Pass,my_ride_card,10.00,USD
+airport_day_pass,Airport Day Pass,paper_ticket,10.00,USD
+airport_day_pass,Airport Day Pass,cash,10.00,USD
+airport_day_pass,Airport Day Pass,my_ride_app,10.00,USD
+airport_day_pass,Airport Day Pass,my_ride_card,10.00,USD
+airport_day_pass,Airport Day Pass,paper_ticket,10.00,USD
+airport_transfer,Airport Upgrade,cash,7.25,USD
+airport_transfer,Airport Upgrade,my_ride_card,7.25,USD
+airport_transfer,Airport Upgrade,my_ride_app,7.25,USD
+airport_transfer,Airport Upgrade,cash,7.25,USD
+airport_transfer,Airport Upgrade,paper_ticket,7.25,USD
+airport_transfer,Airport Upgrade,my_ride_card,7.25,USD
+airport_transfer,Airport Upgrade,my_ride_app,7.25,USD
+airport_transfer,Airport Upgrade,cash,7.25,USD
+airport_transfer,Airport Upgrade,my_ride_app,7.25,USD
+airport_transfer,Airport Upgrade,my_ride_card,7.25,USD
+airport_transfer,Airport Upgrade,paper_ticket,7.25,USD
+airport_transfer,Airport Upgrade,paper_ticket,7.25,USD
+airport_transfer,Airport Upgrade,paper_ticket,7.25,USD
+airport_transfer,Airport Upgrade,my_ride_card,7.25,USD
+airport_transfer,Airport Upgrade,my_ride_app,7.25,USD
+airport_transfer,Airport Upgrade,cash,7.25,USD
+airport_transfer,Airport Upgrade,paper_ticket,7.25,USD
+airport_transfer,Airport Upgrade,my_ride_card,7.25,USD
+airport_transfer,Airport Upgrade,my_ride_app,7.25,USD
+airport_transfer,Airport Upgrade,cash,7.25,USD
+airport_transfer,Airport Upgrade,paper_ticket,7.25,USD
+airport_transfer,Airport Upgrade,my_ride_card,7.25,USD
+airport_transfer,Airport Upgrade,my_ride_app,7.25,USD
+airport_transfer,Airport Upgrade,cash,7.25,USD
+airport_transfer,Airport Upgrade,paper_ticket,7.25,USD
+airport_transfer,Airport Upgrade,my_ride_card,7.25,USD
+airport_transfer,Airport Upgrade,my_ride_app,7.25,USD
+airport_transfer,Airport Upgrade,cash,7.25,USD
+avon_denver,Avon to/from Denver,mobile_ticket,19,USD
+avon_denver,Avon to/from Denver,mobile_ticket,19,USD
+avon_denver,Avon to/from Denver,cash,19,USD
+avon_denver,Avon to/from Denver,cash,19,USD
+avon_denver,Avon to/from Denver,mobile_ticket,19,USD
+avon_denver,Avon to/from Denver,cash,19,USD
+avon_eagle,Avon to/from Eagle,mobile_ticket,4,USD
+avon_eagle,Avon to/from Eagle,mobile_ticket,4,USD
+avon_eagle,Avon to/from Eagle,cash,4,USD
+avon_eagle,Avon to/from Eagle,mobile_ticket,4,USD
+avon_eagle,Avon to/from Eagle,cash,4,USD
+avon_eagle,Avon to/from Eagle,cash,4,USD
+avon_frisco,Avon to/from Frisco,mobile_ticket,7,USD
+avon_frisco,Avon to/from Frisco,cash,7,USD
+avon_frisco,Avon to/from Frisco,cash,7,USD
+avon_frisco,Avon to/from Frisco,mobile_ticket,7,USD
+avon_frisco,Avon to/from Frisco,cash,7,USD
+avon_frisco,Avon to/from Frisco,mobile_ticket,7,USD
+avon_glenwood,Avon to/from Glenwood Springs,cash,8,USD
+avon_glenwood,Avon to/from Glenwood Springs,cash,8,USD
+avon_glenwood,Avon to/from Glenwood Springs,mobile_ticket,8,USD
+avon_glenwood,Avon to/from Glenwood Springs,mobile_ticket,8,USD
+avon_glenwood,Avon to/from Glenwood Springs,mobile_ticket,8,USD
+avon_glenwood,Avon to/from Glenwood Springs,cash,8,USD
+avon_grandjct,Avon to/from Grand Junction,mobile_ticket,24,USD
+avon_grandjct,Avon to/from Grand Junction,mobile_ticket,24,USD
+avon_grandjct,Avon to/from Grand Junction,cash,24,USD
+avon_grandjct,Avon to/from Grand Junction,mobile_ticket,24,USD
+avon_grandjct,Avon to/from Grand Junction,cash,24,USD
+avon_grandjct,Avon to/from Grand Junction,cash,24,USD
+avon_idahospgs,Avon to/from Idaho Springs,cash,13,USD
+avon_idahospgs,Avon to/from Idaho Springs,mobile_ticket,13,USD
+avon_idahospgs,Avon to/from Idaho Springs,mobile_ticket,13,USD
+avon_idahospgs,Avon to/from Idaho Springs,mobile_ticket,13,USD
+avon_idahospgs,Avon to/from Idaho Springs,cash,13,USD
+avon_idahospgs,Avon to/from Idaho Springs,cash,13,USD
+avon_parachute,Avon to/from Parachute,mobile_ticket,16,USD
+avon_parachute,Avon to/from Parachute,cash,16,USD
+avon_parachute,Avon to/from Parachute,mobile_ticket,16,USD
+avon_parachute,Avon to/from Parachute,mobile_ticket,16,USD
+avon_parachute,Avon to/from Parachute,cash,16,USD
+avon_parachute,Avon to/from Parachute,cash,16,USD
+avon_rifle,Avon to/from Rifle,mobile_ticket,13,USD
+avon_rifle,Avon to/from Rifle,cash,13,USD
+avon_rifle,Avon to/from Rifle,mobile_ticket,13,USD
+avon_rifle,Avon to/from Rifle,cash,13,USD
+avon_rifle,Avon to/from Rifle,mobile_ticket,13,USD
+avon_rifle,Avon to/from Rifle,cash,13,USD
+berthoud_centerraloveland,Berthoud Mobility Hub to/from Centerra Loveland Mobility Hub,mobile_ticket,1,USD
+berthoud_centerraloveland,Berthoud Mobility Hub to/from Centerra Loveland Mobility Hub,mobile_ticket,1,USD
+berthoud_centerraloveland,Berthoud Mobility Hub to/from Centerra Loveland Mobility Hub,cash,1,USD
+berthoud_centerraloveland,Berthoud Mobility Hub to/from Centerra Loveland Mobility Hub,cash,1,USD
+berthoud_centerraloveland,Berthoud Mobility Hub to/from Centerra Loveland Mobility Hub,mobile_ticket,1,USD
+berthoud_centerraloveland,Berthoud Mobility Hub to/from Centerra Loveland Mobility Hub,cash,1,USD
+berthoud_denver,Berthoud Mobility Hub to/from Denver,cash,7,USD
+berthoud_denver,Berthoud Mobility Hub to/from Denver,mobile_ticket,7,USD
+berthoud_denver,Berthoud Mobility Hub to/from Denver,mobile_ticket,7,USD
+berthoud_denver,Berthoud Mobility Hub to/from Denver,cash,7,USD
+berthoud_denver,Berthoud Mobility Hub to/from Denver,cash,7,USD
+berthoud_denver,Berthoud Mobility Hub to/from Denver,mobile_ticket,7,USD
+berthoud_firestonelongmont, Berthoud Mobility Hub to Firestone-Longmont Mobility Hub ,mobile_ticket,2,USD
+berthoud_firestonelongmont, Berthoud Mobility Hub to Firestone-Longmont Mobility Hub ,cash,2,USD
+berthoud_firestonelongmont, Berthoud Mobility Hub to Firestone-Longmont Mobility Hub ,mobile_ticket,2,USD
+berthoud_firestonelongmont, Berthoud Mobility Hub to Firestone-Longmont Mobility Hub ,mobile_ticket,2,USD
+berthoud_firestonelongmont, Berthoud Mobility Hub to Firestone-Longmont Mobility Hub ,cash,2,USD
+berthoud_firestonelongmont, Berthoud Mobility Hub to Firestone-Longmont Mobility Hub ,cash,2,USD
+berthoud_ftcollins,Berthoud Mobility Hub to/from Fort Collins,mobile_ticket,4,USD
+berthoud_ftcollins,Berthoud Mobility Hub to/from Fort Collins,mobile_ticket,4,USD
+berthoud_ftcollins,Berthoud Mobility Hub to/from Fort Collins ,cash,4,USD
+berthoud_ftcollins,Berthoud Mobility Hub to/from Fort Collins ,cash,4,USD
+berthoud_ftcollins,Berthoud Mobility Hub to/from Fort Collins ,cash,4,USD
+berthoud_ftcollins,Berthoud Mobility Hub to/from Fort Collins,mobile_ticket,4,USD
+centerraloveland_denver,Centerra Loveland Mobility Hub to Denver Union Station,cash,8,USD
+centerraloveland_denver,Centerra Loveland Mobility Hub to Denver Union Station,cash,8,USD
+centerraloveland_denver,Centerra Loveland Mobility Hub to Denver Union Station,mobile_ticket,8,USD
+centerraloveland_denver,Centerra Loveland Mobility Hub to Denver Union Station,mobile_ticket,8,USD
+centerraloveland_denver,Centerra Loveland Mobility Hub to Denver Union Station,cash,8,USD
+centerraloveland_denver,Centerra Loveland Mobility Hub to Denver Union Station,mobile_ticket,8,USD
+centerraloveland_firestonelongmont,Centerra Loveland Mobility Hub to Firestone-Longmont Mobility Hub,cash,3,USD
+centerraloveland_firestonelongmont,Centerra Loveland Mobility Hub to Firestone-Longmont Mobility Hub,cash,3,USD
+centerraloveland_firestonelongmont,Centerra Loveland Mobility Hub to Firestone-Longmont Mobility Hub,mobile_ticket,3,USD
+centerraloveland_firestonelongmont,Centerra Loveland Mobility Hub to Firestone-Longmont Mobility Hub,mobile_ticket,3,USD
+centerraloveland_firestonelongmont,Centerra Loveland Mobility Hub to Firestone-Longmont Mobility Hub,mobile_ticket,3,USD
+centerraloveland_firestonelongmont,Centerra Loveland Mobility Hub to Firestone-Longmont Mobility Hub,cash,3,USD
+centerraloveland_ftcollins,Centerra Loveland Mobility Hub to/from Fort Collins,mobile_ticket,6,USD
+centerraloveland_ftcollins,Centerra Loveland Mobility Hub to/from Fort Collins,cash,6,USD
+centerraloveland_ftcollins,Centerra Loveland Mobility Hub to/from Fort Collins,mobile_ticket,6,USD
+centerraloveland_ftcollins,Centerra Loveland Mobility Hub to/from Fort Collins,cash,6,USD
+centerraloveland_ftcollins,Centerra Loveland Mobility Hub to/from Fort Collins,cash,6,USD
+centerraloveland_ftcollins,Centerra Loveland Mobility Hub to/from Fort Collins,mobile_ticket,6,USD
+csprings_denver,Colorado Springs to/from Denver,mobile_ticket,12,USD
+csprings_denver,Colorado Springs to/from Denver,mobile_ticket,12,USD
+csprings_denver,Colorado Springs to/from Denver,cash,12,USD
+csprings_denver,Colorado Springs to/from Denver,cash,12,USD
+csprings_denver,Colorado Springs to/from Denver,mobile_ticket,12,USD
+csprings_denver,Colorado Springs to/from Denver,cash,12,USD
+csprings_monument,Colorado Springs to/from Monument Park and Ride,cash,5,USD
+csprings_monument,Colorado Springs to/from Monument Park and Ride,cash,5,USD
+csprings_monument,Colorado Springs to/from Monument Park and Ride,mobile_ticket,5,USD
+csprings_monument,Colorado Springs to/from Monument Park and Ride,mobile_ticket,5,USD
+csprings_monument,Colorado Springs to/from Monument Park and Ride,cash,5,USD
+csprings_monument,Colorado Springs to/from Monument Park and Ride,mobile_ticket,5,USD
+csprings_woodmen,Colorado Springs to/from Woodmen Road Park and Ride,cash,12,USD
+csprings_woodmen,Colorado Springs to/from Woodmen Road Park and Ride,mobile_ticket,12,USD
+csprings_woodmen,Colorado Springs to/from Woodmen Road Park and Ride,mobile_ticket,12,USD
+csprings_woodmen,Colorado Springs to/from Woodmen Road Park and Ride,mobile_ticket,12,USD
+csprings_woodmen,Colorado Springs to/from Woodmen Road Park and Ride,cash,12,USD
+csprings_woodmen,Colorado Springs to/from Woodmen Road Park and Ride,cash,12,USD
+day_pass,Day Pass,my_ride_card,5.50,USD
+day_pass,Day Pass,my_ride_app,5.50,USD
+day_pass,Day Pass,my_ride_card,5.50,USD
+day_pass,Day Pass,cash,5.50,USD
+day_pass,Day Pass,paper_ticket,5.50,USD
+day_pass,Day Pass,paper_ticket,5.50,USD
+day_pass,Day Pass,paper_ticket,5.50,USD
+day_pass,Day Pass,cash,5.50,USD
+day_pass,Day Pass,paper_ticket,5.50,USD
+day_pass,Day Pass,my_ride_app,5.50,USD
+day_pass,Day Pass,my_ride_card,5.50,USD
+day_pass,Day Pass,paper_ticket,5.50,USD
+day_pass,Day Pass,my_ride_card,5.50,USD
+day_pass,Day Pass,my_ride_app,5.50,USD
+day_pass,Day Pass,cash,5.50,USD
+day_pass,Day Pass,paper_ticket,5.50,USD
+day_pass,Day Pass,my_ride_card,5.50,USD
+day_pass,Day Pass,my_ride_app,5.50,USD
+day_pass,Day Pass,cash,5.50,USD
+day_pass,Day Pass,my_ride_app,5.50,USD
+day_pass,Day Pass,cash,5.50,USD
+day_pass,Day Pass,my_ride_card,5.50,USD
+day_pass,Day Pass,paper_ticket,5.50,USD
+day_pass,Day Pass,my_ride_app,5.50,USD
+day_pass,Day Pass,cash,5.50,USD
+day_pass,Day Pass,cash,5.50,USD
+day_pass,Day Pass,my_ride_app,5.50,USD
+day_pass,Day Pass,my_ride_card,5.50,USD
+denver_eagle,Denver to/from Eagle,cash,22,USD
+denver_eagle,Denver to/from Eagle,mobile_ticket,22,USD
+denver_eagle,Denver to/from Eagle,cash,22,USD
+denver_eagle,Denver to/from Eagle,mobile_ticket,22,USD
+denver_eagle,Denver to/from Eagle,cash,22,USD
+denver_eagle,Denver to/from Eagle,mobile_ticket,22,USD
+denver_estes,Bustang: Denver to/from Estes,mobile_ticket,7.5,USD
+denver_estes,Bustang: Denver to/from Estes,cash,7.5,USD
+denver_estes,Bustang: Denver to/from Estes,mobile_ticket,7.5,USD
+denver_estes,Bustang: Denver to/from Estes,cash,7.5,USD
+denver_estes,Bustang: Denver to/from Estes,mobile_ticket,7.5,USD
+denver_estes,Bustang: Denver to/from Estes,cash,7.5,USD
+denver_firestonelongmont,Denver Union Station to/from Firestone-Longmont Mobility Hub,mobile_ticket,5,USD
+denver_firestonelongmont,Denver Union Station to/from Firestone-Longmont Mobility Hub,cash,5,USD
+denver_firestonelongmont,Denver Union Station to/from Firestone-Longmont Mobility Hub,mobile_ticket,5,USD
+denver_firestonelongmont,Denver Union Station to/from Firestone-Longmont Mobility Hub,mobile_ticket,5,USD
+denver_firestonelongmont,Denver Union Station to/from Firestone-Longmont Mobility Hub,cash,5,USD
+denver_firestonelongmont,Denver Union Station to/from Firestone-Longmont Mobility Hub,cash,5,USD
+denver_frisco,Denver to/from Frisco,cash,12,USD
+denver_frisco,Denver to/from Frisco,cash,12,USD
+denver_frisco,Denver to/from Frisco,mobile_ticket,12,USD
+denver_frisco,Denver to/from Frisco,cash,12,USD
+denver_frisco,Denver to/from Frisco,mobile_ticket,12,USD
+denver_frisco,Denver to/from Frisco,mobile_ticket,12,USD
+denver_ftcollins,Denver to/from Fort Collins,mobile_ticket,10,USD
+denver_ftcollins,Denver to/from Fort Collins,cash,10,USD
+denver_ftcollins,Denver to/from Fort Collins,mobile_ticket,10,USD
+denver_ftcollins,Denver to/from Fort Collins,cash,10,USD
+denver_ftcollins,Denver to/from Fort Collins,mobile_ticket,10,USD
+denver_ftcollins,Denver to/from Fort Collins,cash,10,USD
+denver_glenwood,Denver to/from Glenwood Springs,mobile_ticket,28,USD
+denver_glenwood,Denver to/from Glenwood Springs,cash,28,USD
+denver_glenwood,Denver to/from Glenwood Springs,mobile_ticket,28,USD
+denver_glenwood,Denver to/from Glenwood Springs,cash,28,USD
+denver_glenwood,Denver to/from Glenwood Springs,mobile_ticket,28,USD
+denver_glenwood,Denver to/from Glenwood Springs,cash,28,USD
+denver_grandjct,Denver to/from Grand Junction,mobile_ticket,43,USD
+denver_grandjct,Denver to/from Grand Junction,cash,43,USD
+denver_grandjct,Denver to/from Grand Junction,mobile_ticket,43,USD
+denver_grandjct,Denver to/from Grand Junction,cash,43,USD
+denver_grandjct,Denver to/from Grand Junction,mobile_ticket,43,USD
+denver_grandjct,Denver to/from Grand Junction,cash,43,USD
+denver_idahospgs,Denver to/from Idaho Springs,mobile_ticket,5,USD
+denver_idahospgs,Denver to/from Idaho Springs,mobile_ticket,5,USD
+denver_idahospgs,Denver to/from Idaho Springs,mobile_ticket,5,USD
+denver_idahospgs,Denver to/from Idaho Springs,cash,5,USD
+denver_idahospgs,Denver to/from Idaho Springs,cash,5,USD
+denver_idahospgs,Denver to/from Idaho Springs,cash,5,USD
+denver_monument,Denver to/from Monument,cash,9,USD
+denver_monument,Denver to/from Monument,mobile_ticket,9,USD
+denver_monument,Denver to/from Monument,mobile_ticket,9,USD
+denver_monument,Denver to/from Monument,cash,9,USD
+denver_monument,Denver to/from Monument,cash,9,USD
+denver_monument,Denver to/from Monument,mobile_ticket,9,USD
+denver_parachute,Denver to/from Parachute,mobile_ticket,35,USD
+denver_parachute,Denver to/from Parachute,cash,35,USD
+denver_parachute,Denver to/from Parachute,cash,35,USD
+denver_parachute,Denver to/from Parachute,mobile_ticket,35,USD
+denver_parachute,Denver to/from Parachute,mobile_ticket,35,USD
+denver_parachute,Denver to/from Parachute,cash,35,USD
+denver_rifle,Denver to/from Rifle,mobile_ticket,32,USD
+denver_rifle,Denver to/from Rifle,mobile_ticket,32,USD
+denver_rifle,Denver to/from Rifle,cash,32,USD
+denver_rifle,Denver to/from Rifle,cash,32,USD
+denver_rifle,Denver to/from Rifle,mobile_ticket,32,USD
+denver_rifle,Denver to/from Rifle,cash,32,USD
+denver_skiarea,Snowstang Roundtrip: Denver to/from Ski Area,mobile_ticket,25,USD
+denver_skiarea,Snowstang Roundtrip: Denver to/from Ski Area,cash,25,USD
+denver_skiarea,Snowstang Roundtrip: Denver to/from Ski Area,cash,25,USD
+denver_skiarea,Snowstang Roundtrip: Denver to/from Ski Area,cash,25,USD
+denver_skiarea,Snowstang Roundtrip: Denver to/from Ski Area,mobile_ticket,25,USD
+denver_skiarea,Snowstang Roundtrip: Denver to/from Ski Area,mobile_ticket,25,USD
+denver_vail,Denver to/from Vail,cash,17,USD
+denver_vail,Denver to/from Vail,cash,17,USD
+denver_vail,Denver to/from Vail,mobile_ticket,17,USD
+denver_vail,Denver to/from Vail,mobile_ticket,17,USD
+denver_vail,Denver to/from Vail,cash,17,USD
+denver_vail,Denver to/from Vail,mobile_ticket,17,USD
+denver_woodmen,Denver to/from Woodmen Road Park and Ride,cash,12,USD
+denver_woodmen,Denver to/from Woodmen Road Park and Ride,cash,12,USD
+denver_woodmen,Denver to/from Woodmen Road Park and Ride,mobile_ticket,12,USD
+denver_woodmen,Denver to/from Woodmen Road Park and Ride,mobile_ticket,12,USD
+denver_woodmen,Denver to/from Woodmen Road Park and Ride,cash,12,USD
+denver_woodmen,Denver to/from Woodmen Road Park and Ride,mobile_ticket,12,USD
+eagle_frisco,Eagle to/from Frisco,mobile_ticket,10,USD
+eagle_frisco,Eagle to/from Frisco,cash,10,USD
+eagle_frisco,Eagle to/from Frisco,mobile_ticket,10,USD
+eagle_frisco,Eagle to/from Frisco,cash,10,USD
+eagle_frisco,Eagle to/from Frisco,cash,10,USD
+eagle_frisco,Eagle to/from Frisco,mobile_ticket,10,USD
+eagle_glenwood,Eagle to/from Glenwood Springs,mobile_ticket,5,USD
+eagle_glenwood,Eagle to/from Glenwood Springs,cash,5,USD
+eagle_glenwood,Eagle to/from Glenwood Springs,mobile_ticket,5,USD
+eagle_glenwood,Eagle to/from Glenwood Springs,cash,5,USD
+eagle_glenwood,Eagle to/from Glenwood Springs,mobile_ticket,5,USD
+eagle_glenwood,Eagle to/from Glenwood Springs,cash,5,USD
+eagle_grandjct,Eagle to/from Grand Junction,cash,20,USD
+eagle_grandjct,Eagle to/from Grand Junction,cash,20,USD
+eagle_grandjct,Eagle to/from Grand Junction,mobile_ticket,20,USD
+eagle_grandjct,Eagle to/from Grand Junction,cash,20,USD
+eagle_grandjct,Eagle to/from Grand Junction,mobile_ticket,20,USD
+eagle_grandjct,Eagle to/from Grand Junction,mobile_ticket,20,USD
+eagle_idahospgs,Eagle to/from Idaho Springs,mobile_ticket,16,USD
+eagle_idahospgs,Eagle to/from Idaho Springs,cash,16,USD
+eagle_idahospgs,Eagle to/from Idaho Springs,mobile_ticket,16,USD
+eagle_idahospgs,Eagle to/from Idaho Springs,cash,16,USD
+eagle_idahospgs,Eagle to/from Idaho Springs,mobile_ticket,16,USD
+eagle_idahospgs,Eagle to/from Idaho Springs,cash,16,USD
+eagle_parachute,Eagle to/from Parachute,mobile_ticket,13,USD
+eagle_parachute,Eagle to/from Parachute,cash,13,USD
+eagle_parachute,Eagle to/from Parachute,cash,13,USD
+eagle_parachute,Eagle to/from Parachute,mobile_ticket,13,USD
+eagle_parachute,Eagle to/from Parachute,cash,13,USD
+eagle_parachute,Eagle to/from Parachute,mobile_ticket,13,USD
+eagle_rifle,Eagle to/from Rifle,mobile_ticket,10,USD
+eagle_rifle,Eagle to/from Rifle,cash,10,USD
+eagle_rifle,Eagle to/from Rifle,mobile_ticket,10,USD
+eagle_rifle,Eagle to/from Rifle,cash,10,USD
+eagle_rifle,Eagle to/from Rifle,mobile_ticket,10,USD
+eagle_rifle,Eagle to/from Rifle,cash,10,USD
+firestonelongmont_ftcollins,Firestone-Longmont Mobility Hub to/from Ft Collins,mobile_ticket,6,USD
+firestonelongmont_ftcollins,Firestone-Longmont Mobility Hub to/from Ft Collins,cash,6,USD
+firestonelongmont_ftcollins,Firestone-Longmont Mobility Hub to/from Ft Collins,mobile_ticket,6,USD
+firestonelongmont_ftcollins,Firestone-Longmont Mobility Hub to/from Ft Collins,mobile_ticket,6,USD
+firestonelongmont_ftcollins,Firestone-Longmont Mobility Hub to/from Ft Collins,cash,6,USD
+firestonelongmont_ftcollins,Firestone-Longmont Mobility Hub to/from Ft Collins,cash,6,USD
+free_mall_ride,Free Mall Ride,,0.00,USD
+free_mall_ride,Free Mall Ride,,0.00,USD
+free_mall_ride,Free Mall Ride,,0.00,USD
+free_mall_ride,Free Mall Ride,,0.00,USD
+free_mall_ride,Free Mall Ride,,0.00,USD
+free_mall_ride,Free Mall Ride,,0.00,USD
+free_mall_ride,Free Mall Ride,,0.00,USD
+free_metro_ride,Free Metro Ride,,0.00,USD
+free_metro_ride,Free Metro Ride,,0.00,USD
+free_metro_ride,Free Metro Ride,,0.00,USD
+free_metro_ride,Free Metro Ride,,0.00,USD
+free_metro_ride,Free Metro Ride,,0.00,USD
+free_metro_ride,Free Metro Ride,,0.00,USD
+free_metro_ride,Free Metro Ride,,0.00,USD
+free_transfer,Free Transfer,,0,USD
+free_transfer,Free Transfer,,0,USD
+free_transfer,Free Transfer,,0.00,USD
+free_transfer,Free Transfer,,0.00,USD
+free_transfer,Free Transfer,,0.00,USD
+free_transfer,Free Transfer,,0.00,USD
+free_transfer,Free Transfer,,0,USD
+free_transfer,Free Transfer,,0.00,USD
+free_transfer,Free Transfer,,0.00,USD
+free_transfer,Free Transfer,,0.00,USD
+frisco_glenwood,Frisco to/from Glenwood Springs,cash,17,USD
+frisco_glenwood,Frisco to/from Glenwood Springs,mobile_ticket,17,USD
+frisco_glenwood,Frisco to/from Glenwood Springs,mobile_ticket,17,USD
+frisco_glenwood,Frisco to/from Glenwood Springs,cash,17,USD
+frisco_glenwood,Frisco to/from Glenwood Springs,cash,17,USD
+frisco_glenwood,Frisco to/from Glenwood Springs,mobile_ticket,17,USD
+frisco_grandjct,Frisco to/from Grand Junction,mobile_ticket,30,USD
+frisco_grandjct,Frisco to/from Grand Junction,cash,30,USD
+frisco_grandjct,Frisco to/from Grand Junction,mobile_ticket,30,USD
+frisco_grandjct,Frisco to/from Grand Junction,mobile_ticket,30,USD
+frisco_grandjct,Frisco to/from Grand Junction,cash,30,USD
+frisco_grandjct,Frisco to/from Grand Junction,cash,30,USD
+frisco_idahospgs,Idaho Springs to/from Frisco,mobile_ticket,7,USD
+frisco_idahospgs,Idaho Springs to/from Frisco,cash,7,USD
+frisco_idahospgs,Idaho Springs to/from Frisco,cash,7,USD
+frisco_idahospgs,Idaho Springs to/from Frisco,mobile_ticket,7,USD
+frisco_idahospgs,Idaho Springs to/from Frisco,cash,7,USD
+frisco_idahospgs,Idaho Springs to/from Frisco,mobile_ticket,7,USD
+frisco_parachute,Frisco to/from Parachute,cash,23,USD
+frisco_parachute,Frisco to/from Parachute,mobile_ticket,23,USD
+frisco_parachute,Frisco to/from Parachute,cash,23,USD
+frisco_parachute,Frisco to/from Parachute,mobile_ticket,23,USD
+frisco_parachute,Frisco to/from Parachute,cash,23,USD
+frisco_parachute,Frisco to/from Parachute,mobile_ticket,23,USD
+frisco_rifle,Frisco to/from Rifle,mobile_ticket,20,USD
+frisco_rifle,Frisco to/from Rifle,cash,20,USD
+frisco_rifle,Frisco to/from Rifle,mobile_ticket,20,USD
+frisco_rifle,Frisco to/from Rifle,cash,20,USD
+frisco_rifle,Frisco to/from Rifle,cash,20,USD
+frisco_rifle,Frisco to/from Rifle,mobile_ticket,20,USD
+frisco_vail,Frisco to/from Vail,mobile_ticket,5,USD
+frisco_vail,Frisco to/from Vail,mobile_ticket,5,USD
+frisco_vail,Frisco to/from Vail,cash,5,USD
+frisco_vail,Frisco to/from Vail,cash,5,USD
+frisco_vail,Frisco to/from Vail,cash,5,USD
+frisco_vail,Frisco to/from Vail,mobile_ticket,5,USD
+glenwood_grandjct,Glenwood Springs to/from Grand Junction,cash,15,USD
+glenwood_grandjct,Glenwood Springs to/from Grand Junction,mobile_ticket,15,USD
+glenwood_grandjct,Glenwood Springs to/from Grand Junction,mobile_ticket,15,USD
+glenwood_grandjct,Glenwood Springs to/from Grand Junction,mobile_ticket,15,USD
+glenwood_grandjct,Glenwood Springs to/from Grand Junction,cash,15,USD
+glenwood_grandjct,Glenwood Springs to/from Grand Junction,cash,15,USD
+glenwood_idahospgs,Glenwood Springs to/from Idaho Springs,mobile_ticket,22,USD
+glenwood_idahospgs,Glenwood Springs to/from Idaho Springs,cash,22,USD
+glenwood_idahospgs,Glenwood Springs to/from Idaho Springs,mobile_ticket,22,USD
+glenwood_idahospgs,Glenwood Springs to/from Idaho Springs,mobile_ticket,22,USD
+glenwood_idahospgs,Glenwood Springs to/from Idaho Springs,cash,22,USD
+glenwood_idahospgs,Glenwood Springs to/from Idaho Springs,cash,22,USD
+glenwood_parachute,Glenwood Springs to/from Parachute,mobile_ticket,7,USD
+glenwood_parachute,Glenwood Springs to/from Parachute,mobile_ticket,7,USD
+glenwood_parachute,Glenwood Springs to/from Parachute,cash,7,USD
+glenwood_parachute,Glenwood Springs to/from Parachute,mobile_ticket,7,USD
+glenwood_parachute,Glenwood Springs to/from Parachute,cash,7,USD
+glenwood_parachute,Glenwood Springs to/from Parachute,cash,7,USD
+glenwood_rifle,Glenwood Springs to/from Rifle,cash,5,USD
+glenwood_rifle,Glenwood Springs to/from Rifle,mobile_ticket,5,USD
+glenwood_rifle,Glenwood Springs to/from Rifle,cash,5,USD
+glenwood_rifle,Glenwood Springs to/from Rifle,mobile_ticket,5,USD
+glenwood_rifle,Glenwood Springs to/from Rifle,cash,5,USD
+glenwood_rifle,Glenwood Springs to/from Rifle,mobile_ticket,5,USD
+glenwood_vail,Glenwood Springs to/from Vail,cash,12,USD
+glenwood_vail,Glenwood Springs to/from Vail,mobile_ticket,12,USD
+glenwood_vail,Glenwood Springs to/from Vail,mobile_ticket,12,USD
+glenwood_vail,Glenwood Springs to/from Vail,cash,12,USD
+glenwood_vail,Glenwood Springs to/from Vail,cash,12,USD
+glenwood_vail,Glenwood Springs to/from Vail,mobile_ticket,12,USD
+grandjct_idahospgs,Grand Junction to/from Idaho Springs,cash,37,USD
+grandjct_idahospgs,Grand Junction to/from Idaho Springs,mobile_ticket,37,USD
+grandjct_idahospgs,Grand Junction to/from Idaho Springs,cash,37,USD
+grandjct_idahospgs,Grand Junction to/from Idaho Springs,mobile_ticket,37,USD
+grandjct_idahospgs,Grand Junction to/from Idaho Springs,cash,37,USD
+grandjct_idahospgs,Grand Junction to/from Idaho Springs,mobile_ticket,37,USD
+grandjct_parachute,Grand Junction to/from Parachute,mobile_ticket,8,USD
+grandjct_parachute,Grand Junction to/from Parachute,cash,8,USD
+grandjct_parachute,Grand Junction to/from Parachute,mobile_ticket,8,USD
+grandjct_parachute,Grand Junction to/from Parachute,cash,8,USD
+grandjct_parachute,Grand Junction to/from Parachute,mobile_ticket,8,USD
+grandjct_parachute,Grand Junction to/from Parachute,cash,8,USD
+grandjct_rifle,Grand Junction to/from Rifle,mobile_ticket,11,USD
+grandjct_rifle,Grand Junction to/from Rifle,mobile_ticket,11,USD
+grandjct_rifle,Grand Junction to/from Rifle,cash,11,USD
+grandjct_rifle,Grand Junction to/from Rifle,cash,11,USD
+grandjct_rifle,Grand Junction to/from Rifle,mobile_ticket,11,USD
+grandjct_rifle,Grand Junction to/from Rifle,cash,11,USD
+grandjct_vail,Grand Junction to/from Vail,mobile_ticket,26,USD
+grandjct_vail,Grand Junction to/from Vail,mobile_ticket,26,USD
+grandjct_vail,Grand Junction to/from Vail,mobile_ticket,26,USD
+grandjct_vail,Grand Junction to/from Vail,cash,26,USD
+grandjct_vail,Grand Junction to/from Vail,cash,26,USD
+grandjct_vail,Grand Junction to/from Vail,cash,26,USD
+idahospgs_parachute,Idaho Springs to/from Parachute,cash,29,USD
+idahospgs_parachute,Idaho Springs to/from Parachute,mobile_ticket,29,USD
+idahospgs_parachute,Idaho Springs to/from Parachute,cash,29,USD
+idahospgs_parachute,Idaho Springs to/from Parachute,mobile_ticket,29,USD
+idahospgs_parachute,Idaho Springs to/from Parachute,cash,29,USD
+idahospgs_parachute,Idaho Springs to/from Parachute,mobile_ticket,29,USD
+idahospgs_rifle,Idaho Springs to/from Rifle,cash,26,USD
+idahospgs_rifle,Idaho Springs to/from Rifle,mobile_ticket,26,USD
+idahospgs_rifle,Idaho Springs to/from Rifle,cash,26,USD
+idahospgs_rifle,Idaho Springs to/from Rifle,mobile_ticket,26,USD
+idahospgs_rifle,Idaho Springs to/from Rifle,cash,26,USD
+idahospgs_rifle,Idaho Springs to/from Rifle,mobile_ticket,26,USD
+idahospgs_vail,Idaho Springs to/from Vail,cash,11,USD
+idahospgs_vail,Idaho Springs to/from Vail,cash,11,USD
+idahospgs_vail,Idaho Springs to/from Vail,mobile_ticket,11,USD
+idahospgs_vail,Idaho Springs to/from Vail,cash,11,USD
+idahospgs_vail,Idaho Springs to/from Vail,mobile_ticket,11,USD
+idahospgs_vail,Idaho Springs to/from Vail,mobile_ticket,11,USD
+monthly_pass,Monthly Pass,cash,88.00,USD
+monthly_pass,Monthly Pass,my_ride_card,88.00,USD
+monthly_pass,Monthly Pass,my_ride_app,88.00,USD
+monthly_pass,Monthly Pass,cash,88.00,USD
+monthly_pass,Monthly Pass,cash,88.00,USD
+monthly_pass,Monthly Pass,my_ride_app,88.00,USD
+monthly_pass,Monthly Pass,my_ride_card,88.00,USD
+monthly_pass,Monthly Pass,paper_ticket,88.00,USD
+monthly_pass,Monthly Pass,cash,88.00,USD
+monthly_pass,Monthly Pass,my_ride_app,88.00,USD
+monthly_pass,Monthly Pass,my_ride_card,88.00,USD
+monthly_pass,Monthly Pass,paper_ticket,88.00,USD
+monthly_pass,Monthly Pass,my_ride_app,88.00,USD
+monthly_pass,Monthly Pass,my_ride_card,88.00,USD
+monthly_pass,Monthly Pass,paper_ticket,88.00,USD
+monthly_pass,Monthly Pass,paper_ticket,88.00,USD
+monthly_pass,Monthly Pass,paper_ticket,88.00,USD
+monthly_pass,Monthly Pass,my_ride_card,88.00,USD
+monthly_pass,Monthly Pass,my_ride_card,88.00,USD
+monthly_pass,Monthly Pass,cash,88.00,USD
+monthly_pass,Monthly Pass,my_ride_app,88.00,USD
+monthly_pass,Monthly Pass,my_ride_app,88.00,USD
+monthly_pass,Monthly Pass,my_ride_card,88.00,USD
+monthly_pass,Monthly Pass,my_ride_app,88.00,USD
+monthly_pass,Monthly Pass,paper_ticket,88.00,USD
+monthly_pass,Monthly Pass,cash,88.00,USD
+monthly_pass,Monthly Pass,cash,88.00,USD
+monthly_pass,Monthly Pass,paper_ticket,88.00,USD
+monument_woodman,Monument Park and Ride to/from Woodmen Park and Ride,mobile_ticket,5,USD
+monument_woodman,Monument Park and Ride to/from Woodmen Park and Ride,cash,5,USD
+monument_woodman,Monument Park and Ride to/from Woodmen Park and Ride,mobile_ticket,5,USD
+monument_woodman,Monument Park and Ride to/from Woodmen Park and Ride,cash,5,USD
+monument_woodman,Monument Park and Ride to/from Woodmen Park and Ride,mobile_ticket,5,USD
+monument_woodman,Monument Park and Ride to/from Woodmen Park and Ride,cash,5,USD
+parachute_rifle,Parachute to/from Rifle,cash,5,USD
+parachute_rifle,Parachute to/from Rifle,cash,5,USD
+parachute_rifle,Parachute to/from Rifle,mobile_ticket,5,USD
+parachute_rifle,Parachute to/from Rifle,mobile_ticket,5,USD
+parachute_rifle,Parachute to/from Rifle,cash,5,USD
+parachute_rifle,Parachute to/from Rifle,mobile_ticket,5,USD
+parachute_vail,Parachute to/from Vail,cash,18,USD
+parachute_vail,Parachute to/from Vail,cash,18,USD
+parachute_vail,Parachute to/from Vail,mobile_ticket,18,USD
+parachute_vail,Parachute to/from Vail,mobile_ticket,18,USD
+parachute_vail,Parachute to/from Vail,mobile_ticket,18,USD
+parachute_vail,Parachute to/from Vail,cash,18,USD
+pegasus_avonvail_denver,Pegasus: Avon/Vail to/from Denver,mobile_ticket,20,USD
+pegasus_avonvail_denver,Pegasus: Avon/Vail to/from Denver,cash,20,USD
+pegasus_avonvail_denver,Pegasus: Avon/Vail to/from Denver,mobile_ticket,20,USD
+pegasus_avonvail_denver,Pegasus: Avon/Vail to/from Denver,mobile_ticket,20,USD
+pegasus_avonvail_denver,Pegasus: Avon/Vail to/from Denver,cash,20,USD
+pegasus_avonvail_denver,Pegasus: Avon/Vail to/from Denver,cash,20,USD
+pegasus_avonvail_frisco,Pegasus: Avon/Vail to/from Frisco,cash,6,USD
+pegasus_avonvail_frisco,Pegasus: Avon/Vail to/from Frisco,cash,6,USD
+pegasus_avonvail_frisco,Pegasus: Avon/Vail to/from Frisco,mobile_ticket,6,USD
+pegasus_avonvail_frisco,Pegasus: Avon/Vail to/from Frisco,mobile_ticket,6,USD
+pegasus_avonvail_frisco,Pegasus: Avon/Vail to/from Frisco,mobile_ticket,6,USD
+pegasus_avonvail_frisco,Pegasus: Avon/Vail to/from Frisco,cash,6,USD
+pegasus_avonvail_idahospgs,Pegasus: Avon/Vail to/from Idaho Springs,mobile_ticket,13,USD
+pegasus_avonvail_idahospgs,Pegasus: Avon/Vail to/from Idaho Springs,cash,13,USD
+pegasus_avonvail_idahospgs,Pegasus: Avon/Vail to/from Idaho Springs,cash,13,USD
+pegasus_avonvail_idahospgs,Pegasus: Avon/Vail to/from Idaho Springs,mobile_ticket,13,USD
+pegasus_avonvail_idahospgs,Pegasus: Avon/Vail to/from Idaho Springs,cash,13,USD
+pegasus_avonvail_idahospgs,Pegasus: Avon/Vail to/from Idaho Springs,mobile_ticket,13,USD
+pegasus_denver_frisco,Pegasus: Denver to/from Frisco,cash,13,USD
+pegasus_denver_frisco,Pegasus: Denver to/from Frisco,mobile_ticket,13,USD
+pegasus_denver_frisco,Pegasus: Denver to/from Frisco,cash,13,USD
+pegasus_denver_frisco,Pegasus: Denver to/from Frisco,mobile_ticket,13,USD
+pegasus_denver_frisco,Pegasus: Denver to/from Frisco,cash,13,USD
+pegasus_denver_frisco,Pegasus: Denver to/from Frisco,mobile_ticket,13,USD
+pegasus_denver_idahospgs,Pegasus: Denver to/from Idaho Springs,mobile_ticket,6,USD
+pegasus_denver_idahospgs,Pegasus: Denver to/from Idaho Springs,mobile_ticket,6,USD
+pegasus_denver_idahospgs,Pegasus: Denver to/from Idaho Springs,cash,6,USD
+pegasus_denver_idahospgs,Pegasus: Denver to/from Idaho Springs,cash,6,USD
+pegasus_denver_idahospgs,Pegasus: Denver to/from Idaho Springs,cash,6,USD
+pegasus_denver_idahospgs,Pegasus: Denver to/from Idaho Springs,mobile_ticket,6,USD
+pegasus_frisco_idahospgs,Pegasus: Frisco to/from Idaho Springs,mobile_ticket,8,USD
+pegasus_frisco_idahospgs,Pegasus: Frisco to/from Idaho Springs,cash,8,USD
+pegasus_frisco_idahospgs,Pegasus: Frisco to/from Idaho Springs,mobile_ticket,8,USD
+pegasus_frisco_idahospgs,Pegasus: Frisco to/from Idaho Springs,mobile_ticket,8,USD
+pegasus_frisco_idahospgs,Pegasus: Frisco to/from Idaho Springs,cash,8,USD
+pegasus_frisco_idahospgs,Pegasus: Frisco to/from Idaho Springs,cash,8,USD
+rams_denver_ftcollins,Rams: Denver to/from Ft. Collins,cash,9,USD
+rams_denver_ftcollins,Rams: Denver to/from Ft. Collins,mobile_ticket,9,USD
+rams_denver_ftcollins,Rams: Denver to/from Ft. Collins,mobile_ticket,9,USD
+rams_denver_ftcollins,Rams: Denver to/from Ft. Collins,cash,9,USD
+rams_denver_ftcollins,Rams: Denver to/from Ft. Collins,cash,9,USD
+rams_denver_ftcollins,Rams: Denver to/from Ft. Collins,mobile_ticket,9,USD
+rifle_vail,Rifle to/from Vail,cash,15,USD
+rifle_vail,Rifle to/from Vail,cash,15,USD
+rifle_vail,Rifle to/from Vail,mobile_ticket,15,USD
+rifle_vail,Rifle to/from Vail,mobile_ticket,15,USD
+rifle_vail,Rifle to/from Vail,cash,15,USD
+rifle_vail,Rifle to/from Vail,mobile_ticket,15,USD
+three_hour,3-Hour Pass,my_ride_card,2.75,USD
+three_hour,3-Hour Pass,paper_ticket,2.75,USD
+three_hour,3-Hour Pass,my_ride_card,2.75,USD
+three_hour,3-Hour Pass,paper_ticket,2.75,USD
+three_hour,3-Hour Pass,my_ride_card,2.75,USD
+three_hour,3-Hour Pass,cash,2.75,USD
+three_hour,3-Hour Pass,cash,2.75,USD
+three_hour,3-Hour Pass,cash,2.75,USD
+three_hour,3-Hour Pass,my_ride_app,2.75,USD
+three_hour,3-Hour Pass,my_ride_app,2.75,USD
+three_hour,3-Hour Pass,paper_ticket,2.75,USD
+three_hour,3-Hour Pass,my_ride_app,2.75,USD
+three_hour,3-Hour Pass,my_ride_card,2.75,USD
+three_hour,3-Hour Pass,cash,2.75,USD
+three_hour,3-Hour Pass,my_ride_app,2.75,USD
+three_hour,3-Hour Pass,paper_ticket,2.75,USD
+three_hour,3-Hour Pass,cash,2.75,USD
+three_hour,3-Hour Pass,paper_ticket,2.75,USD
+three_hour,3-Hour Pass,paper_ticket,2.75,USD
+three_hour,3-Hour Pass,cash,2.75,USD
+three_hour,3-Hour Pass,cash,2.75,USD
+three_hour,3-Hour Pass,my_ride_app,2.75,USD
+three_hour,3-Hour Pass,my_ride_card,2.75,USD
+three_hour,3-Hour Pass,my_ride_app,2.75,USD
+three_hour,3-Hour Pass,my_ride_app,2.75,USD
+three_hour,3-Hour Pass,my_ride_card,2.75,USD
+three_hour,3-Hour Pass,paper_ticket,2.75,USD
+three_hour,3-Hour Pass,my_ride_card,2.75,USD

@@ -100,7 +100,13 @@ dependencies {
     implementation 'com.sun.net.httpserver:http:20070405'
     implementation 'org.apache.commons:commons-csv:1.12.0'
     implementation 'org.apache.commons:commons-lang3:3.17.0'
-    
+
+    // Database - PostgreSQL JDBC Driver
+    implementation 'org.postgresql:postgresql:42.7.4'
+
+    // Database - Oracle JDBC Driver (for data migration)
+    implementation 'com.oracle.database.jdbc:ojdbc11:23.6.0.24.10'
+
     // Test Dependencies
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.apache.flink:flink-test-utils:${flinkVersion}"
@@ -133,6 +139,176 @@ task runRailReceiver(type: JavaExec) {
 task runSpringBootAPI(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'com.rtd.pipeline.RTDApiApplication'
+}
+
+// TIES GTFS Fare Extraction Pipeline
+task runTIESFarePipeline(type: JavaExec) {
+    group = 'rtd-pipelines'
+    description = 'Run TIES GTFS Fare Data Extraction Pipeline (use -Pagency=RTD or -Pagency=CDOT)'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.TIESGTFSFareExtractionPipeline'
+
+    // Get agency from project property, default to RTD
+    def agency = project.hasProperty('agency') ? project.property('agency') : 'RTD'
+    args = [agency]
+
+    jvmArgs = [
+        '--enable-preview',
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.nio=ALL-UNNAMED'
+    ]
+
+    // Environment variables can be set here or externally
+    environment 'TIES_DB_URL', System.getenv('TIES_DB_URL') ?: 'jdbc:postgresql://localhost:5432/ties'
+    environment 'TIES_DB_USER', System.getenv('TIES_DB_USER') ?: 'ties'
+    environment 'TIES_DB_PASSWORD', System.getenv('TIES_DB_PASSWORD') ?: 'TiesPassword123'
+    environment 'TIES_OUTPUT_DIR', System.getenv('TIES_OUTPUT_DIR') ?: 'data/gtfs-ties'
+}
+
+task runTIESFarePipelineRTD(type: JavaExec) {
+    group = 'rtd-pipelines'
+    description = 'Run TIES GTFS Fare Data Extraction Pipeline for RTD'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.TIESGTFSFareExtractionPipeline'
+    args = ['RTD']
+    jvmArgs = [
+        '--enable-preview',
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED'
+    ]
+
+    // Environment variables for PostgreSQL connection
+    environment 'POSTGRES_TIES_URL', System.getenv('POSTGRES_TIES_URL') ?: 'jdbc:postgresql://localhost:5433/ties'
+    environment 'POSTGRES_TIES_USER', System.getenv('POSTGRES_TIES_USER') ?: 'ties'
+    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: 'TiesPassword123'
+}
+
+task runNextGenCorePipeline(type: JavaExec) {
+    group = 'rtd-pipelines'
+    description = 'Run NextGenPipeline GTFS extraction pipeline (agency, routes, trips, stops, stop_times, fares)'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.NextGenPipelineGTFS'
+    jvmArgs = [
+        '--enable-preview',
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED'
+    ]
+
+    // Environment variables for PostgreSQL connection (connected to TIES Oracle source)
+    environment 'POSTGRES_TIES_URL', System.getenv('POSTGRES_TIES_URL') ?: 'jdbc:postgresql://localhost:5433/ties'
+    environment 'POSTGRES_TIES_USER', System.getenv('POSTGRES_TIES_USER') ?: 'ties'
+    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: 'TiesPassword123'
+}
+
+// Backward compatibility alias
+task runTIESCorePipeline {
+    group = 'rtd-pipelines'
+    description = '[DEPRECATED] Use runNextGenCorePipeline instead'
+    dependsOn runNextGenCorePipeline
+}
+
+task runTIESFarePipelineCDOT(type: JavaExec) {
+    group = 'rtd-pipelines'
+    description = 'Run TIES GTFS Fare Data Extraction Pipeline for CDOT/Bustang'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.TIESGTFSFareExtractionPipeline'
+    args = ['CDOT']
+    jvmArgs = [
+        '--enable-preview',
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED'
+    ]
+
+    // Environment variables for PostgreSQL connection
+    environment 'POSTGRES_TIES_URL', System.getenv('POSTGRES_TIES_URL') ?: 'jdbc:postgresql://localhost:5433/ties'
+    environment 'POSTGRES_TIES_USER', System.getenv('POSTGRES_TIES_USER') ?: 'ties'
+    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: 'TiesPassword123'
+}
+
+// TIES Data Migration (Oracle to PostgreSQL)
+task runTIESMigration(type: JavaExec) {
+    group = 'rtd-pipelines'
+    description = 'Migrate GTFS data from Oracle TIES to PostgreSQL TIES (use -Pagency=RTD, -Pagency=CDOT, or -Pagency=ALL)'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.TIESDataMigrationPipeline'
+
+    // Get agency from project property, default to ALL
+    def agency = project.hasProperty('agency') ? project.property('agency') : 'ALL'
+    args = [agency]
+
+    jvmArgs = [
+        '--enable-preview',
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED'
+    ]
+
+    // Environment variables for Oracle connection
+    environment 'ORACLE_TIES_URL', System.getenv('ORACLE_TIES_URL') ?: 'jdbc:oracle:thin:@localhost:1521:FREEPDB1'
+    environment 'ORACLE_TIES_USER', System.getenv('ORACLE_TIES_USER') ?: 'TIES'
+    environment 'ORACLE_TIES_PASSWORD', System.getenv('ORACLE_TIES_PASSWORD') ?: 'TiesPassword123'
+
+    // Environment variables for PostgreSQL connection
+    environment 'POSTGRES_TIES_URL', System.getenv('POSTGRES_TIES_URL') ?: 'jdbc:postgresql://localhost:5433/ties'
+    environment 'POSTGRES_TIES_USER', System.getenv('POSTGRES_TIES_USER') ?: 'ties'
+    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: 'TiesPassword123'
+}
+
+task runTIESMigrationRTD(type: JavaExec) {
+    group = 'rtd-pipelines'
+    description = 'Migrate RTD GTFS data from Oracle to PostgreSQL'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.TIESDataMigrationPipeline'
+    args = ['RTD']
+    jvmArgs = ['--enable-preview', '--add-opens', 'java.base/java.lang=ALL-UNNAMED']
+
+    // Environment variables for Oracle connection
+    environment 'ORACLE_TIES_URL', System.getenv('ORACLE_TIES_URL') ?: 'jdbc:oracle:thin:@localhost:1521:FREEPDB1'
+    environment 'ORACLE_TIES_USER', System.getenv('ORACLE_TIES_USER') ?: 'TIES'
+    environment 'ORACLE_TIES_PASSWORD', System.getenv('ORACLE_TIES_PASSWORD') ?: 'TiesPassword123'
+
+    // Environment variables for PostgreSQL connection
+    environment 'POSTGRES_TIES_URL', System.getenv('POSTGRES_TIES_URL') ?: 'jdbc:postgresql://localhost:5433/ties'
+    environment 'POSTGRES_TIES_USER', System.getenv('POSTGRES_TIES_USER') ?: 'ties'
+    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: 'TiesPassword123'
+}
+
+task runTIESMigrationCDOT(type: JavaExec) {
+    group = 'rtd-pipelines'
+    description = 'Migrate CDOT/Bustang GTFS data from Oracle to PostgreSQL'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.TIESDataMigrationPipeline'
+    args = ['CDOT']
+    jvmArgs = ['--enable-preview', '--add-opens', 'java.base/java.lang=ALL-UNNAMED']
+
+    // Environment variables for Oracle connection
+    environment 'ORACLE_TIES_URL', System.getenv('ORACLE_TIES_URL') ?: 'jdbc:oracle:thin:@localhost:1521:FREEPDB1'
+    environment 'ORACLE_TIES_USER', System.getenv('ORACLE_TIES_USER') ?: 'TIES'
+    environment 'ORACLE_TIES_PASSWORD', System.getenv('ORACLE_TIES_PASSWORD') ?: 'TiesPassword123'
+
+    // Environment variables for PostgreSQL connection
+    environment 'POSTGRES_TIES_URL', System.getenv('POSTGRES_TIES_URL') ?: 'jdbc:postgresql://localhost:5433/ties'
+    environment 'POSTGRES_TIES_USER', System.getenv('POSTGRES_TIES_USER') ?: 'ties'
+    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: 'TiesPassword123'
+}
+
+task runTIESMigrationALL(type: JavaExec) {
+    group = 'rtd-pipelines'
+    description = 'Migrate all GTFS data (RTD + CDOT) from Oracle to PostgreSQL'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.rtd.pipeline.TIESDataMigrationPipeline'
+    args = ['ALL']
+    jvmArgs = ['--enable-preview', '--add-opens', 'java.base/java.lang=ALL-UNNAMED']
+
+    // Environment variables for Oracle connection
+    environment 'ORACLE_TIES_URL', System.getenv('ORACLE_TIES_URL') ?: 'jdbc:oracle:thin:@localhost:1521:FREEPDB1'
+    environment 'ORACLE_TIES_USER', System.getenv('ORACLE_TIES_USER') ?: 'TIES'
+    environment 'ORACLE_TIES_PASSWORD', System.getenv('ORACLE_TIES_PASSWORD') ?: 'TiesPassword123'
+
+    // Environment variables for PostgreSQL connection
+    environment 'POSTGRES_TIES_URL', System.getenv('POSTGRES_TIES_URL') ?: 'jdbc:postgresql://localhost:5433/ties'
+    environment 'POSTGRES_TIES_USER', System.getenv('POSTGRES_TIES_USER') ?: 'ties'
+    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: 'TiesPassword123'
 }
 
 // Configure the JAR task
@@ -478,4 +654,11 @@ clean.dependsOn cleanRTD
 wrapper {
     gradleVersion = '8.14'
     distributionType = Wrapper.DistributionType.ALL
+}
+// PostgreSQL Connection Test
+task testPostgresConn(type: JavaExec) {
+    group = 'verification'
+    description = 'Test PostgreSQL JDBC connection'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'TestPostgresConnection'
 }

@@ -1,0 +1,137 @@
+stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,location_type,parent_station,stop_timezone,wheelchair_boarding
+10023,23022,Boulder Junction at Depot Square Station Gate S4,,40.023324,-105.253137,,,0,,,
+10031,23025,Boulder Junction at Depot Square Station Gate S3,,40.023669,-105.252523,,,0,,,
+10073,10101,Union Station Loop,,39.755067,-105.002733,,,0,,,
+10076,22356,16th Street Mall & Stout St,,39.745893,-104.993246,,,0,,,
+10077,23485,Civic Center Mall Loop,,39.741392,-104.987192,,,0,,,
+10079,22357,16th Street Mall & California St,,39.745179,-104.992403,,,0,,,
+10080,22351,16th Street Mall & Larimer St,,39.749249,-104.997681,,,0,,,
+10081,22352,16th Street Mall & Lawrence St,,39.748544,-104.996777,,,0,,,
+10082,22353,16th Street Mall & Arapahoe St,,39.747869,-104.995887,,,0,,,
+10083,22354,16th Street Mall & Curtis St,,39.747203,-104.995041,,,0,,,
+10084,22355,16th Street Mall & Champa St,,39.746520,-104.994151,,,0,,,
+10085,22358,16th Street Mall & Welton St,,39.744495,-104.991487,,,0,,,
+10086,22359,16th Street Mall & Glenarm Pl,,39.743836,-104.990629,,,0,,,
+10087,22360,16th Street Mall & Tremont Pl,,39.743152,-104.989761,,,0,,,
+10088,22361,16th Street Mall & Court Pl,,39.742503,-104.988861,,,0,,,
+10089,22362,16th Street Mall & Cleveland Pl,,39.741796,-104.987998,,,0,,,
+10090,22363,16th Street & Court Pl,,39.742410,-104.988531,,,0,,,
+10091,22364,16th Street & Tremont Pl,,39.743168,-104.989350,,,0,,,
+10092,22365,16th Street & Glenarm Pl,,39.743839,-104.990234,,,0,,,
+10093,22366,16th Street & Welton St,,39.744507,-104.991086,,,0,,,
+10094,22367,16th Street & California St,,39.745154,-104.991982,,,0,,,
+10095,22368,16th Street & Stout St,,39.745811,-104.992809,,,0,,,
+10096,22369,16th Street & Champa St,,39.746471,-104.993709,,,0,,,
+10097,22370,16th Street & Curtis St,,39.747157,-104.994606,,,0,,,
+10098,22371,16th Street & Arapahoe St,,39.747834,-104.995420,,,0,,,
+10099,22372,16th Street & Lawrence St,,39.748444,-104.996392,,,0,,,
+10100,22373,16th Street & Larimer St,,39.749098,-104.997223,,,0,,,
+117,12430,Broadway & W 14th Ave,,39.738634,-104.987499,,,0,,,
+11773,25422,16th Street Mall & Wazee St,,39.751271,-105.000201,,,0,,,
+11774,25423,16th Street Mall & Wynkoop St,,39.751959,-105.001090,,,0,,,
+11775,25424,16th Street & Wazee St,,39.751140,-104.999778,,,0,,,
+11776,25425,16th Street Mall & Wynkoop St,,39.751815,-105.000764,,,0,,,
+1315,19775,US 36 & McCaslin Station Gate A {2008},,39.958022,-105.168041,,,0,,,1
+1345,22903,US 36 & Sheridan Station Gate D,,39.857772,-105.053267,,,0,,,
+1348,19732,US 36 & McCaslin Station Gate D {2008},,39.959010,-105.167351,,,0,,,1
+13753,26105,Wagon Road PnR Gate E {1203},,39.912527,-104.994437,,,0,,,1
+13770,26118,Civic Center Mall Loop,,39.741031,-104.987191,,,0,,,
+13832,26122,Colorado Station Gate E,,39.679984,-104.937814,,,0,,,
+13870,26188,Arapahoe at Village Center Station Gate D  {1409},,39.601134,-104.887857,,,0,,,1
+14925,33570,16th Street Mall & Blake St,,39.750602,-104.999357,,,0,,,
+15002,33646,Union Station {Boarding},,39.754727,-105.003450,,,0,,,1
+15003,33647,Union Station {Alighting},,39.755067,-105.002733,,,0,,,1
+15014,33658,Federal Center Station Gate L {1304},,39.719621,-105.129459,,,0,,,1
+15589,34232,{Parent} Decatur-Federal Station,,39.737418,-105.024806,,,0,,,1
+15651,34296,19th St & Blake St,,39.753179,-104.995460,,,0,,,
+15652,34297,19th St & Lawrence St,,39.751170,-104.992863,,,0,,,
+15653,34298,19th St & Curtis St,,39.749802,-104.991088,,,0,,,
+15654,34299,19th St & Stout St,,39.748813,-104.989785,,,0,,,
+15655,34300,Broadway & 18th St,,39.745500,-104.987528,,,0,,,
+15657,34302,Lincoln St & 17th Ave,,39.743383,-104.985994,,,0,,,
+15658,34303,18th St & Glenarm Pl,,39.745596,-104.987734,,,0,,,
+15659,34304,18th St & California St,,39.747305,-104.989967,,,0,,,
+15660,34305,18th St & Curtis St,,39.749259,-104.992484,,,0,,,
+15661,34306,18th St & Lawrence St,,39.750569,-104.994181,,,0,,,
+15662,34307,18th St & Market St,,39.751903,-104.995946,,,0,,,
+15663,34308,18th St & Wazee St,,39.753222,-104.997660,,,0,,,
+15665,34310,Union Station Gate B13,,39.755018,-105.002303,,,0,,,
+15671,34316,Union Station Gate B19,,39.754023,-105.001048,,,0,,,
+15674,34319,Union Station Gate B22,,39.753586,-105.000476,,,0,,,
+15676,34321,Union Station Gate B2,,39.753582,-105.000826,,,0,,,
+15677,34322,Union Station Gate B3,,39.753706,-105.000983,,,0,,,
+15678,34323,Union Station Gate B4,,39.753904,-105.001241,,,0,,,
+15685,34330,Union Station Gate B11,,39.754993,-105.002636,,,0,,,
+15698,34343,Union Station {Dropoff Union Station Se},,39.753394,-105.000558,,,0,,,1
+15699,34344,Union Station {Dropoff Union Station Nw},,39.755200,-105.002550,,,0,,,1
+15734,34379,16th Street & Blake St,,39.750486,-104.999023,,,0,,,
+15735,34380,16th Street Mall & Market St,,39.749912,-104.998459,,,0,,,
+15736,34381,16th Street & Market St,,39.749838,-104.998162,,,0,,,
+15740,34385,Wewatta St & 17th St,,39.754143,-105.001356,,,0,,,
+15830,34475,Denver Airport Station,,39.846725,-104.673986,,,0,,,
+15831,34476,Denver Airport Station,,39.846570,-104.673988,,,0,,,
+1597,17724,19th St & Stout St,,39.748748,-104.989695,,,0,,,
+16005,34650,Denver Airport Station Gate 6,,39.847909,-104.673762,,,0,,,
+16006,34651,Denver Airport Station Gate 7,,39.847919,-104.673639,,,0,,,
+16007,34652,Denver Airport Station Gate 8,,39.847930,-104.673377,,,0,,,
+16008,34653,Denver Airport Station Gate 9,,39.847944,-104.673172,,,0,,,
+16009,34654,Denver Airport Station Gate 10,,39.847957,-104.672991,,,0,,,
+16013,34658,US 36 & Broomfield Station Gate P {1105},,39.906238,-105.085272,,,0,,,1
+16014,34659,US 36 & Broomfield Station Gate R {1104},,39.906451,-105.084539,,,0,,,1
+16015,34660,US 36 & Sheridan Station Gate C,,39.857430,-105.054121,,,0,,,
+16362,35037,Civic Center Station Gate 7,,39.740658,-104.986904,,,0,,,
+16364,35039,Civic Center Station Gate 9,,39.740673,-104.986325,,,0,,,
+16444,35119,{Bustang} Breckenridge Transfer Station,,39.484800,-106.047533,,,0,,,1
+16447,35122,{Bustang} Colorado Springs Downtown Station,,38.835175,-104.821992,,,0,,,1
+16448,35123,{Bustang} Colorado State University,,40.576400,-105.088273,,,0,,,1
+16455,35130,{Bustang} Eagle,,39.659093,-106.826844,,,0,,,1
+16457,35132,{Bustang} Fort Collins Downtown Transit Center,,40.590050,-105.078081,,,0,,,1
+16461,35136,{Bustang} Frisco Transit Center,,39.588237,-106.097487,,,0,,,1
+16462,35137,{Bustang} Glenwood Springs South Station,,39.524770,-107.322006,,,0,,,1
+16464,35139,{Bustang} Grand Junction Regional Airport,,39.122629,-108.530227,,,0,,,1
+16466,35141,{Bustang} Harmony Transfer Center,,40.524108,-104.996188,,,0,,,1
+16469,35144,{Bustang} Idaho Springs,,39.741468,-105.520083,,,0,,,1
+16471,35146,{Bustang} Loveland Park and Ride,,40.408153,-104.995587,,,0,,,1
+16477,35152,{Bustang} Loveland Ski Area,,39.680163,-105.896818,,,0,,,1
+16481,35156,{Bustang} Monument P & R,,39.093398,-104.861938,,,0,,,1
+16483,35158,{Bustang} Parachute,,39.453687,-108.041777,,,0,,,1
+16490,35165,{Bustang} Rifle,,39.529578,-107.783808,,,0,,,1
+16494,35169,{Bustang} Steamboat Springs Transit Station,,40.493874,-106.850002,,,0,,,1
+16499,35174,{Bustang} Vail Transportation Center,,39.642430,-106.373333,,,0,,,1
+16501,35176,{Bustang} West Glenwood Park & Ride,,39.557502,-107.353704,,,0,,,1
+16504,35179,{Bustang} Woodmen Park and Ride Northbound,,38.932115,-104.814988,,,0,,,1
+16505,35180,{Bustang} Woodmen Park and Ride Southbound,,38.931355,-104.815267,,,0,,,1
+16518,35193,16th St Mall & Wewatta St,,39.752626,-105.001630,,,0,,,
+16519,35194,16th St Mall & Wewatta St,,39.752522,-105.001819,,,0,,,
+16682,35357,Sky Ridge Station,,39.532448,-104.871108,,,0,,,
+16706,35381,{Bustang} Grand Junction Downtown Transfer Facility,,39.063389,-108.564000,,,0,,,1
+16726,35401,{Bustang} Avon Station,,39.634256,-106.524138,,,0,,,1
+16738,35417,17th St & Curtis St,,39.747837,-104.993277,,,0,,,
+16740,35413,17th St & Blake St,,39.751130,-104.997635,,,0,,,
+16741,35414,17th St & Larimer St,,39.750186,-104.996415,,,0,,,
+16744,35419,17th St & Stout St,,39.746605,-104.991697,,,0,,,
+16745,35420,15th St & Stout St,,39.745408,-104.994817,,,0,,,
+16747,35422,15th St & Curtis St,,39.746614,-104.996358,,,0,,,
+16749,35424,15th St & Lawrence St,,39.748068,-104.998245,,,0,,,
+16750,35425,15th St & Market St,,39.749245,-104.999786,,,0,,,
+16758,35433,17th St & California St,,39.746122,-104.991028,,,0,,,
+16760,35435,15th St & Welton St,,39.744226,-104.993321,,,0,,,
+16779,35451,{Bustang} A Basin,,39.642721,-105.871835,,,0,,,1
+16783,35457,{Bustang} Steamboat Springs Stop 1,,40.457539,-106.806242,,,0,,,1
+16791,35465,{Bustang} Copper Mountain,,39.502105,-106.157811,,,0,,,1
+16796,35471,Wooly Mammoth Park & Ride,,39.697713,-105.207457,,,0,,,
+16801,35476,{Bustang} Estes Park Visitor Center,,40.378786,-105.513842,,,0,,,1
+16802,35477,{Bustang} Rocky Mnt N.P. PnR,,40.329802,-105.601082,,,0,,,1
+16814,35489,{Bustang} Centerra Loveland Mobility Hub,,40.420436,-104.992898,,,0,,,1
+16815,35490,{Bustang} Centerra Loveland Mobility Hub,,40.420432,-104.992674,,,0,,,1
+16816,35491,{Bustang} Berthoud Mobility Hub,,40.308793,-104.980425,,,0,,,1
+16817,35492,{Bustang} Berthoud Mobility Hub,,40.308793,-104.980248,,,0,,,1
+16832,35507,{Bustang} Firestone-Longmont Mobility Hub,,40.158369,-104.979689,,,0,,,1
+16833,35508,{Bustang} Firestone-Longmont Mobility Hub,,40.160473,-104.977548,,,0,,,1
+173,17771,Broadway & Speer Blvd,,39.726320,-104.987563,,,0,,,
+2054,20922,{Bustang} Lyons PnR,,40.222132,-105.264785,,,0,,,1
+2082,22070,{Bustang} Lyons PnR,,40.222200,-105.264524,,,0,,,1
+2122,17754,Lincoln St & Colfax Ave,,39.740420,-104.986023,,,0,,,
+2207,17710,17th St & Glenarm [ Y Stop ],,39.744464,-104.989005,,,0,,,
+55,14978,Lincoln St & 7th Ave,,39.727596,-104.986043,,,0,,,
+72,17722,18th St & Stout St,,39.748010,-104.990867,,,0,,,
