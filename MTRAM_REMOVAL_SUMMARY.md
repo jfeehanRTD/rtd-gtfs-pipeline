@@ -31,7 +31,7 @@ All MTRAM (Maior/MTRAM) references and code have been removed from the project. 
 
 ### Data Source
 **Oracle TIES Database Only**
-- Source database: Oracle TIES (10.1.77.23:1521/ops2p)
+- Source database: Oracle TIES (requires VPN access, configured via environment variables)
 - Staging database: PostgreSQL with TIES views (localhost:5433)
 - No MTRAM tables or references
 

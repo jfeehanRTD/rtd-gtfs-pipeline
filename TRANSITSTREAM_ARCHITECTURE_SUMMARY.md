@@ -79,7 +79,7 @@ The GTFS Static Data System extracts RTD's transit scheduling and fare data from
 - **Purpose**: Source of truth for RTD transit scheduling data
 - **Data**: Route patterns, trips, stops/points, calendars, fare products
 - **Access**: VPN connection required (Palo Alto GlobalProtect)
-- **Connection**: `jdbc:oracle:thin:@10.1.77.23:1521/ops2p`
+- **Connection**: Configured via environment variables (`~/ties-oracle-config.sh`)
 - **Note**: Data accessed through PostgreSQL views, not direct Oracle queries
 
 #### 2. PostgreSQL Staging Layer

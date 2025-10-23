@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-RTD GTFS-RT Data Pipeline - A Java application using Apache Flink to download and process real-time transit feeds from RTD Denver.
+TransitStream - RTD's modern transit information system. A Java application using Apache Flink to download and process real-time transit feeds from RTD Denver.
 
 ## Current Flink Version
 
@@ -90,7 +90,7 @@ Use the secure startup scripts that load credentials from environment variables:
 ```
 
 #### RTD Control Script (General Pipeline Management)
-The easiest way to manage the RTD pipeline, React web app, and HTTP receivers:
+The easiest way to manage the TransitStream pipeline, React web app, and HTTP receivers:
 
 ```bash
 # Start all services (Java, React, Bus & Rail receivers)
@@ -135,29 +135,29 @@ The easiest way to manage the RTD pipeline, React web app, and HTTP receivers:
 **Bus SIRI Pipeline (Secure)**
 ```bash
 # Preferred: Use environment variables (requires .env file or exported variables)
-java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar com.rtd.pipeline.BusCommHTTPReceiver
+java -cp target/transitstream-1.0-SNAPSHOT.jar com.rtd.pipeline.BusCommHTTPReceiver
 
 # Alternative: Command line with credentials (less secure - avoid in production)
-java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar \
+java -cp target/transitstream-1.0-SNAPSHOT.jar \
   com.rtd.pipeline.BusCommHTTPReceiver \
   http://tisproxy.rtd-denver.com siri 90000 username password
 
 # Bus data processing pipeline
-java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar com.rtd.pipeline.RTDBusCommSimplePipeline
+java -cp target/transitstream-1.0-SNAPSHOT.jar com.rtd.pipeline.RTDBusCommSimplePipeline
 ```
 
 **Rail Communication Pipeline (Secure)**
 ```bash
 # Preferred: Use environment variables (requires .env file or exported variables)
-java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar com.rtd.pipeline.RailCommHTTPReceiver
+java -cp target/transitstream-1.0-SNAPSHOT.jar com.rtd.pipeline.RailCommHTTPReceiver
 
 # Alternative: Command line with credentials (less secure - avoid in production)
-java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar \
+java -cp target/transitstream-1.0-SNAPSHOT.jar \
   com.rtd.pipeline.RailCommHTTPReceiver \
   http://tisproxy.rtd-denver.com railcomm 90000 username password
 
 # Rail communication data processing pipeline
-java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar com.rtd.pipeline.RTDRailCommPipeline
+java -cp target/transitstream-1.0-SNAPSHOT.jar com.rtd.pipeline.RTDRailCommPipeline
 ```
 
 **Local Development (Flink Mini Cluster)**
@@ -166,7 +166,7 @@ java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar com.rtd.pipeline.RTDRailCommP
 mvn exec:java -Dexec.mainClass="com.rtd.pipeline.RTDStaticDataPipeline"
 
 # Run packaged JAR
-java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar com.rtd.pipeline.RTDStaticDataPipeline
+java -cp target/transitstream-1.0-SNAPSHOT.jar com.rtd.pipeline.RTDStaticDataPipeline
 ```
 
 **React Web App**
@@ -178,7 +178,7 @@ cd rtd-maps-app && npm start
 **Flink Cluster Deployment**
 ```bash
 # Submit to Flink cluster
-flink run target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar
+flink run target/transitstream-1.0-SNAPSHOT.jar
 ```
 
 ## Architecture Overview
@@ -205,10 +205,9 @@ flink run target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar
 **CRITICAL**: Oracle TIES database requires VPN connection, but Claude Code does NOT work when VPN is connected.
 
 ### Oracle Connection Details
-- **Host**: 10.1.77.23:1521/ops2p
-- **User**: ties
-- **Password**: tiesPr0d
-- **JDBC URL**: jdbc:oracle:thin:@10.1.77.23:1521/ops2p
+- **Connection**: Requires VPN access (credentials stored in environment variables)
+- **User**: Configured via environment variables
+- **JDBC URL**: Configured via `~/ties-oracle-config.sh`
 
 ### VPN Workflow Constraint
 - **User must connect to VPN** to access Oracle database

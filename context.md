@@ -148,10 +148,9 @@ Output: data/gtfs-nextgen/rtd/2025-10-22/
 **CRITICAL**: Oracle TIES database requires VPN connection, but Claude Code does NOT work when VPN is connected.
 
 ### Oracle Connection Details
-- **Host**: 10.1.77.23:1521/ops2p
-- **User**: ties
-- **Password**: tiesPr0d
-- **JDBC URL**: jdbc:oracle:thin:@10.1.77.23:1521/ops2p
+- **Connection**: Requires VPN access (credentials stored in environment variables)
+- **Configuration**: Loaded via `~/ties-oracle-config.sh`
+- **JDBC URL**: Configured via environment variables
 
 ### PostgreSQL Staging Database
 - **Host**: localhost:5433
