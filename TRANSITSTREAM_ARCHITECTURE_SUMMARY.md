@@ -85,7 +85,7 @@ The GTFS Static Data System extracts RTD's transit scheduling and fare data from
 #### 2. PostgreSQL Staging Layer
 - **Purpose**: Transform TIES data into GTFS-compatible views
 - **Setup**: Docker container on localhost:5433
-- **Database**: ties / User: ties / Password: TiesPassword123
+- **Database**: ties / User: <configured via environment> / Password: <password>
 
 **16 PostgreSQL Views**:
 
@@ -119,7 +119,7 @@ The GTFS Static Data System extracts RTD's transit scheduling and fare data from
 ```bash
 POSTGRES_TIES_URL=jdbc:postgresql://localhost:5433/ties
 POSTGRES_TIES_USER=ties
-POSTGRES_TIES_PASSWORD=TiesPassword123
+POSTGRES_TIES_PASSWORD=<password>
 NEXTGEN_OUTPUT_DIR=data/gtfs-nextgen/rtd/2025-10-22
 ```
 

@@ -82,7 +82,7 @@ The pipeline connects to the TIES PostgreSQL database running on localhost (conv
 ```properties
 TIES_DB_URL=jdbc:postgresql://localhost:5432/ties
 TIES_DB_USER=ties
-TIES_DB_PASSWORD=TiesPassword123
+TIES_DB_PASSWORD=<password>
 TIES_OUTPUT_DIR=data/gtfs-ties
 ```
 

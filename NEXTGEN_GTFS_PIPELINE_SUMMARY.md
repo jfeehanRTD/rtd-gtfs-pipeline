@@ -79,7 +79,7 @@ The NextGenPipeline GTFS extraction process transforms RTD's transit scheduling 
 docker-compose up -d ties-postgres
 # PostgreSQL runs on localhost:5433
 # Database: ties
-# User: ties / Password: TiesPassword123
+# User: <configured via environment> / Password: <password>
 ```
 
 **Key Views** (16 total):
@@ -180,7 +180,7 @@ Environment variables:
 ```bash
 POSTGRES_TIES_URL=jdbc:postgresql://localhost:5433/ties
 POSTGRES_TIES_USER=ties
-POSTGRES_TIES_PASSWORD=TiesPassword123
+POSTGRES_TIES_PASSWORD=<password>
 NEXTGEN_OUTPUT_DIR=data/gtfs-nextgen/rtd/2025-10-22
 ```
 
@@ -348,7 +348,7 @@ java -jar gtfs-validator.jar \
    ```bash
    export POSTGRES_TIES_URL="jdbc:postgresql://localhost:5433/ties"
    export POSTGRES_TIES_USER="ties"
-   export POSTGRES_TIES_PASSWORD="TiesPassword123"
+   export POSTGRES_TIES_PASSWORD="<password>"
    export NEXTGEN_OUTPUT_DIR="data/gtfs-nextgen/rtd/$(date +%Y-%m-%d)"
    ```
 
@@ -715,7 +715,7 @@ java -version
 |----------|---------|-------------|
 | POSTGRES_TIES_URL | jdbc:postgresql://localhost:5433/ties | PostgreSQL connection URL |
 | POSTGRES_TIES_USER | ties | PostgreSQL username |
-| POSTGRES_TIES_PASSWORD | TiesPassword123 | PostgreSQL password |
+| POSTGRES_TIES_PASSWORD | <password> | PostgreSQL password |
 | NEXTGEN_OUTPUT_DIR | data/gtfs-nextgen/rtd/`<date>` | Output directory for GTFS files |
 
 ### Gradle Tasks

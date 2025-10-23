@@ -102,7 +102,7 @@ A production-ready Apache Flink pipeline that extracts GTFS v2 fare data from th
 - ✅ **Environment Variable Support:**
   - TIES_DB_URL (default: jdbc:postgresql://localhost:5432/ties)
   - TIES_DB_USER (default: ties)
-  - TIES_DB_PASSWORD (default: TiesPassword123)
+  - TIES_DB_PASSWORD (default: <password>)
   - TIES_OUTPUT_DIR (default: data/gtfs-ties)
 
 ### 5. Documentation

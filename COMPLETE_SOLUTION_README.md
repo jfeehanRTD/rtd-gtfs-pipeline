@@ -214,7 +214,7 @@ head -10 data/gtfs-ties/rtd/fare_products.txt/part-*.csv
 # Default
 ORACLE_TIES_URL=jdbc:oracle:thin:@localhost:1521:FREEPDB1
 ORACLE_TIES_USER=TIES
-ORACLE_TIES_PASSWORD=TiesPassword123
+ORACLE_TIES_PASSWORD=<password>
 
 # Custom
 export ORACLE_TIES_URL="jdbc:oracle:thin:@your-host:1521:FREEPDB1"
@@ -228,7 +228,7 @@ export ORACLE_TIES_PASSWORD="your_password"
 # Default
 POSTGRES_TIES_URL=jdbc:postgresql://localhost:5432/ties
 POSTGRES_TIES_USER=ties
-POSTGRES_TIES_PASSWORD=TiesPassword123
+POSTGRES_TIES_PASSWORD=<password>
 
 # Custom
 export POSTGRES_TIES_URL="jdbc:postgresql://your-host:5432/ties"

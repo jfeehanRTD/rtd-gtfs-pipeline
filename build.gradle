@@ -162,7 +162,7 @@ task runTIESFarePipeline(type: JavaExec) {
     // Environment variables can be set here or externally
     environment 'TIES_DB_URL', System.getenv('TIES_DB_URL') ?: 'jdbc:postgresql://localhost:5432/ties'
     environment 'TIES_DB_USER', System.getenv('TIES_DB_USER') ?: 'ties'
-    environment 'TIES_DB_PASSWORD', System.getenv('TIES_DB_PASSWORD') ?: 'TiesPassword123'
+    environment 'TIES_DB_PASSWORD', System.getenv('TIES_DB_PASSWORD') ?: '<password>'
     environment 'TIES_OUTPUT_DIR', System.getenv('TIES_OUTPUT_DIR') ?: 'data/gtfs-ties'
 }
 
@@ -181,7 +181,7 @@ task runTIESFarePipelineRTD(type: JavaExec) {
     // Environment variables for PostgreSQL connection
     environment 'POSTGRES_TIES_URL', System.getenv('POSTGRES_TIES_URL') ?: 'jdbc:postgresql://localhost:5433/ties'
     environment 'POSTGRES_TIES_USER', System.getenv('POSTGRES_TIES_USER') ?: 'ties'
-    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: 'TiesPassword123'
+    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: '<password>'
 }
 
 task runNextGenCorePipeline(type: JavaExec) {
@@ -198,7 +198,7 @@ task runNextGenCorePipeline(type: JavaExec) {
     // Environment variables for PostgreSQL connection (connected to TIES Oracle source)
     environment 'POSTGRES_TIES_URL', System.getenv('POSTGRES_TIES_URL') ?: 'jdbc:postgresql://localhost:5433/ties'
     environment 'POSTGRES_TIES_USER', System.getenv('POSTGRES_TIES_USER') ?: 'ties'
-    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: 'TiesPassword123'
+    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: '<password>'
 }
 
 // Backward compatibility alias
@@ -223,7 +223,7 @@ task runTIESFarePipelineCDOT(type: JavaExec) {
     // Environment variables for PostgreSQL connection
     environment 'POSTGRES_TIES_URL', System.getenv('POSTGRES_TIES_URL') ?: 'jdbc:postgresql://localhost:5433/ties'
     environment 'POSTGRES_TIES_USER', System.getenv('POSTGRES_TIES_USER') ?: 'ties'
-    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: 'TiesPassword123'
+    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: '<password>'
 }
 
 // TIES Data Migration (Oracle to PostgreSQL)
@@ -246,12 +246,12 @@ task runTIESMigration(type: JavaExec) {
     // Environment variables for Oracle connection
     environment 'ORACLE_TIES_URL', System.getenv('ORACLE_TIES_URL') ?: 'jdbc:oracle:thin:@localhost:1521:FREEPDB1'
     environment 'ORACLE_TIES_USER', System.getenv('ORACLE_TIES_USER') ?: 'TIES'
-    environment 'ORACLE_TIES_PASSWORD', System.getenv('ORACLE_TIES_PASSWORD') ?: 'TiesPassword123'
+    environment 'ORACLE_TIES_PASSWORD', System.getenv('ORACLE_TIES_PASSWORD') ?: '<password>'
 
     // Environment variables for PostgreSQL connection
     environment 'POSTGRES_TIES_URL', System.getenv('POSTGRES_TIES_URL') ?: 'jdbc:postgresql://localhost:5433/ties'
     environment 'POSTGRES_TIES_USER', System.getenv('POSTGRES_TIES_USER') ?: 'ties'
-    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: 'TiesPassword123'
+    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: '<password>'
 }
 
 task runTIESMigrationRTD(type: JavaExec) {
@@ -265,12 +265,12 @@ task runTIESMigrationRTD(type: JavaExec) {
     // Environment variables for Oracle connection
     environment 'ORACLE_TIES_URL', System.getenv('ORACLE_TIES_URL') ?: 'jdbc:oracle:thin:@localhost:1521:FREEPDB1'
     environment 'ORACLE_TIES_USER', System.getenv('ORACLE_TIES_USER') ?: 'TIES'
-    environment 'ORACLE_TIES_PASSWORD', System.getenv('ORACLE_TIES_PASSWORD') ?: 'TiesPassword123'
+    environment 'ORACLE_TIES_PASSWORD', System.getenv('ORACLE_TIES_PASSWORD') ?: '<password>'
 
     // Environment variables for PostgreSQL connection
     environment 'POSTGRES_TIES_URL', System.getenv('POSTGRES_TIES_URL') ?: 'jdbc:postgresql://localhost:5433/ties'
     environment 'POSTGRES_TIES_USER', System.getenv('POSTGRES_TIES_USER') ?: 'ties'
-    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: 'TiesPassword123'
+    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: '<password>'
 }
 
 task runTIESMigrationCDOT(type: JavaExec) {
@@ -284,12 +284,12 @@ task runTIESMigrationCDOT(type: JavaExec) {
     // Environment variables for Oracle connection
     environment 'ORACLE_TIES_URL', System.getenv('ORACLE_TIES_URL') ?: 'jdbc:oracle:thin:@localhost:1521:FREEPDB1'
     environment 'ORACLE_TIES_USER', System.getenv('ORACLE_TIES_USER') ?: 'TIES'
-    environment 'ORACLE_TIES_PASSWORD', System.getenv('ORACLE_TIES_PASSWORD') ?: 'TiesPassword123'
+    environment 'ORACLE_TIES_PASSWORD', System.getenv('ORACLE_TIES_PASSWORD') ?: '<password>'
 
     // Environment variables for PostgreSQL connection
     environment 'POSTGRES_TIES_URL', System.getenv('POSTGRES_TIES_URL') ?: 'jdbc:postgresql://localhost:5433/ties'
     environment 'POSTGRES_TIES_USER', System.getenv('POSTGRES_TIES_USER') ?: 'ties'
-    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: 'TiesPassword123'
+    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: '<password>'
 }
 
 task runTIESMigrationALL(type: JavaExec) {
@@ -303,12 +303,12 @@ task runTIESMigrationALL(type: JavaExec) {
     // Environment variables for Oracle connection
     environment 'ORACLE_TIES_URL', System.getenv('ORACLE_TIES_URL') ?: 'jdbc:oracle:thin:@localhost:1521:FREEPDB1'
     environment 'ORACLE_TIES_USER', System.getenv('ORACLE_TIES_USER') ?: 'TIES'
-    environment 'ORACLE_TIES_PASSWORD', System.getenv('ORACLE_TIES_PASSWORD') ?: 'TiesPassword123'
+    environment 'ORACLE_TIES_PASSWORD', System.getenv('ORACLE_TIES_PASSWORD') ?: '<password>'
 
     // Environment variables for PostgreSQL connection
     environment 'POSTGRES_TIES_URL', System.getenv('POSTGRES_TIES_URL') ?: 'jdbc:postgresql://localhost:5433/ties'
     environment 'POSTGRES_TIES_USER', System.getenv('POSTGRES_TIES_USER') ?: 'ties'
-    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: 'TiesPassword123'
+    environment 'POSTGRES_TIES_PASSWORD', System.getenv('POSTGRES_TIES_PASSWORD') ?: '<password>'
 }
 
 // Configure the JAR task

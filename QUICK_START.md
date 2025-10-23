@@ -117,8 +117,8 @@ runTIESFarePipelineCDOT      # CDOT/Bustang only
 ### Default Values
 ```properties
 Database URL:  jdbc:postgresql://localhost:5432/ties
-Database User: ties
-Database Pass: TiesPassword123
+Database User: <configured via environment>
+Database Pass: <configured via environment>
 Output Dir:    data/gtfs-ties
 ```
 

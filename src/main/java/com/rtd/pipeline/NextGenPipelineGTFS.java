@@ -28,12 +28,9 @@ public class NextGenPipelineGTFS {
 
     private static final Logger LOG = LoggerFactory.getLogger(NextGenPipelineGTFS.class);
 
-    private static final String POSTGRES_JDBC_URL = System.getenv().getOrDefault(
-        "POSTGRES_TIES_URL", "jdbc:postgresql://localhost:5433/ties");
-    private static final String POSTGRES_USER = System.getenv().getOrDefault(
-        "POSTGRES_TIES_USER", "ties");
-    private static final String POSTGRES_PASSWORD = System.getenv().getOrDefault(
-        "POSTGRES_TIES_PASSWORD", "TiesPassword123");
+    private static final String POSTGRES_JDBC_URL = System.getenv("POSTGRES_TIES_URL");
+    private static final String POSTGRES_USER = System.getenv("POSTGRES_TIES_USER");
+    private static final String POSTGRES_PASSWORD = System.getenv("POSTGRES_TIES_PASSWORD");
     private static final String OUTPUT_DIR = System.getenv().getOrDefault(
         "NEXTGEN_OUTPUT_DIR", "data/gtfs-nextgen/rtd/" + LocalDate.now());
 

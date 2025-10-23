@@ -48,7 +48,7 @@ export ORACLE_TIES_PASSWORD="<your_password>"
 # PostgreSQL TIES Connection (Local)
 export POSTGRES_TIES_URL="jdbc:postgresql://localhost:5432/ties"
 export POSTGRES_TIES_USER="ties"
-export POSTGRES_TIES_PASSWORD="TiesPassword123"
+export POSTGRES_TIES_PASSWORD="<password>"
 
 echo "✓ Oracle TIES connection configured for: $ORACLE_TIES_URL"
 EOF
@@ -154,7 +154,7 @@ export ORACLE_TIES_PASSWORD="YourSecurePassword"
 # PostgreSQL TIES (Local)
 export POSTGRES_TIES_URL="jdbc:postgresql://localhost:5432/ties"
 export POSTGRES_TIES_USER="ties"
-export POSTGRES_TIES_PASSWORD="TiesPassword123"
+export POSTGRES_TIES_PASSWORD="<password>"
 
 echo "✓ Configured for RTD Production TIES"
 EOF

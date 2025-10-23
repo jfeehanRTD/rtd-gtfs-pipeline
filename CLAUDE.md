@@ -228,7 +228,7 @@ When Oracle data migration is needed:
    ```
 4. **Check results**:
    ```bash
-   PGPASSWORD=TiesPassword123 psql -h localhost -p 5433 -U ties -d ties -c "
+   PGPASSWORD=<password> psql -h localhost -p 5433 -U ties -d ties -c "
    SELECT table_name,
           (xpath('/row/c/text()', query_to_xml(format('select count(*) as c from %I', table_name), false, true, '')))[1]::text::int as row_count
    FROM information_schema.tables

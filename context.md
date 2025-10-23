@@ -156,7 +156,7 @@ Output: data/gtfs-nextgen/rtd/2025-10-22/
 - **Host**: localhost:5433
 - **Database**: ties
 - **User**: ties
-- **Password**: TiesPassword123
+- **Password**: <password>
 - **JDBC URL**: jdbc:postgresql://localhost:5433/ties
 
 ### VPN Workflow Constraint
@@ -200,7 +200,7 @@ When Oracle data migration is needed:
 ### Key Environment Variables
 - `POSTGRES_TIES_URL` - PostgreSQL connection (default: jdbc:postgresql://localhost:5433/ties)
 - `POSTGRES_TIES_USER` - PostgreSQL user (default: ties)
-- `POSTGRES_TIES_PASSWORD` - PostgreSQL password (default: TiesPassword123)
+- `POSTGRES_TIES_PASSWORD` - PostgreSQL password (default: <password>)
 - `NEXTGEN_OUTPUT_DIR` - Output directory (default: data/gtfs-nextgen/rtd/<date>)
 
 ### Docker Services

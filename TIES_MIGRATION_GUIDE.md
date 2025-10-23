@@ -72,7 +72,7 @@ A Java-based migration pipeline that:
 
 ```bash
 # Test Oracle connection
-sqlplus TIES/TiesPassword123@//localhost:1521/FREEPDB1
+sqlplus TIES/<password>@//localhost:1521/FREEPDB1
 
 # Verify tables exist
 SELECT table_name FROM user_tables WHERE table_name LIKE 'TIES_GTFS%';
@@ -124,14 +124,14 @@ telnet localhost 5432
 ```properties
 URL:      jdbc:oracle:thin:@localhost:1521:FREEPDB1
 User:     TIES
-Password: TiesPassword123
+Password: <password>
 ```
 
 **PostgreSQL (Target):**
 ```properties
 URL:      jdbc:postgresql://localhost:5432/ties
 User:     ties
-Password: TiesPassword123
+Password: <password>
 ```
 
 ### Custom Configuration
