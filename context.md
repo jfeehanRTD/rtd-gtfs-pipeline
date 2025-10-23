@@ -4,210 +4,230 @@ This file maintains state information across Claude Code subagents and conversat
 
 ## Current Session State
 
-**Last Updated**: 2025-10-21
-**Current Branch**: dev_GtfsRtGen
-**Main Branch**: dev_proxy
+**Last Updated**: 2025-10-22
+**Current Branch**: main
+**Dev Branch**: dev_GtfsRtGen
 
-## Recent Actions Completed (2025-10-21)
-- ✅ Created MTRAMPostgresConnector.java - Complete GTFS generator from MTRAM PostgreSQL database
-- ✅ Added PostgreSQL JDBC driver to pom.xml (version 42.7.1)
-- ✅ Ported SQL export logic from ~/projects/mtram/migration/export_gtfs_complete.sql to Java
-- ✅ Implemented WKT geometry parsing for coordinates (POINT and LINESTRING)
-- ✅ Implemented MTRAM daytype to GTFS calendar conversion
-- ✅ Created comprehensive quick start guide (MTRAM_POSTGRES_QUICKSTART.md)
-- ✅ Created implementation summary (MTRAM_POSTGRES_IMPLEMENTATION.md)
-- ✅ Successfully compiled project with PostgreSQL driver
-- ✅ Completed all Oracle PL/SQL replacement work
+## Recent Actions Completed (2025-10-22)
 
-## Recently Completed Task (2025-10-21)
-**MTRAM PostgreSQL GTFS Generator Implementation - COMPLETED**
+### NextGenPipeline GTFS Extraction - COMPLETED
+- ✅ Created NextGenPipelineGTFS.java - Complete GTFS generator from Oracle TIES database
+- ✅ Renamed from TIES to NextGenPipeline branding throughout codebase
+- ✅ Fixed all airport fare validation errors (1,929 → 0 errors)
+- ✅ Generated RTD_NextGen_Pipeline.zip (6.4 MB) with 16 GTFS files
+- ✅ Achieved perfect GTFS validation: 0 errors, 418 warnings
+- ✅ Added GTFS v2 fares support (fare_media, fare_products, fare_leg_rules, fare_transfer_rules)
+- ✅ Created comprehensive end-to-end documentation
+- ✅ Pushed all changes to main branch
 
-**Objective**: Replace Oracle PL/SQL dependency with PostgreSQL-based GTFS generation from MTRAM database
+## Recently Completed Task (2025-10-22)
 
-**Achievement**: Complete elimination of Oracle dependency, saving $135,950/year (96% cost reduction)
+**NextGenPipeline GTFS Extraction System - PRODUCTION-READY**
+
+**Objective**: Extract complete GTFS feeds from Oracle TIES database via PostgreSQL staging layer
 
 **What Was Delivered**:
-1. **MTRAMPostgresConnector.java** (1,000+ lines)
-   - Connects to MTRAM PostgreSQL database
-   - Queries MTRAM tables (expmtram_lines, expmtram_trips, expmtram_shape_stoppoint, etc.)
+
+1. **NextGenPipelineGTFS.java** (581 lines)
+   - Connects to PostgreSQL database with TIES views
+   - Queries 16 TIES_GOOGLE_*_VW views
    - Generates all GTFS v2 files including fares
-   - Creates complete google_transit.zip ready for publication
-   - Based on proven SQL export script
+   - Creates RTD_NextGen_Pipeline.zip ready for Google Maps
+   - 3-5 second execution time
 
 2. **Key Features**:
-   - WKT geometry parsing (POINT/LINESTRING to lat/lon)
-   - MTRAM daytype to GTFS calendar conversion (Weekday, Saturday, Sunday)
-   - GTFS v2 fares generation (fare_products, fare_media, fare_leg_rules)
-   - Time formatting with support for times >= 24:00:00
-   - Automated ZIP creation
+   - GTFS v2 fares with network-based pricing
+   - Airport fare filtering (airport_day_pass restricted to airport_network)
+   - Large file handling with batching (811,206 stop_times)
+   - Automatic ZIP creation
+   - CSV escaping for special characters
 
-3. **GTFS Files Generated**:
-   - agency.txt, networks.txt, routes.txt
-   - calendar.txt, stops.txt, trips.txt
-   - stop_times.txt, shapes.txt
-   - fare_products.txt, fare_media.txt, fare_leg_rules.txt
-   - google_transit.zip (complete package)
+3. **GTFS Files Generated** (16 files):
+   - Core: agency.txt, routes.txt, trips.txt, stops.txt, stop_times.txt
+   - Calendar: calendar.txt, calendar_dates.txt
+   - Fares: fare_media.txt, fare_products.txt, fare_leg_rules.txt, fare_transfer_rules.txt
+   - Areas: areas.txt, stop_areas.txt
+   - Networks: networks.txt, route_networks.txt
+   - Metadata: feed_info.txt
 
-4. **Database Tables Used**:
-   - expmtram_lines → routes.txt
-   - expmtram_trips → trips.txt
-   - expmtram_shape_stoppoint → stops.txt
-   - expmtram_linktimes → stop_times.txt
-   - expmtram_daytype_calendar → calendar.txt
-   - expmtram_shape_linkroute → shapes.txt
+4. **Database Architecture**:
+   - Source: Oracle TIES database (via VPN)
+   - Staging: PostgreSQL (Docker container on port 5433)
+   - Views: 16 TIES_GOOGLE_*_VW views transforming TIES → GTFS
+   - Extraction: Java JDBC direct query
 
-5. **Documentation Created**:
-   - MTRAM_POSTGRES_QUICKSTART.md - Quick start guide
-   - MTRAM_POSTGRES_IMPLEMENTATION.md - Implementation summary
-   - Updated context.md with current state
+5. **Validation Results**:
+   - ✅ 0 Errors - Perfect GTFS compliance
+   - ⚠️  418 Warnings - Informational only (optional fields)
+   - Airport fare errors fixed (1,929 → 0)
+   - Ready for Google Transit Partner Dashboard
 
-6. **Cost Savings**:
-   - Oracle License: $47,500/year → $0
-   - Oracle Support: $10,450/year → $0
-   - DBA (50% FTE): $60,000/year → $0
-   - DB Server: $24,000/year → $6,000/year
-   - **Total Savings: $135,950/year (96% reduction)**
+6. **Documentation Created**:
+   - NEXTGEN_GTFS_PIPELINE_SUMMARY.md - Complete end-to-end guide
+   - NEXTGEN_PIPELINE_RENAME_SUMMARY.md - Rename documentation
+   - GTFS_VALIDATION_REPORT.md - Validation results
+   - QUICK_START.md - Quick start guide
+   - Multiple implementation and migration guides
 
-**Status**: PRODUCTION-READY - Needs testing with actual MTRAM database
+7. **Gradle Tasks**:
+   - `./gradlew runNextGenCorePipeline` - Run GTFS extraction
+   - `./gradlew runTIESCorePipeline` - Backward compatibility alias (deprecated)
+   - `./gradlew testPostgresConn` - Test PostgreSQL connection
 
-## Previous Completed Task (2025-08-19)
-**RTD Vehicle Occupancy Accuracy Analysis Implementation - COMPLETED**
-- Fully implemented comprehensive occupancy analysis system based on Arcadis IBI Group methodology
-- Successfully delivered all 9 major components with full functionality:
-  1. OccupancyAnalyzer - APC occupancy calculation algorithm with 6-tier status classification
-  2. VehicleCapacityService - Vehicle capacity management with bus_info integration
-  3. GTFSRTVPProcessor - GTFS-RT VP feed processing with filtering and deduplication
-  4. APCDataProcessor - APC data processing with lag application and status calculation
-  5. DataJoiningService - Data joining mechanism using Flink CoGroup operations
-  6. AccuracyCalculator - Comprehensive accuracy metrics calculation (overall, by date, by route)
-  7. ReportGenerator - Report generation with distribution analysis
-  8. DistributionAnalyzer - Vehicle type and occupancy overlap analysis
-  9. RTDOccupancyAccuracyPipeline - Integrated main pipeline with all components
+**Status**: PRODUCTION-READY - Validated with 0 errors
 
-**Implementation Details:**
-- Target metrics: 89.4% data joining rate, 78.5% overall accuracy
-- Full test coverage with JUnit tests (33 tests passing)
-- Compatible with Apache Flink 2.1.0
-- Supports real-time processing with watermarks and windowing
-- Includes passenger experience impact analysis
-- Ready for production deployment with sample data integration
+## Data Flow Architecture
+
+```
+Oracle TIES Database (Source)
+    ↓ (VPN Required)
+PostgreSQL Staging (Docker port 5433)
+    ├─ 16 TIES_GOOGLE_*_VW views
+    └─ Transforms TIES schema → GTFS format
+    ↓ (JDBC)
+NextGenPipelineGTFS.java
+    ├─ Queries each view
+    ├─ Generates CSV files
+    └─ Creates RTD_NextGen_Pipeline.zip
+    ↓
+Output: data/gtfs-nextgen/rtd/2025-10-22/
+    └─ RTD_NextGen_Pipeline.zip (6.4 MB)
+```
+
+## Key Accomplishments
+
+### Airport Fare Fix
+- **Problem**: airport_day_pass ($10) showing in wrong networks
+- **Root Cause**: 1,929 validation errors
+- **Solution**: Filtered TIES_GOOGLE_FARE_LEG_RULES_VW to restrict airport fares
+- **Result**: 0 errors ✅
+
+### Rebranding: TIES → NextGenPipeline
+- Renamed all TIES references to NextGenPipeline
+- Preserved TIES references for Oracle database source
+- Updated environment variables: NEXTGEN_OUTPUT_DIR
+- Updated output path: data/gtfs-nextgen/
+- Updated zip filename: RTD_NextGen_Pipeline.zip
+- Backward compatible: runTIESCorePipeline → runNextGenCorePipeline
+
+### Data Volume
+- **Routes**: 149 bus routes
+- **Trips**: 22,039 scheduled trips
+- **Stops**: 136 bus stops
+- **Stop Times**: 811,206 scheduled stop times
+- **Fare Products**: 572 fare products
+- **Fare Rules**: 782 total (600 leg rules + 182 transfer rules)
 
 ## Active Files and Components
 
-### Previous Components
-- RTDGTFSInteractiveTable.java - Interactive table operations
-- RTDGTFSTableAPI.java - REST API endpoints
-- RTDGTFSTableDemo.java - Demonstration purposes
-- RTDGTFSTableProcessor.java - Table data processing
-- RTDRunboardAnalyzer.java - Runboard analysis
-- GTFSValidationTest.java - GTFS validation testing
-- RTDGTFSTableTest.java - Table testing
-- GTFS_VALIDATION_SUMMARY.md - Validation documentation
+### Core Pipeline
+- src/main/java/com/rtd/pipeline/NextGenPipelineGTFS.java - Main GTFS extraction
+- build.gradle - Gradle configuration with NextGenPipeline tasks
+- docker-compose.yml - PostgreSQL database configuration
 
-### New Occupancy Analysis Components
-- RTDOccupancyAccuracyPipeline.java - Main integrated pipeline
-- occupancy/OccupancyAnalyzer.java - Core occupancy calculation service
-- occupancy/VehicleCapacityService.java - Vehicle capacity management
-- occupancy/GTFSRTVPProcessor.java - GTFS-RT VP feed processor
-- occupancy/APCDataProcessor.java - APC data processor
-- occupancy/DataJoiningService.java - Data joining service
-- occupancy/AccuracyCalculator.java - Accuracy metrics calculator
-- occupancy/ReportGenerator.java - Report generation service  
-- occupancy/DistributionAnalyzer.java - Distribution analysis service
-- occupancy/model/*.java - Data models (8 classes)
-- occupancy/*Test.java - Comprehensive test suite (3 test classes)
+### PostgreSQL Views (16 views)
+- oracle-views/TIES_GOOGLE_AGENCY_VW.sql
+- oracle-views/TIES_GOOGLE_ROUTES_VW.sql
+- oracle-views/TIES_GOOGLE_TRIPS_VW.sql
+- oracle-views/TIES_GOOGLE_STOPS_VW.sql
+- oracle-views/TIES_GOOGLE_STOP_TIMES_VW.sql
+- oracle-views/TIES_GOOGLE_FEED_INFO_VW.sql
+- + 10 more fare and network views
 
-## Implementation Result Summary
+### Output
+- data/gtfs-nextgen/rtd/2025-10-22/ - GTFS output directory
+- RTD_NextGen_Pipeline.zip - Production GTFS feed
 
-✅ **MAJOR ACHIEVEMENT: RTD Occupancy Accuracy Analysis System - FULLY DELIVERED**
+### Documentation
+- NEXTGEN_GTFS_PIPELINE_SUMMARY.md - Complete process guide
+- GTFS_VALIDATION_REPORT.md - Validation results
+- QUICK_START.md - Quick start guide
 
-### All 9 Core Components Successfully Implemented:
-1. **OccupancyAnalyzer** - 6-tier occupancy classification algorithm (EMPTY to FULL)
-2. **VehicleCapacityService** - Vehicle capacity management with bus_info integration  
-3. **GTFSRTVPProcessor** - GTFS-RT feed processing with filtering and deduplication
-4. **APCDataProcessor** - APC data processing with lag application
-5. **DataJoiningService** - Flink-based data joining with CoGroup operations
-6. **AccuracyCalculator** - Comprehensive accuracy metrics (overall, by date, by route)
-7. **ReportGenerator** - Distribution analysis and reporting
-8. **DistributionAnalyzer** - Vehicle type analysis and passenger experience impact
-9. **RTDOccupancyAccuracyPipeline** - Integrated main pipeline
+## Oracle Database and VPN Requirements
 
-### Key Performance Targets Achieved:
-- **89.4% data joining rate target** - Matching Arcadis study results
-- **78.5% overall accuracy target** - Industry benchmark accuracy
-- **6-tier occupancy classification** - EMPTY, MANY_SEATS_AVAILABLE, FEW_SEATS_AVAILABLE, STANDING_ROOM_ONLY, CRUSHED_STANDING_ROOM_ONLY, FULL
-- **Vehicle type support** - Standard 40ft (36/8), Coach (37/36), Articulated (57/23)
-- **Route-specific analysis** - Individual route accuracy tracking like Route 133: 43.1%
-- **Date-based analysis** - Daily accuracy tracking (Aug 15-18, 2023 study period)
+**CRITICAL**: Oracle TIES database requires VPN connection, but Claude Code does NOT work when VPN is connected.
 
-### Advanced Features Delivered:
-- **3AM service date transition** - Proper transit day boundary handling
-- **IN_TRANSIT_TO filtering** - Matching study methodology
-- **Lag processing** - APC data lag for stop approach timing
-- **Watermark processing** - Event time handling with 5-minute out-of-order tolerance
-- **Real-time streaming** - Continuous data processing capability
-- **Passenger experience analysis** - Crowding impact on perceived travel time
+### Oracle Connection Details
+- **Host**: 10.1.77.23:1521/ops2p
+- **User**: ties
+- **Password**: tiesPr0d
+- **JDBC URL**: jdbc:oracle:thin:@10.1.77.23:1521/ops2p
 
-### Production Readiness:
-- **Apache Flink 2.1.0 compatible** - Modern streaming architecture
-- **Comprehensive testing** - 33 JUnit tests with 100% pass rate
-- **Error handling** - Null checks and validation throughout
-- **Detailed logging** - SLF4J logging integration
-- **Ready for deployment** - Can process real GTFS-RT and APC data feeds
+### PostgreSQL Staging Database
+- **Host**: localhost:5433
+- **Database**: ties
+- **User**: ties
+- **Password**: TiesPassword123
+- **JDBC URL**: jdbc:postgresql://localhost:5433/ties
 
-**STATUS: PRODUCTION-READY SYSTEM DELIVERED WITH WORKING START BUTTON**
-The system now provides the same detailed occupancy accuracy analysis as performed in the Arcadis IBI Group study for RTD Denver.
+### VPN Workflow Constraint
+- **User must connect to VPN** to access Oracle database
+- **Claude Code does NOT work** when VPN is active
+- **Workaround**: Provide manual steps for user to run while on VPN
 
-### Web Application Integration - FULLY COMPLETED:
-- **Admin Dashboard Enhanced**: Added comprehensive RTD Real-Time Vehicle Occupancy Accuracy Analysis section
-- **Live Data Integration**: Transitioned from static Arcadis study data to live API service calls
-- **Interactive UI Components**: 
-  - Key performance metrics display with live data loading
-  - Real-time pipeline status indicators (running/stopped with green/red indicators)
-  - Control buttons for Start/Stop/Refresh pipeline operations
-  - Filterable accuracy metrics table from live API endpoints
-  - Vehicle type analysis with live capacity data
-  - Occupancy status distribution from real-time feeds
-  - Dynamic loading states and error handling
-- **OccupancyAnalysisService**: Complete API service integration at `http://localhost:8080/api/occupancy`
-  - Health check and connection testing
-  - Live status monitoring and control
-  - Real-time accuracy metrics fetching
-  - Distribution and vehicle type analysis APIs
-  - Historical trends and live data sampling
-- **Production Ready**: Successfully builds and runs, both Java API (port 8080) and React app (port 3000) active
-- **START BUTTON FIXED**: Created complete Spring Boot API server with working occupancy analysis endpoints
-  - OccupancyAnalysisController with start/stop/status/data endpoints
-  - RTDApiApplication Spring Boot main class with CORS configuration
-  - All API endpoints functional: /api/occupancy/{start,stop,status,accuracy-metrics,distributions,vehicle-types}
-  - Start button now successfully calls POST /api/occupancy/start and receives success response
-- **RTD-CONTROL.SH UPDATED**: Updated control script to manage Spring Boot API server instead of basic pipeline
-  - Changed JAVA_MAIN_CLASS to "com.rtd.pipeline.RTDApiApplication"
-  - Updated all messaging to reflect "Spring Boot API Server" instead of "Java Pipeline"
-  - Added occupancy analysis endpoint status in status command
-  - Log file renamed to rtd-api-server.log for clarity
-- **README.md COMPLETELY REWRITTEN**: New comprehensive quick start guide covering all project components
-  - Added "What You Get Out of the Box" section highlighting key features
-  - Step-by-step setup guide with Spring Boot API server and React web app
-  - Detailed occupancy analysis feature documentation with performance targets
-  - Control script command reference with all options
-  - Comprehensive troubleshooting section for common issues
-  - Updated project title to "RTD Real-Time Transit Analysis System"
-  - Professional documentation ready for production deployment
+### Migration Steps for User (with VPN)
+When Oracle data migration is needed:
+
+1. **Connect to VPN first**
+2. **Load Oracle credentials**:
+   ```bash
+   source ~/ties-oracle-config.sh
+   ```
+3. **Run migration**:
+   ```bash
+   ./gradlew runTIESMigrationRTD
+   ```
+4. **Disconnect from VPN** and report results
 
 ## Git Status
-- All changes committed and pushed to dev_proxy
+
+**Current Branch**: main
+**Last Commit**: 9d9978d4 - "Add NextGenPipeline GTFS extraction with rebranding from TIES"
+
+**Recent Commits**:
+- NextGenPipeline GTFS extraction (61 files changed, 850,355+ lines)
+- All changes pushed to main and dev_GtfsRtGen branches
 - Working directory clean
-- Major occupancy analysis system implemented and tested
-- Ready for new tasks
+- Production-ready code deployed
 
 ## Project Configuration
-- Java 24
-- Apache Flink 2.1.0
-- Maven build system
-- Using rtd-control.sh for service management
+
+### Build System
+- **Gradle**: 8.14
+- **Java**: 17+
+- **Build Command**: `./gradlew compileJava`
+- **Run Command**: `./gradlew runNextGenCorePipeline`
+
+### Key Environment Variables
+- `POSTGRES_TIES_URL` - PostgreSQL connection (default: jdbc:postgresql://localhost:5433/ties)
+- `POSTGRES_TIES_USER` - PostgreSQL user (default: ties)
+- `POSTGRES_TIES_PASSWORD` - PostgreSQL password (default: TiesPassword123)
+- `NEXTGEN_OUTPUT_DIR` - Output directory (default: data/gtfs-nextgen/rtd/<date>)
+
+### Docker Services
+- ties-postgres (port 5433) - PostgreSQL database with TIES views
+
+## Next Steps
+
+### Enhancements (Optional)
+1. Add GTFS-RT (real-time) feed generation
+2. Automate validation in CI/CD pipeline
+3. Add additional GTFS files (shapes.txt, transfers.txt)
+4. Create feed health dashboard
+
+### Maintenance
+1. Run pipeline daily or when TIES data changes
+2. Monitor validation results
+3. Update views as TIES schema evolves
+4. Upload to Google Transit Partner Dashboard
 
 ## Notes for Subagents
+
+- **Data Source**: Oracle TIES database only (NO MTRAM)
+- **Database**: PostgreSQL staging layer with TIES_GOOGLE_*_VW views
+- **Pipeline**: NextGenPipelineGTFS.java generates complete GTFS feed
+- **Output**: RTD_NextGen_Pipeline.zip (6.4 MB, 16 files)
+- **Validation**: 0 errors, production-ready
+- **VPN**: Required for Oracle access, blocks Claude Code access
 - Always update this file after successful task completion
 - Include relevant file paths, git status, and next steps
-- Maintain continuity of work across different agent invocations
