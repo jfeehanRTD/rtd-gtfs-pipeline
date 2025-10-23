@@ -106,7 +106,7 @@ Removing MTRAM code:
 ┌─────────────────────────────────────────────┐
 │     Oracle TIES Database (Source)          │
 │  - Transit scheduling data                  │
-│  - EXPMTRAM_* tables                       │
+│  - Routes, trips, stops, calendars, fares  │
 └──────────────┬──────────────────────────────┘
                │
                │ (VPN Required)

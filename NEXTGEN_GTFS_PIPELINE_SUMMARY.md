@@ -9,7 +9,7 @@ The NextGenPipeline GTFS extraction process transforms RTD's transit scheduling 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                         SOURCE: Oracle TIES Database                     │
-│  - Transit scheduling data (EXPMTRAM_* tables)                          │
+│  - Transit scheduling data                                               │
 │  - Routes, trips, stops, calendars, fares                               │
 │  - Hosted on Oracle with VPN access required                            │
 └─────────────────────┬───────────────────────────────────────────────────┘
@@ -50,19 +50,20 @@ The NextGenPipeline GTFS extraction process transforms RTD's transit scheduling 
 
 **Purpose**: Source of truth for RTD transit scheduling data
 
-**Key Tables**:
-- `EXPMTRAM_PATTERNS` - Route patterns
-- `EXPMTRAM_TRIPS` - Individual trips
-- `EXPMTRAM_POINTS` - Bus stops and stations
-- `EXPMTRAM_CALENDARS` - Service schedules
-- `EXPMTRAM_FARES` - Fare products and rules
+**Data Content**:
+- Route patterns and schedules
+- Individual trips and stop times
+- Bus stops and stations
+- Service calendars and exceptions
+- Fare products and rules
 
 **Access**:
 - VPN connection required: Palo Alto GlobalProtect
 - Oracle JDBC URL: `jdbc:oracle:thin:@//oracle-host:1521/SERVICE`
 - Credentials stored in environment variables
+- Data accessed via PostgreSQL views (not direct Oracle queries)
 
-**Data Model**:
+**Data Model Features**:
 - Complex versioning system (CONTAINER, RUNBOARD_ID, SCENARIO_ID)
 - History tables with date partitioning
 - Flexible attributes system for custom fields
