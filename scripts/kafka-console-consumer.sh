@@ -31,7 +31,7 @@ print_header() {
 
 # Check if project is built
 check_build() {
-    if [ ! -f "$PROJECT_DIR/target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar" ]; then
+    if [ ! -f "$PROJECT_DIR/target/transitstream-1.0-SNAPSHOT.jar" ]; then
         print_status "Project not built. Building now..."
         cd "$PROJECT_DIR"
         mvn clean package -DskipTests > /dev/null 2>&1
@@ -104,7 +104,7 @@ main() {
     echo
     
     # Run Kafka console consumer with all provided arguments
-    java -cp "target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar:$CLASSPATH" \
+    java -cp "target/transitstream-1.0-SNAPSHOT.jar:$CLASSPATH" \
          com.rtd.pipeline.tools.KafkaConsumerManager "$@"
 }
 

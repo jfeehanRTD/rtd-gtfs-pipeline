@@ -55,7 +55,7 @@ echo "   Username: ${TIS_PROXY_USERNAME:0:3}***"  # Show only first 3 chars
 echo ""
 
 # Build the project if needed
-if [[ ! -f "target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar" ]]; then
+if [[ ! -f "target/transitstream-1.0-SNAPSHOT.jar" ]]; then
     echo "🔨 Building project..."
     mvn clean package -DskipTests
 fi
@@ -78,7 +78,7 @@ echo ""
 
 # Start the Rail Communication HTTP Receiver (reads credentials from environment)
 echo "📡 Starting Rail Communication HTTP Receiver..."
-java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar \
+java -cp target/transitstream-1.0-SNAPSHOT.jar \
     com.rtd.pipeline.RailCommHTTPReceiver &
 
 RECEIVER_PID=$!
@@ -96,7 +96,7 @@ echo "✅ Rail Communication HTTP Receiver started (PID: $RECEIVER_PID)"
 
 # Start the Rail Communication Pipeline
 echo "⚙️  Starting Rail Communication Pipeline..."
-java -cp target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar \
+java -cp target/transitstream-1.0-SNAPSHOT.jar \
     com.rtd.pipeline.RTDRailCommPipeline &
 
 PIPELINE_PID=$!

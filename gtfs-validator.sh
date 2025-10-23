@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 # Project directory
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TARGET_DIR="$PROJECT_DIR/target"
-JAR_FILE="$TARGET_DIR/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar"
+JAR_FILE="$TARGET_DIR/transitstream-1.0-SNAPSHOT.jar"
 
 # Java options for the validator
 JAVA_OPTS="-Xmx2g -Xms512m"

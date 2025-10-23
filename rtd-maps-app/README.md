@@ -1,8 +1,8 @@
-# RTD Live Transit Map
+# TransitStream Live Map
 
-A real-time visualization of RTD Denver's buses and light rail trains using OpenStreetMap, built with React and TypeScript. This application consumes live GTFS-RT data from the RTD pipeline and displays vehicle positions, routes, delays, and service information on an interactive map.
+A real-time visualization of RTD Denver's buses and light rail trains using OpenStreetMap, built with React and TypeScript. This application is part of TransitStream, RTD's modern transit information system. It consumes live GTFS-RT data from the TransitStream pipeline and displays vehicle positions, routes, delays, and service information on an interactive map.
 
-![RTD Maps Demo](https://via.placeholder.com/800x400/0066CC/FFFFFF?text=RTD+Live+Transit+Map)
+![TransitStream Live Map](https://via.placeholder.com/800x400/0066CC/FFFFFF?text=TransitStream+Live+Map)
 
 ## 🚌 Features
 
@@ -38,8 +38,8 @@ A real-time visualization of RTD Denver's buses and light rail trains using Open
 
 ### Prerequisites
 
-1. **Node.js 18+** and npm/yarn  
-2. **RTD Pipeline Running** (optional - will use mock data otherwise)
+1. **Node.js 18+** and npm/yarn
+2. **TransitStream Pipeline Running** (optional - will use mock data otherwise)
 
 **No API keys required!** OpenStreetMap is completely free.
 
@@ -126,7 +126,7 @@ When clicking a vehicle, shows:
 
 ## 🔧 Admin Dashboard
 
-The RTD Live Transit Map includes a comprehensive admin dashboard for managing data feeds, monitoring system health, and controlling subscriptions to RTD communication services.
+TransitStream includes a comprehensive admin dashboard for managing data feeds, monitoring system health, and controlling subscriptions to RTD communication services.
 
 ### Access the Admin Dashboard
 
@@ -545,7 +545,7 @@ VITE_RTD_API_BASE=https://api.rtd.com npm run build
 
 ## 📄 License
 
-This project is part of the RTD GTFS-RT Pipeline and processes publicly available transit data from RTD Denver. Please comply with RTD's terms of service when using their data feeds.
+This project is part of TransitStream, RTD's modern transit information system, and processes publicly available transit data from RTD Denver. Please comply with RTD's terms of service when using their data feeds.
 
 ## 🙏 Acknowledgments
 

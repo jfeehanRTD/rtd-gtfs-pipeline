@@ -6,12 +6,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.rtd</groupId>
-    <artifactId>rtd-gtfs-pipeline</artifactId>
+    <artifactId>transitstream</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>RTD GTFS-RT Data Pipeline</name>
-    <description>Apache Flink pipeline for processing RTD GTFS-RT feeds</description>
+    <name>TransitStream</name>
+    <description>RTD's modern transit information system - Apache Flink pipeline for processing real-time transit feeds</description>
 
     <properties>
         <maven.compiler.source>24</maven.compiler.source>

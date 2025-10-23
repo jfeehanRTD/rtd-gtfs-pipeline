@@ -31,7 +31,7 @@ print_header() {
 
 # Check if project is built
 check_build() {
-    if [ ! -f "$PROJECT_DIR/target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar" ]; then
+    if [ ! -f "$PROJECT_DIR/target/transitstream-1.0-SNAPSHOT.jar" ]; then
         print_status "Project not built. Building now..."
         cd "$PROJECT_DIR"
         mvn clean package -DskipTests > /dev/null 2>&1
@@ -91,7 +91,7 @@ show_usage() {
 create_rtd_topics() {
     print_status "Creating all RTD GTFS-RT topics..."
     
-    java -cp "target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar:$CLASSPATH" \
+    java -cp "target/transitstream-1.0-SNAPSHOT.jar:$CLASSPATH" \
          com.rtd.pipeline.tools.KafkaTopicsManager \
          --create-rtd-topics \
          --bootstrap-server localhost:9092
@@ -128,7 +128,7 @@ main() {
     
     # Run Kafka topics command with all provided arguments
     # Default bootstrap server is handled in the Java class
-    java -cp "target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar:$CLASSPATH" \
+    java -cp "target/transitstream-1.0-SNAPSHOT.jar:$CLASSPATH" \
          com.rtd.pipeline.tools.KafkaTopicsManager \
          "$@"
 }

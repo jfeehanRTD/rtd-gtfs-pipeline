@@ -35,7 +35,7 @@ print_header() {
 
 # Check if project is built
 check_build() {
-    if [ ! -f "$PROJECT_DIR/target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar" ]; then
+    if [ ! -f "$PROJECT_DIR/target/transitstream-1.0-SNAPSHOT.jar" ]; then
         print_warning "Project not built. Building now..."
         cd "$PROJECT_DIR"
         mvn clean package -DskipTests > /dev/null 2>&1
@@ -104,7 +104,7 @@ main() {
     # Check for help or no arguments
     if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
         CLASSPATH=$(mvn dependency:build-classpath -q -Dmdep.outputFile=/dev/stdout 2>/dev/null)
-        java -cp "target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar:$CLASSPATH" com.rtd.pipeline.client.SimpleRTDQueryClient
+        java -cp "target/transitstream-1.0-SNAPSHOT.jar:$CLASSPATH" com.rtd.pipeline.client.SimpleRTDQueryClient
         exit 0
     fi
     
@@ -136,7 +136,7 @@ main() {
     CLASSPATH=$(mvn dependency:build-classpath -q -Dmdep.outputFile=/dev/stdout 2>/dev/null)
     
     # Use the simple client that doesn't require Flink runtime
-    java -cp "target/rtd-gtfs-pipeline-1.0-SNAPSHOT.jar:$CLASSPATH" \
+    java -cp "target/transitstream-1.0-SNAPSHOT.jar:$CLASSPATH" \
          -Djava.util.logging.config.file=src/main/resources/logging.properties \
          com.rtd.pipeline.client.SimpleRTDQueryClient "$@"
 }
